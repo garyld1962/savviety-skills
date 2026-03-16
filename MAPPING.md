@@ -26,6 +26,7 @@ Status: `=` in sync, `C>` Claude only, `V>` VS Code only, `~` functionally equiv
 | triage | `claude/triage/` | `vscode/prompts/dev/triage.prompt.md` | = | New — created in sync |
 | changelog | `claude/changelog/` | `vscode/prompts/dev/changelog.prompt.md` | = | New — created in sync |
 | work-item | `claude/work-item/` | `vscode/prompts/dev/ado-item.prompt.md` | ~ | Claude supports both ADO + Linear; VS Code is ADO-only |
+| simplify | superpowers plugin | `vscode/prompts/dev/simplify.prompt.md` | ~ | Claude uses 3 parallel agents; VS Code is single-pass |
 | checkpoint | `claude/checkpoint/` | `vscode/prompts/dev/checkpoint.prompt.md` | ~ | Claude has existing deployed version |
 | code-review | `claude/code-review/` | `vscode/prompts/dev/code-review.prompt.md` | ~ | Claude has existing deployed version |
 | pr | `claude/pr/` | `vscode/prompts/dev/pr.prompt.md` | ~ | Claude has existing deployed version |
