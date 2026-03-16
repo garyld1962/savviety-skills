@@ -26,7 +26,7 @@ Status: `=` in sync, `C>` Claude only, `V>` VS Code only, `~` functionally equiv
 | triage | `claude/triage/` | `vscode/prompts/dev/triage.prompt.md` | = | New — created in sync |
 | changelog | `claude/changelog/` | `vscode/prompts/dev/changelog.prompt.md` | = | New — created in sync |
 | work-item | `claude/work-item/` | `vscode/prompts/dev/ado-item.prompt.md` | ~ | Claude supports both ADO + Linear; VS Code is ADO-only |
-| simplify | superpowers plugin | `vscode/prompts/dev/simplify.prompt.md` | ~ | Claude uses 3 parallel agents; VS Code is single-pass |
+| simplify | superpowers plugin | `vscode/prompts/dev/simplify.prompt.md` | = | Both use 3 parallel agents (reuse, quality, efficiency) |
 | checkpoint | `claude/checkpoint/` | `vscode/prompts/dev/checkpoint.prompt.md` | ~ | Claude has existing deployed version |
 | code-review | `claude/code-review/` | `vscode/prompts/dev/code-review.prompt.md` | ~ | Claude has existing deployed version |
 | pr | `claude/pr/` | `vscode/prompts/dev/pr.prompt.md` | ~ | Claude has existing deployed version |
@@ -101,6 +101,9 @@ These have no direct Claude equivalent (Claude uses the Agent tool with subagent
 | k8s-readiness | `vscode/agents/k8s-readiness.agent.md` | Kubernetes readiness review |
 | review-report-writer | `vscode/agents/review-report-writer.agent.md` | Formats review reports |
 | security | `vscode/agents/security.agent.md` | Security review |
+| simplify-reuse | `vscode/agents/simplify-reuse.agent.md` | Code reuse review (for simplify prompt) |
+| simplify-quality | `vscode/agents/simplify-quality.agent.md` | Code quality review (for simplify prompt) |
+| simplify-efficiency | `vscode/agents/simplify-efficiency.agent.md` | Efficiency review (for simplify prompt) |
 
 ### VS Code Only — Instructions (auto-applied by path)
 
