@@ -1,11 +1,15 @@
 ---
-description: "Review changed code for reuse, quality, and efficiency, then fix issues found. Run between coding and code review to clean up before the inspector arrives."
+description: "Review changed code for reuse, quality, and efficiency using 3 parallel reviewer agents, then fix issues found. Run between coding and code review."
 argument-hint: "Optional: specific files or areas to focus on"
+agents:
+  - Code Reuse Reviewer
+  - Code Quality Reviewer
+  - Efficiency Reviewer
 ---
 
 # Simplify — Code Cleanup and Refactoring Pass
 
-Review all changed files for code reuse opportunities, quality patterns, and efficiency. Fix issues directly — this is an auto-refactoring pass, not a report.
+Auto-refactoring pass that dispatches 3 specialist agents in parallel to review changed code, then fixes the issues they find.
 
 ## When to Use
 
@@ -38,46 +42,29 @@ If no changes exist, review the most recently discussed or modified files.
 
 Report: "Reviewing N files changed across M packages."
 
-## Step 2: Code Reuse Review
+## Step 2: Dispatch Reviewers in Parallel
 
-For each changed file:
+Send the full diff to all three agents simultaneously:
 
-1. **Search for existing utilities and helpers** that could replace newly written code. Look in utility directories, shared modules, and files adjacent to the changed ones.
-2. **Flag any new function that duplicates existing functionality.** Suggest the existing function to use instead.
-3. **Flag inline logic that could use an existing utility** — hand-rolled string manipulation, manual path handling, custom environment checks, ad-hoc type guards.
+1. **@Code Reuse Reviewer** — finds duplicated utilities, inline logic that existing helpers handle
+2. **@Code Quality Reviewer** — catches redundant state, copy-paste, leaky abstractions, stringly-typed code
+3. **@Efficiency Reviewer** — spots unnecessary work, missed concurrency, hot-path bloat, memory concerns
 
-## Step 3: Code Quality Review
+Each agent returns a numbered findings list or confirms the code is clean.
 
-Review the same changes for structural smells:
+## Step 3: Aggregate Findings
 
-1. **Redundant state**: state that duplicates existing state, cached values that could be derived, observers/effects that could be direct calls
-2. **Parameter sprawl**: adding new parameters to a function instead of generalizing or restructuring
-3. **Copy-paste with slight variation**: near-duplicate code blocks that should be unified with a shared abstraction
-4. **Leaky abstractions**: exposing internal details that should be encapsulated, or breaking existing abstraction boundaries
-5. **Stringly-typed code**: using raw strings where constants, enums (string unions), or branded types already exist in the codebase
-6. **Unnecessary JSX nesting**: wrapper elements that add no layout value — check if inner component props already provide the needed behavior
+Collect all findings from the three agents. Deduplicate any overlapping issues (same file + same line from multiple agents — keep the more actionable description).
 
-## Step 4: Efficiency Review
+## Step 4: Fix Issues
 
-Review the same changes for performance:
-
-1. **Unnecessary work**: redundant computations, repeated file reads, duplicate network/API calls, N+1 patterns
-2. **Missed concurrency**: independent operations run sequentially when they could run in parallel (Promise.all, parallel queries)
-3. **Hot-path bloat**: new blocking work added to startup or per-request/per-render hot paths
-4. **Recurring no-op updates**: state/store updates inside polling loops or event handlers that fire unconditionally — add a change-detection guard so downstream consumers aren't notified when nothing changed
-5. **Unnecessary existence checks**: pre-checking file/resource existence before operating (TOCTOU anti-pattern) — operate directly and handle the error
-6. **Memory concerns**: unbounded data structures, missing cleanup, event listener leaks
-7. **Overly broad operations**: reading entire files when only a portion is needed, loading all items when filtering for one
-
-## Step 5: Fix Issues
-
-For each finding from Steps 2-4:
+For each finding:
 
 - **If actionable**: fix it directly in the code. Make the edit.
 - **If false positive or not worth addressing**: note it briefly and skip. Do not argue with yourself about borderline cases.
 - **If the fix would be risky** (changing public API, altering shared utilities used elsewhere): flag it for the developer instead of auto-fixing.
 
-## Step 6: Summary
+## Step 5: Summary
 
 After all fixes:
 
@@ -99,7 +86,7 @@ After all fixes:
 
 ## Key Rules
 
-1. **Fix, don't report.** This is not a review — it's an auto-refactoring pass. Edit the code.
+1. **Fix, don't just report.** This is not a review — it's an auto-refactoring pass. Edit the code.
 2. **Minimal changes.** Each fix should be the smallest correct simplification. Don't reorganize the whole file.
 3. **Don't break anything.** If a simplification could change behavior, skip it.
 4. **Respect existing patterns.** Read `.github/copilot-instructions.md` for project conventions before making changes.
