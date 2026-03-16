@@ -1,0 +1,7 @@
+# Archives — original source zips, not needed in git
+archives/
+
+# Platform config directories — must NOT exist in this repo
+# (would confuse Claude Code and VS Code when they walk up the directory tree)
+.claude/
+.github/
