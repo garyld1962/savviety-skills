@@ -1,5 +1,5 @@
 ---
-description: "Create or manage a pull request: branch, stage, commit, run checkpoint, push, and PR creation. Does not wait for CI or build a release — for that, use the ship skill."
+description: "Create or manage a pull request: branch, stage, commit, run checkpoint, push, and PR creation. Does not wait for CI or build a release - for that, use the ship skill."
 ---
 
 # Pull Request Lifecycle

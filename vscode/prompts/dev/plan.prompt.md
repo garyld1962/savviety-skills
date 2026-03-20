@@ -1,6 +1,17 @@
 ---
-description: "Create an implementation plan for a feature, bug fix, refactor, or infrastructure change. Explores the codebase, writes TDD-style tasks with exact file paths and code, and validates the plan through design, dev feasibility, security, and scope reviews."
-argument-hint: "Describe what to plan..."
+description: >-
+  Create an implementation plan for a feature, bug fix, refactor, or
+  infrastructure change. Explores the codebase, writes TDD-style tasks with
+  exact file paths and code, and validates the plan.
+argument-hint: '<description> [--ado <id>] [--linear <id>] [--type bug|feature|refactor|infra] [--skip-validation]'
+agent: 'agent'
+tools:
+  - execute
+  - read
+  - search
+  - codebase
+  - edit
+  - web
 ---
 
 # Implementation Planning
@@ -16,50 +27,51 @@ Explore the codebase, understand the problem, write a validated implementation p
 ## Arguments
 
 - `<description>` — what to plan (feature, bug fix, refactor, etc.)
-- `--ado <item-id>` — fetch an Azure DevOps work item by ID and use it as the requirements input
+- `--ado <item-id>` — fetch an Azure DevOps work item by ID and use it as requirements
+- `--linear <issue-id>` — fetch a Linear issue by identifier (e.g., `BF-42`) and use it as requirements
 - `--skip-validation` — skip the validation gate (for quick/small plans)
 - `--type <bug|feature|refactor|infra>` — hint the plan type (auto-detected if omitted)
+
+---
+
+## CRITICAL: Do Not Guess
+
+- **File paths**: ALWAYS search the codebase before citing paths. Do NOT invent paths like "probably src/services/auth.ts" — verify with search.
+- **Function signatures**: READ the actual function before referencing it in a plan task. Do NOT guess parameter names, return types, or method names.
+- **Test commands**: Check `package.json` scripts and test framework config. Do NOT assume `pnpm vitest` — the project may use jest, mocha, or a custom script.
+- **Build commands**: Read the `scripts` field in `package.json` or project docs. Do NOT assume `pnpm -r build`.
+- **Import paths**: Check actual import patterns in existing code. Path aliases (`@/`, `~/`, `#`), barrel exports, and workspace references vary by project.
+- **Dependencies**: Verify what packages are installed before referencing them in plan code. Do NOT import packages that aren't in `package.json`.
+- **Branch/remote names**: Run `git branch --show-current` and `git remote -v`. Do NOT assume `main` or `origin`.
 
 ---
 
 ## Phase 1: Understand the Problem
 
 ### 1.1 Read the Request
-Parse the description, issue link, or spec. If the request references a file path or GitHub issue, read it for full context.
+
+Parse the description, issue link, or spec. If the request references a file path or issue, read it for full context.
 
 #### If `--ado <item-id>` is provided:
-
-Fetch the work item from Azure DevOps using the `ado-item` skill workflow:
 
 1. Resolve ADO org/project configuration:
    ```bash
    az devops configure --list
    ```
-   If not configured, check for `.ado-config` in the repo root, then ask the user.
-   Once known, set them as defaults:
-   ```bash
-   az devops configure --defaults organization=<ADO_ORG> project="<ADO_PROJECT>"
-   ```
+   If not configured, check for `.ado-config` in the repo root, then ASK the user. Do NOT guess org/project names.
 
 2. Fetch the work item (uses configured defaults — do NOT pass `--project` inline):
    ```bash
    az boards work-item show --id <ITEM_ID> --output json
    ```
 
-3. Extract requirements from the response:
-   - **Title** → use as the plan name
-   - **Description** → use as the primary requirements
-   - **Acceptance Criteria** → use as the definition of done / test criteria
-   - **Work Item Type** → use to hint plan type (User Story → feature, Bug → bug)
-   - **Tags** → note for context
-   - **Parent** → fetch parent item if needed for broader context
+3. Extract: Title → plan name, Description → requirements, Acceptance Criteria → definition of done, Work Item Type → plan type hint
 
-4. Include the ADO reference in the plan header:
-   ```markdown
-   **Source:** ADO #<ID> — <Title>
-   ```
+4. Include reference: `**Source:** ADO #<ID> — <Title>`
 
-Then continue with the parsed requirements as if they were provided inline.
+#### If `--linear <issue-id>` is provided:
+
+Use the Linear MCP tool or CLI to fetch the issue. Extract the same fields. Include reference: `**Source:** Linear <ID> — <Title>`
 
 ### 1.2 Classify Plan Type
 
@@ -71,27 +83,72 @@ Then continue with the parsed requirements as if they were provided inline.
 | **infra** | "deploy", "config", "CI", "k8s", manifests | Config → apply → smoke test |
 
 ### 1.3 Clarify Ambiguity
-If requirements are unclear, ask clarifying questions. One question at a time. Prefer multiple choice. Don't proceed with assumptions.
+
+If requirements are unclear: ASK. One question at a time. Prefer multiple choice. Do NOT proceed with assumptions.
+
+### Example: Correct clarification
+
+```
+The requirements mention "user authentication" but don't specify the method.
+Which authentication approach should we use?
+a) JWT tokens (stateless, typical for APIs)
+b) Session-based (server-side, typical for web apps)
+c) OAuth2/OIDC (delegated to identity provider)
+```
+
+### Example: INCORRECT
+
+```
+# WRONG: Making assumptions instead of asking
+I'll implement JWT authentication since that's most common.  # ← ASK, don't assume
+```
 
 ---
 
 ## Phase 2: Explore the Codebase
 
 ### 2.1 Identify Affected Areas
+
+From the requirements, list which packages/services/files are likely involved.
+
 ### 2.2 Read Existing Code
-For each affected area: main source files, existing tests, relevant types/interfaces, project docs.
+
+For EACH affected area, actually read:
+- Main source files (the code you'll modify)
+- Existing tests (understand coverage and test patterns)
+- Relevant types/interfaces from shared packages
+- Project docs (`.github/copilot-instructions.md`)
+
+**Do NOT skip this step.** Plans written without reading the codebase produce incorrect file paths, wrong function signatures, and broken imports.
 
 ### 2.3 Map Dependencies
-What imports what, shared types, external dependencies.
+
+Identify:
+- What imports what (which packages depend on which)
+- Shared types or interfaces that multiple tasks will touch
+- External dependencies (APIs, databases, config) that constrain the design
 
 ### 2.4 Check for Existing Work
-Related PRs or branches, partial implementations, similar patterns.
+
+```bash
+# Related branches
+git branch -a | grep -i "<feature-keyword>"
+
+# Related PRs (if gh CLI is available)
+gh pr list --state all --search "<feature-keyword>" 2>/dev/null
+
+# Partial implementations or TODOs
+grep -r "TODO\|FIXME\|HACK" --include='*.ts' src/ | grep -i "<feature-keyword>"
+```
 
 ---
 
 ## Phase 3: Scope & Estimate
 
 ### 3.1 High-Level Task List
+
+One line per task, ordered by dependency.
+
 ### 3.2 Estimate Scope
 
 | Tasks | Scope | Approach |
@@ -101,9 +158,14 @@ Related PRs or branches, partial implementations, similar patterns.
 | 11+ | Large | Split into Waves |
 
 ### 3.3 Identify Risks
-Blocking dependencies, merge conflict risks, parallel streams, unknowns, need for multiple Waves.
 
-### 3.4 Report Scope
+- Blocking dependencies (task order)
+- Merge conflict risks (shared files)
+- Parallel streams (for team dispatch)
+- Unknowns requiring spikes
+
+### 3.4 Report Scope and WAIT
+
 ```
 Scope: M tasks across N packages
 Type: feature/bug/refactor/infra
@@ -113,19 +175,20 @@ Parallelizable: yes/no (N independent streams)
 
 Proceed with detailed plan?
 ```
-Wait for confirmation.
+
+**WAIT for user confirmation before writing the plan.** Do NOT auto-proceed.
 
 ---
 
 ## Phase 4: Write the Plan
 
-Save plans to: `docs/plans/YYYY-MM-DD-<feature-name>.md`
+Save to: `docs/plans/YYYY-MM-DD-<feature-name>.md`
 
 ### Plan Header
 
 ```markdown
 # [Feature Name] Implementation Plan
-**Source:** ADO #<ID> — <Title> (if --ado was used)
+**Source:** ADO #<ID> / Linear <ID> — <Title> (if applicable)
 **Goal:** [One sentence]
 **Architecture:** [2-3 sentences about approach]
 **Tech Stack:** [Key technologies/libraries]
@@ -136,30 +199,34 @@ Save plans to: `docs/plans/YYYY-MM-DD-<feature-name>.md`
 
 ### Task Structure (TDD)
 
-Each task follows TDD discipline — test first, then implement:
+Each task follows TDD discipline:
 
 ````markdown
 ### Task N: [Component Name]
 **Files:**
-- Create: `exact/path/to/file.ts`
-- Modify: `exact/path/to/existing.ts`
-- Test: `tests/exact/path/to/test.ts`
+- Create: `exact/path/verified/by/search.ts`
+- Modify: `exact/path/verified/by/reading.ts`
+- Test: `exact/path/matching/project/convention.test.ts`
 
 **Depends on:** Task M (if any)
 
 **Step 1: Write the failing test**
 ```typescript
+// Imports must use ACTUAL paths from the project
+import { actualFunction } from '../../actual/import/path';
+
 describe('specific behavior', () => {
   it('should do X when given Y', () => {
-    const result = functionUnderTest(input);
-    expect(result).toBe(expected);
+    const result = actualFunction(validInput);
+    expect(result).toBe(expectedOutput);
   });
 });
 ```
 
 **Step 2: Run test to verify it fails**
 ```bash
-npx vitest run tests/path/test.ts
+# Use the project's ACTUAL test command
+<detected-test-command> <test-file-path>
 ```
 
 **Step 3: Write minimal implementation**
@@ -172,31 +239,30 @@ git commit -m "feat(scope): add specific feature"
 ```
 ````
 
-### Writing Rules
-- **Exact file paths always** — never "add this somewhere appropriate"
-- **Complete code in plan** — never "add validation here" without the actual code
-- **Exact commands with expected output** — runnable as-is
-- **One action per step** (2-5 minutes each)
-- **DRY, YAGNI, TDD, frequent commits**
-- **Dependency annotations** — mark which tasks block which
+### Writing Rules — MANDATORY
+
+1. **Exact file paths always** — every path must have been verified by search. NEVER write "add this somewhere appropriate."
+2. **Complete code in plan** — NEVER write "add validation here" without the actual code.
+3. **Exact commands with expected output** — runnable as-is, using the project's actual build/test commands.
+4. **One action per step** (2-5 minutes each).
+5. **Dependency annotations** — mark which tasks block which.
+6. **Real imports only** — every import path must match an actual file in the project. If you haven't verified the path, add a comment: `// VERIFY: path not confirmed`.
 
 ---
 
 ## Phase 5: Validate the Plan (unless --skip-validation)
 
-Run through 4 review lenses:
-
 ### 5.1 Design Review
 Follows project patterns? Naming conventions? No circular dependencies?
 
 ### 5.2 Dev Feasibility Review
-Every task has tests? Commands are correct? Tasks ordered? Code compiles?
+Every task has tests? Commands correct for this project? Tasks ordered? Code compiles?
 
 ### 5.3 Security Review
-Input validated? No secrets? Auth on new endpoints? No injection?
+Input validated? No secrets in code? Auth on new endpoints? No injection?
 
 ### 5.4 Scope Review
-Stays within stated goal? All requirements addressed? No scope creep?
+Within stated goal? All requirements addressed? No scope creep?
 
 ### 5.5 Present Findings
 
@@ -206,9 +272,20 @@ Stays within stated goal? All requirements addressed? No scope creep?
 |---|------|----------|------|---------|------------|
 ```
 
-For each: **Fix Now** / **File Issue** / **Dismiss**. Revise the plan for any "Fix Now" items.
+For each: **Fix Now** / **File Issue** / **Dismiss**. Revise plan for "Fix Now" items.
 
 ### 5.6 Stamp
+
 ```markdown
-<!-- Validated: YYYY-MM-DD | Design ✅ | Dev ✅ | Security ✅ | Scope ✅ -->
+<!-- Validated: YYYY-MM-DD | Design ✓ | Dev ✓ | Security ✓ | Scope ✓ -->
 ```
+
+---
+
+## Rules
+
+1. **Read before writing.** Never plan changes to code you haven't read. Phase 2 is mandatory.
+2. **Verify every path.** Every file path in the plan must exist or be clearly marked as "to be created."
+3. **Use real commands.** Build and test commands must match the actual project setup.
+4. **Ask, don't assume.** If requirements are ambiguous, ask a clarifying question instead of guessing.
+5. **Wait for approval.** Report scope in Phase 3 and wait for the user to confirm before writing the plan.

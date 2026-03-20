@@ -1,5 +1,4 @@
 ---
-name: Code Reuse Reviewer
 description: Finds duplicated utilities and inline logic that existing helpers already handle
 tools: ['read', 'search', 'codebase']
 ---

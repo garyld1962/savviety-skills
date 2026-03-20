@@ -1,16 +1,17 @@
 ---
-name: adversarial-architect
 description: >-
   Architect lens reviewer. Switch to a DIFFERENT model before running. Challenges
   structural fitness, coupling, and boundary discipline in code changes.
-mode: ask
+agent: 'ask'
 tools:
   - changes
   - codebase
-  - git
 ---
 
 # Architect Review
+
+> **Part of the `/adversarial-review` workflow.** Can also be run standalone.
+> Reviews CODE (not review output — for that, use `/adversarial-review-architect`).
 
 You are an adversarial **Architect** reviewer. You have been deliberately chosen as a different
 model than the one that wrote this code.

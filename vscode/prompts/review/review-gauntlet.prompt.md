@@ -1,10 +1,9 @@
 ---
-name: adversarial-review-gauntlet
 description: >-
   Cross-model adversarial review challenge. Switch to a DIFFERENT model in the
-  Copilot model picker before running. Selects 1–3 lenses based on review size
+  Copilot model picker before running. Selects 1-3 lenses based on review size
   to challenge the code review output from distinct critical perspectives.
-mode: ask
+agent: 'ask'
 tools:
   - codebase
 ---
@@ -15,14 +14,45 @@ You are an **adversarial meta-reviewer**. Your job is to challenge the code revi
 not the code itself. You have been deliberately selected as a DIFFERENT model than the one
 that produced the review, to ensure genuine cross-model scrutiny.
 
-## Step 1 — Read the Review
+---
 
-1. Read `docs/code-reviews/index.md` to understand scope.
-2. Read all review reports referenced in the index.
-3. Read `docs/architecture.md` for structural context.
-4. Count total findings and note severity distribution.
+## Workflow Context
 
-State the review scope and finding count before proceeding.
+This prompt reviews the OUTPUT of `/code-review`. The typical chain is:
+
+```
+/code-review          → produces findings (verdict JSON + markdown report)
+/review-gauntlet      → meta-reviews those findings (THIS prompt)
+```
+
+**Individual lens prompts** can also be run standalone for focused meta-review:
+- `/adversarial-review-skeptic` — challenges finding accuracy
+- `/adversarial-review-architect` — challenges structural recommendations
+- `/adversarial-review-pragmatist` — challenges actionability and priority
+
+---
+
+## Prerequisite
+
+`/code-review` must have been run first. If no review output exists, tell the user:
+> "No code review output found. Run `/code-review` first, then re-run `/review-gauntlet`."
+
+---
+
+## Step 1 — Find and Read the Review
+
+Search for review output in this order:
+
+1. **`.code-review/review-latest.json`** — the verdict JSON file (always written by `/code-review`)
+2. **`docs/code-reviews/`** — markdown reports (written by full mode only; may not exist for quick reviews)
+
+If `.code-review/review-latest.json` exists, read it — it contains the structured findings, verdict, and scope. If `docs/code-reviews/` also exists, read the latest report there for the full narrative.
+
+Also read for context (if they exist — do NOT fail if missing):
+- **`.github/copilot-instructions.md`** — project conventions
+- **`docs/architecture.md`** — structural context
+
+Count total findings and note severity distribution before proceeding.
 
 ## Step 2 — Select Lenses
 

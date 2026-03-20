@@ -1,6 +1,5 @@
 ---
-name: Code Quality Reviewer
-description: Catches structural smells — redundant state, copy-paste, leaky abstractions, stringly-typed code
+description: Catches structural smells - redundant state, copy-paste, leaky abstractions, stringly-typed code
 tools: ['read', 'search', 'codebase']
 ---
 

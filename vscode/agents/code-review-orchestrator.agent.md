@@ -1,5 +1,4 @@
 ---
-name: Code Review Orchestrator
 description: Multi-domain code review that writes a versioned report under docs/code-reviews/
 tools: ['agent', 'read', 'search', 'codebase']
 agents:

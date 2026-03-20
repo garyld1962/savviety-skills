@@ -1,5 +1,4 @@
 ---
-name: DI Architecture
 description: DI and architecture analyzer (findings only)
 tools: ['read', 'search']
 user-invokable: false

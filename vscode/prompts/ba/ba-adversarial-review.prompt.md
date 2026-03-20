@@ -1,7 +1,7 @@
 ---
 description: >-
   Adversarial review of BA work products. Switch to a DIFFERENT model in the Copilot
-  model picker before running. Spawns 1–3 reviewer lenses to challenge analysis
+  model picker before running. Spawns 1-3 reviewer lenses to challenge analysis
   from distinct critical perspectives.
 argument-hint: "Paste or reference the Project Brief section(s) to review..."
 ---

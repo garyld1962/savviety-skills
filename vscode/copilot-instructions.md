@@ -1,8 +1,15 @@
 # Project Instructions
 
 > **This file is the single source of truth for project conventions.**
-> All skills (code-review, checkpoint, execute-plan, plan, etc.) read this file for configuration.
-> Update this file as the project evolves.
+> All prompts and skills read this file for configuration. Update it as the project evolves.
+
+## Scope Boundaries
+
+- **This file** (`.github/copilot-instructions.md`) is the ONLY project-level instructions file for VS Code / GitHub Copilot prompts.
+- **Do NOT read** `CLAUDE.md`, `.claude/`, or any Claude Code configuration. Those are for a different tool and contain instructions irrelevant to Copilot.
+- **Prompts live in** `.github/prompts/`. Skills live in `.github/skills/`. Agents live in `.github/agents/`.
+- **Domain rule skills** (used by `/code-review` and `/adversarial-review`): `typescript-quality`, `api-patterns`, `security`, `test-quality`, `ui-design-compliance`, `postgres`, `csharp-quality`, `dotnet-api`, `azure-functions`, `bicep`, `nextjs-patterns`, `monorepo`, `python-quality`.
+- **Orchestration skills** (used only by `/code-review`): `code-review-orchestrator`, `review-report-writer`, `review-foundations`, `architecture-map`, `complexity`, `di-architecture`, `async-safety`, `k8s-readiness`, `team-roles`. Do NOT load these for adversarial reviews.
 
 ## Project Overview
 

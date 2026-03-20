@@ -1,6 +1,5 @@
 ---
-name: Efficiency Reviewer
-description: Finds performance issues — unnecessary work, missed concurrency, hot-path bloat, memory concerns
+description: Finds performance issues - unnecessary work, missed concurrency, hot-path bloat, memory concerns
 tools: ['read', 'search', 'codebase']
 ---
 

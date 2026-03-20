@@ -15,6 +15,9 @@
 #   VS Code skills → each project's .github/ directory
 #
 # Until restructure, Claude skills go to each project's .claude/skills/.
+#
+# Convention: project-specific skills live in each project's
+# .claude/skills/_project/ directory. This script never touches _project/.
 
 set -euo pipefail
 

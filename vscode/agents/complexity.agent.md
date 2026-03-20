@@ -1,5 +1,4 @@
 ---
-name: Complexity
 description: Maintainability and complexity analyzer (findings only)
 tools: ['read', 'search']
 user-invokable: false
