@@ -48,6 +48,7 @@ Status: `=` in sync, `C>` Claude only, `V>` VS Code only, `~` functionally equiv
 | k8s-deploy-verify | `claude/k8s-deploy-verify/` | `vscode/prompts/dev/k8s-deploy-verify.prompt.md` | = | Ported — GPT/Gemini-hardened |
 | dependency-audit | `claude/dependency-audit/` | `vscode/prompts/dev/dependency-audit.prompt.md` | = | Ported — GPT/Gemini-hardened |
 | migration-guide | `claude/migration-guide/` | `vscode/prompts/dev/migration-guide.prompt.md` | = | Ported — GPT/Gemini-hardened |
+| acceptance | `claude/acceptance/` | `vscode/prompts/dev/acceptance.prompt.md` | = | NEW — GPT/Gemini-hardened, PRD acceptance validation |
 
 ### Review Skills
 
