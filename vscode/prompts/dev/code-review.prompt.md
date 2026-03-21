@@ -34,8 +34,9 @@ Automated code review with structured findings, severity ratings, and actionable
 - **Shared package identity**: DETECT the shared types package from workspace config. Do NOT assume it's called `shared` or `@project/shared`.
 - **UI vs API packages**: Check directory structure and `package.json` to determine if a package is UI or backend. Do NOT classify based on the directory name alone.
 - **Finding severity**: Only report findings you are confident about. If confidence is below 0.50, do NOT emit the finding. False positives waste developer time.
-- **File paths in findings**: Use EXACT paths verified by search. Do NOT cite "around line 42" — cite the actual line number.
+- **File paths in findings**: Use EXACT paths verified by search. Do NOT cite "around line 42" --- cite the actual line number.
 - **Fix recommendations**: Only recommend fixes using APIs, utilities, and patterns that ACTUALLY exist in the project. Do NOT recommend importing a utility that doesn't exist.
+- **Documented behavior**: If code comments, CLAUDE.md, or copilot-instructions.md EXPLAIN why something works a certain way, that is mitigating context. Do NOT flag documented intentional behavior at the same severity as an accidental omission.
 
 ---
 
@@ -111,7 +112,7 @@ git diff --name-only
 
 ### Verify mode
 
-Read `.code-review/review-latest.json` — scope determined by existing findings.
+Read `.code-review/review-latest.json` --- scope determined by existing findings.
 
 ---
 
@@ -141,10 +142,10 @@ Based on files in scope:
 ### How to determine UI vs API packages
 
 Read the package's `package.json` and check:
-- Does it have `react`, `vue`, `svelte`, or `@angular/core` as a dependency? → UI
-- Does it have `express`, `fastify`, `koa`, or `hono` as a dependency? → API
-- Is it in a directory named `web`, `ui`, `frontend`, `app`? → Likely UI
-- Is it in a directory named `api`, `server`, `service`, `backend`? → Likely API
+- Does it have `react`, `vue`, `svelte`, or `@angular/core` as a dependency? -> UI
+- Does it have `express`, `fastify`, `koa`, or `hono` as a dependency? -> API
+- Is it in a directory named `web`, `ui`, `frontend`, `app`? -> Likely UI
+- Is it in a directory named `api`, `server`, `service`, `backend`? -> Likely API
 
 When ambiguous: include the specialist. False negatives are worse than false positives.
 
@@ -154,7 +155,9 @@ When ambiguous: include the specialist. False negatives are worse than false pos
 
 For each selected specialist, read the corresponding skill reference and apply its rules against each file in scope.
 
-### Finding Schema — MANDATORY
+**While reviewing, note strengths.** As you examine each file, record solid patterns, good design decisions, and effective implementations. These go in the Strengths section of the report (Step 6). A review that only lists problems loses credibility with developers who know the codebase.
+
+### Finding Schema --- MANDATORY
 
 Every finding MUST conform to this schema:
 
@@ -165,8 +168,8 @@ Every finding MUST conform to this schema:
   "confidence": 0.50,
   "file": "src/services/auth.ts",
   "lineRange": "42-58",
-  "title": "Max 120 chars — what is wrong",
-  "rationale": "Why this is a problem — risk and impact",
+  "title": "Max 120 chars - what is wrong",
+  "rationale": "Why this is a problem - risk and impact",
   "recommendation": "Concrete fix: exactly what to change",
   "evidence": "code snippet showing the issue",
   "suggestedPatch": "unified diff (optional)",
@@ -184,14 +187,38 @@ Every finding MUST conform to this schema:
 | **Low** | Style preference, minor optimization | Could use optional chaining, verbose code |
 | **Info** | Observation, positive feedback | "Good use of generics here" |
 
+### Severity Context Rules
+
+Severity is not absolute. Consider:
+
+- **Documented intentional behavior** drops severity by one level. If CLAUDE.md says "AUTH_TOKEN not set = dev mode" and the code implements exactly that, it is Medium (known tradeoff), not High (missing auth). The finding should note the documentation and explain the residual risk.
+- **Deployment context matters.** A single-tenant personal tool behind K8s network policies has different risk than a public SaaS API. Do NOT apply enterprise SaaS severity to a personal-use system without justification.
+- **Mitigating controls count.** If the code has a weakness but other layers compensate (e.g., network policies restrict access, env var gates the feature, upstream validation exists), note both the weakness AND the mitigation. Adjust severity accordingly.
+
+### Example: Correct severity adjustment
+
+```
+AUTH_TOKEN fail-open is documented in CLAUDE.md as intentional dev mode, gated by
+env var, and deploy-all.sh auto-generates the token for production. Residual risk:
+misconfigured deployment could expose the API. Medium, not High.
+```
+
+### Example: INCORRECT severity adjustment
+
+```
+# WRONG: Ignoring mitigating context
+AUTH_TOKEN fail-open. High severity. Recommendation: fail closed.
+# <- Does not acknowledge documentation, env var gating, or deploy script behavior
+```
+
 ### Confidence Calibration
 
 | Range | Meaning |
 |-------|---------|
-| 0.90-1.00 | Certain — clear pattern, no ambiguity |
-| 0.75-0.89 | High — strong signal |
-| 0.60-0.74 | Moderate — likely issue, needs judgment |
-| 0.50-0.59 | Low — possible issue, might be false positive |
+| 0.90-1.00 | Certain --- clear pattern, no ambiguity |
+| 0.75-0.89 | High --- strong signal |
+| 0.60-0.74 | Moderate --- likely issue, needs judgment |
+| 0.50-0.59 | Low --- possible issue, might be false positive |
 
 **NEVER emit findings below 0.50 confidence.**
 
@@ -199,9 +226,11 @@ Every finding MUST conform to this schema:
 
 ## Step 5: Deduplicate
 
-1. Same file + overlapping lines + same domain → keep higher severity
-2. Same file + overlapping lines + different domains → keep BOTH
-3. Same pattern across multiple files → collapse into ONE finding with file list
+1. Same file + overlapping lines + same domain -> keep higher severity
+2. Same file + overlapping lines + different domains -> keep BOTH
+3. Same pattern across multiple files -> collapse into ONE finding with file list
+4. **Same root cause across client/server boundary -> merge into ONE finding citing both sides.** Example: if the server accepts tokens via query params AND the client sends tokens via query params, that is ONE finding ("tokens in query strings") referencing both the server endpoint and the client call site --- not two separate findings.
+5. **Same root cause, different manifestations -> merge.** If a missing validation causes issues in both the API route and the UI form, that is one finding with two affected locations, not two findings.
 
 ### Finding caps
 
@@ -235,22 +264,54 @@ Write to `.code-review/review-latest.json`:
 ### Verdict Logic
 
 - **PASS**: 0 Blockers AND 0 High (open/reopened)
-- **WARN**: 0 Blockers AND ≥1 High
-- **FAIL**: ≥1 Blocker (fixable)
-- **ABORT**: ≥1 Blocker that is system-breaking
+- **WARN**: 0 Blockers AND >=1 High
+- **FAIL**: >=1 Blocker (fixable)
+- **ABORT**: >=1 Blocker that is system-breaking
 
 Only `open` and `reopened` findings count. `fixed`, `verified`, `wont_fix` do not.
 
 ### Markdown report (full mode only)
 
-Write to `docs/code-reviews/<date>-<scope>-<id>.md`. Include all findings ordered by severity.
+Write to `docs/code-reviews/<date>-<scope>-<id>.md`. The report MUST include these sections in order:
+
+1. **Header** --- date, mode, scope
+2. **Severity summary** --- counts by level
+3. **Files reviewed** --- every file examined
+4. **Findings** --- ordered by severity (Blocker -> High -> Medium -> Low -> Info)
+5. **Strengths** --- what the code does well (see below)
+6. **Coverage notes** --- files reviewed with no findings (see below)
+7. **Residual risks** --- areas not fully covered
+
+### Strengths (REQUIRED in full mode)
+
+List 3-5 specific, concrete things the code does well. These must be as specific as findings --- cite file:line, name the pattern, explain why it's good.
+
+**Good strengths:**
+- "Bearer token middleware (`api.ts:43-62`) is cleanly structured --- single extraction point, early return, consistent error format."
+- "Extension manager reconnection logic (`extension-manager.ts:180-210`) handles session eviction gracefully with transparent retry."
+- "Shared types package enforces a single source of truth for message schemas across brain, worker, and gateway."
+
+**Bad strengths (do NOT write these):**
+- "The code is generally well-written." --- too vague
+- "Good use of TypeScript." --- says nothing
+- "The project structure is clean." --- not specific
+
+### Coverage Accountability
+
+Every file in the "Files reviewed" list MUST have either:
+- At least one finding referencing it, OR
+- An explicit note in "Coverage notes" explaining why no issues were found
+
+Example: "packages/shared/src/nats.ts --- no findings. Connection handling uses standard NATS patterns; reconnection is delegated to the client library."
+
+Do NOT list a file as reviewed if you only skimmed it. If a file is in scope but you did not substantively review it, move it to a "Files in scope but not reviewed" list with a reason (e.g., "generated code", "no logic changes", "test-only changes").
 
 ---
 
 ## Step 7: Response
 
 ```
-Code Review: <mode> — <verdict>
+Code Review: <mode> -- <verdict>
 
 Scope: <N> files across <M> packages
 Specialists: <list>
@@ -264,9 +325,13 @@ Specialists: <list>
 | Info | N |
 
 Top findings:
-1. [severity] <title> — <file>:<line>
-2. [severity] <title> — <file>:<line>
-3. [severity] <title> — <file>:<line>
+1. [severity] <title> -- <file>:<line>
+2. [severity] <title> -- <file>:<line>
+3. [severity] <title> -- <file>:<line>
+
+Strengths:
+- <specific positive observation>
+- <specific positive observation>
 
 Verdict file: .code-review/review-latest.json
 Report: <report-path> (full mode only)
@@ -288,7 +353,10 @@ Report: <report-path> (full mode only)
 ## Rules
 
 1. **Read conventions first.** Project docs override general best practices. A pattern that looks wrong might be intentional.
-2. **Exact references only.** File paths, line numbers, code snippets — all must be verified. Do NOT cite approximate locations.
+2. **Exact references only.** File paths, line numbers, code snippets --- all must be verified. Do NOT cite approximate locations.
 3. **Confidence matters.** Do NOT pad findings to look thorough. Only report issues you are genuinely confident about.
 4. **Actionable recommendations.** Every finding must include a concrete fix using APIs/patterns that exist in the project. "Consider improving this" is not a recommendation.
 5. **No style wars.** Do NOT flag style preferences as Medium/High. Style issues are Low or Info at most.
+6. **Acknowledge good work.** Every full review MUST include a Strengths section. A review that only lists problems is incomplete.
+7. **Account for every file.** If you list a file as reviewed, justify why it has no findings or don't list it. Unexplained gaps erode trust.
+8. **One root cause = one finding.** The same underlying issue seen from multiple angles (client/server, different files, different domains) is ONE finding with multiple locations --- not separate findings that inflate the count.
