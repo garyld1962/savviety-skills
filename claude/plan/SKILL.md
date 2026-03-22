@@ -68,18 +68,35 @@ description: "Create an implementation plan: explores the codebase, estimates sc
    |-------|-------|----------|
    | 1-3 | Small | Write plan inline, skip validation |
    | 4-10 | Medium | Standard plan file with validation |
-   | 11+ | Large | Consider splitting into phases/milestones |
+   | 11+ | Large | Split into Waves |
 
-10. **Identify risks and blockers:**
+10. **Identify risks and parallel opportunities:**
     - Tasks that block other tasks (dependency order)
     - Tasks that touch shared files (merge conflict risk)
-    - Tasks that are parallelizable (for `/teams` dispatch)
     - Unknowns that need spiking first
+    - **Parallel streams** — identify task groups that:
+      - Live in different packages or directories (clear file ownership)
+      - Have no cross-group file edits (no merge conflicts)
+      - Share a common foundation that must complete first
+
+    When parallel streams exist, structure the plan as multiple **Waves**:
+    - **Wave 1:** Foundation tasks that all streams depend on (sequential via `/execute-plan`)
+    - **Wave 2:** Independent streams that can run in parallel via `/teams`
+    - **Wave 3+:** Integration, verification, or further dependent work (may also be parallel)
+
+    **Parallel wave constraints:**
+    - **Max 4 teams per parallel wave.** If more than 4 independent streams exist, split into sequential parallel waves (Wave 2 with 3 teams, Wave 3 with 3 teams, etc.).
+    - Each team should have a meaningful chunk of work (3-8 tasks). Do NOT create a team for 1-2 trivial tasks.
+    - When in doubt, prefer fewer larger teams over many small ones — each parallel agent has coordination overhead.
 
 11. **Report scope to user** before writing the detailed plan:
     ```
     Scope: M tasks across N packages
     Type: feature/bug/refactor/infra
+    Waves: N
+      Wave 1: <focus> (sequential)
+      Wave 2: <focus> (parallel: N teams) ← if applicable
+      Wave 3: <focus> (sequential)
     Risks: [list]
     Parallelizable: yes/no (N independent streams)
 
@@ -96,8 +113,15 @@ description: "Create an implementation plan: explores the codebase, estimates sc
     - Dependency map
     - Scope estimate and task ordering
     - Risk notes
+    - **Wave structure and team boundaries** (if parallelizable)
 
     The writing-plans skill will produce the full TDD-style plan with exact code, paths, and test commands.
+
+    **If the plan has multiple Waves**, ensure the output includes:
+    - A wave table in the header (Wave, Tasks, Focus, Execution method)
+    - Team boundary table for parallel waves (Team, Tasks, Package, Files)
+    - `## --- WAVE N START ---` markers between waves
+    - Merge order guidance (dependency providers first)
 
 ### Phase 5: Validate (unless --skip-validation)
 
@@ -107,13 +131,27 @@ description: "Create an implementation plan: explores the codebase, estimates sc
 
 ### Phase 6: Ready
 
-14. After validation passes (or is skipped), report:
+14. After validation passes (or is skipped), report next steps based on plan structure:
+
+    **Single Wave (no parallelism):**
     ```
     Plan ready: docs/plans/YYYY-MM-DD-<feature>.md
-    Tasks: N | Scope: small/medium/large
+    Tasks: N | Scope: small/medium/large | Waves: 1
     Validated: yes/no
 
-    Next: run /execute-plan or superpowers:executing-plans to implement.
+    Next: run /execute-plan to implement.
+    ```
+
+    **Multiple Waves (with parallelism):**
+    ```
+    Plan ready: docs/plans/YYYY-MM-DD-<feature>.md
+    Tasks: N | Scope: medium/large | Waves: M
+    Validated: yes/no
+
+    Execution sequence:
+      Wave 1: /execute-plan (stop after Task N — foundation)
+      Wave 2: /teams (parallel: Team A + Team B)
+      Wave 3: /checkpoint (integration verification)
     ```
 
 ## Plan Type Templates

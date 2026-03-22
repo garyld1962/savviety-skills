@@ -96,13 +96,14 @@ tests/                     # Tests
 ### Testing
 - Write tests for all core business logic
 - Test behavior, not implementation details
-- Cover: happy path, invalid input, error paths, edge cases
+- **Minimum coverage:** each exported function needs happy path + at least one edge case; each API endpoint needs success, validation failure (400), and not-found (404) scenarios
 - Keep tests isolated — no shared mutable state without cleanup
 - Always `await` assertions on async operations
 
 ### Git & Commits
 - Follow [Conventional Commits](https://www.conventionalcommits.org/): `feat(scope): description`
-- One logical change per commit
+- **MANDATORY: commit after each completed package or wave.** Do NOT defer all commits to the end. Each unit of work that passes build+test = one commit.
+- Aim for 4-8 commits on a greenfield MVP, not 15-20.
 - **Merge strategy:** Always squash-merge PRs to keep main clean
 - Use `--squash` flag consistently across all skills (PR, Ship, Teams)
 
@@ -114,6 +115,18 @@ tests/                     # Tests
 - When using parallel agent teams, each Wave can contain 2-4 teams working concurrently (see the `teams` skill).
 - Wave naming: `Wave 1: <focus>`, `Wave 2: <focus>`, etc.
 - Reference Waves in plan files, commit messages, and PR descriptions for traceability.
+
+### Architecture
+<!-- TODO: Update with project-specific patterns. These are sensible defaults. -->
+- **Database: use factory functions** for connection/context, not module-level singletons. This enables test isolation (each test creates its own temp DB).
+- **Repository pattern**: data access behind an interface, injected into the app. Route handlers never import the ORM directly.
+- **API structure**: use a factory pattern (e.g., `createApp({ repository })`) — the app receives its dependencies, making it testable without global state.
+- **Shared logic**: types, enums, validation, and domain logic belong in a shared package when multiple packages need them. Never duplicate.
+
+### Execution Strategy
+- **When the PRD or spec is detailed** (data models, endpoints, pages specified): the PRD is the plan. Scaffold immediately, then implement package-by-package. Do NOT spend a separate planning phase re-deriving what the PRD already says.
+- **Do NOT use parallel worktrees or `#prompt:teams`** when the dependency chain is linear. Sequential is faster for projects under ~5,000 lines with cross-package type dependencies. Use `#prompt:teams` only when packages have zero shared types and zero file overlap.
+- Build and test each package before moving to the next.
 
 ### Security
 - No secrets in source code — use environment variables or secret managers

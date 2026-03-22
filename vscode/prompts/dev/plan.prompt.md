@@ -157,19 +157,35 @@ One line per task, ordered by dependency.
 | 4-10 | Medium | Standard plan file with validation |
 | 11+ | Large | Split into Waves |
 
-### 3.3 Identify Risks
+### 3.3 Identify Risks and Parallel Opportunities
 
 - Blocking dependencies (task order)
 - Merge conflict risks (shared files)
-- Parallel streams (for team dispatch)
 - Unknowns requiring spikes
+- **Parallel streams** — identify task groups that:
+  - Live in different packages or directories (clear file ownership)
+  - Have no cross-group file edits (no merge conflicts)
+  - Share a common foundation that must complete first
+
+When parallel streams exist, structure the plan as multiple **Waves**:
+- **Wave 1:** Foundation tasks that all streams depend on (sequential)
+- **Wave 2:** Independent streams that can run in parallel via `#prompt:teams`
+- **Wave 3+:** Integration, verification, or further dependent work (may also be parallel)
+
+**Parallel wave constraints:**
+- **Max 4 teams per parallel wave.** If more than 4 independent streams exist, split into sequential parallel waves (Wave 2 with 3 teams, Wave 3 with 3 teams, etc.).
+- Each team should have a meaningful chunk of work (3-8 tasks). Do NOT create a team for 1-2 trivial tasks.
+- When in doubt, prefer fewer larger teams over many small ones — each parallel session has coordination overhead.
 
 ### 3.4 Report Scope and WAIT
 
 ```
 Scope: M tasks across N packages
 Type: feature/bug/refactor/infra
-Waves: 1 (or N if large)
+Waves: N
+  Wave 1: <focus> (sequential)
+  Wave 2: <focus> (parallel: N teams) ← if applicable
+  Wave 3: <focus> (sequential)
 Risks: [list]
 Parallelizable: yes/no (N independent streams)
 
@@ -193,8 +209,45 @@ Save to: `docs/plans/YYYY-MM-DD-<feature-name>.md`
 **Architecture:** [2-3 sentences about approach]
 **Tech Stack:** [Key technologies/libraries]
 **Scope:** [N tasks, estimated size]
-**Waves:** [N — list focus of each Wave if more than one]
+**Waves:** [N]
+**Parallelizable:** [yes/no (N independent streams)]
 **Risks:** [Key risks from Phase 3]
+
+| Wave | Tasks | Focus | Execution |
+|------|-------|-------|-----------|
+| Wave 1: Foundation | 1–N | [description] | Sequential — `#prompt:execute-plan` (stop after Task N) |
+| Wave 2: [Name] | N–M | [Team A] (Tasks N-P) and [Team B] (Tasks Q-M) | Parallel — `#prompt:teams` with N teams |
+| Wave 3: Verify | M+1 | Integration verification | Sequential — `#prompt:checkpoint` |
+```
+
+If the plan has only 1 Wave (all tasks are sequential), omit the wave table and set `**Waves:** 1`.
+
+### Wave Boundary Markers
+
+When a plan has multiple Waves, insert boundary markers between waves:
+
+```markdown
+## --- WAVE 2 START: [Name] (Parallel Teams) ---
+
+> **Execution:** Use `#prompt:teams` to run [Team A] and [Team B] in parallel worktrees.
+> [Team A] owns `path/to/package-a/`. [Team B] owns `path/to/package-b/`. Zero file overlap.
+
+### Task N: ...
+```
+
+### Team Boundary Table
+
+When Wave 2+ uses parallel teams, include a team boundary table:
+
+```markdown
+### Wave 2 Team Boundaries
+
+| Team | Tasks | Package | Files |
+|------|-------|---------|-------|
+| Team A | N–P | `packages/a/` | [description] |
+| Team B | Q–M | `packages/b/` | [description] |
+
+**Merge order:** [Which team merges first and why]. Run full build + test on main after each merge.
 ```
 
 ### Task Structure (TDD)
@@ -282,6 +335,33 @@ For each: **Fix Now** / **File Issue** / **Dismiss**. Revise plan for "Fix Now" 
 
 ---
 
+## Phase 6: Ready
+
+After validation passes (or is skipped), report next steps based on the plan structure:
+
+**Single Wave (no parallelism):**
+```
+Plan ready: docs/plans/YYYY-MM-DD-<feature>.md
+Tasks: N | Scope: small/medium/large | Waves: 1
+Validated: yes/no
+
+Next: run #prompt:execute-plan to implement.
+```
+
+**Multiple Waves (with parallelism):**
+```
+Plan ready: docs/plans/YYYY-MM-DD-<feature>.md
+Tasks: N | Scope: medium/large | Waves: M
+Validated: yes/no
+
+Execution sequence:
+  Wave 1: #prompt:execute-plan (stop after Task N — foundation)
+  Wave 2: #prompt:teams (parallel: Team A + Team B)
+  Wave 3: #prompt:checkpoint (integration verification)
+```
+
+---
+
 ## Rules
 
 1. **Read before writing.** Never plan changes to code you haven't read. Phase 2 is mandatory.
@@ -289,3 +369,4 @@ For each: **Fix Now** / **File Issue** / **Dismiss**. Revise plan for "Fix Now" 
 3. **Use real commands.** Build and test commands must match the actual project setup.
 4. **Ask, don't assume.** If requirements are ambiguous, ask a clarifying question instead of guessing.
 5. **Wait for approval.** Report scope in Phase 3 and wait for the user to confirm before writing the plan.
+6. **Identify parallelism.** When tasks span independent packages with no shared files, structure as Waves with parallel teams.
