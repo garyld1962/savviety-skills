@@ -136,11 +136,11 @@ tsc   # ← Project might use a different build tool
 ```
 
 If build fails:
-1. Read the error message carefully
-2. Diagnose the root cause (missing import? type error? syntax?)
-3. Fix the minimal change needed
-4. Retry (max 3 attempts)
-5. If still failing after 3: **STOP** and report the build failure
+1. **Check for file corruption FIRST** — before fixing any type errors, read every file you created or modified in this task. Look for merged/duplicated file bodies (two import blocks, two export defaults, two function definitions with the same name, file length 2× what you intended). This is the #1 cause of cascading build failures after code generation.
+2. If corruption found: **rewrite the corrupted file from scratch** — do NOT try to fix individual errors. Rebuild after rewriting.
+3. If files are structurally clean: read the error message, diagnose the root cause (missing import? type error? syntax?), fix minimally.
+4. Retry (max 3 attempts per root cause).
+5. If still failing after 3: **STOP** and report the build failure.
 
 ### 2d. Test
 

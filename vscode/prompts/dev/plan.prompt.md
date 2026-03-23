@@ -300,6 +300,7 @@ git commit -m "feat(scope): add specific feature"
 4. **One action per step** (2-5 minutes each).
 5. **Dependency annotations** — mark which tasks block which.
 6. **Real imports only** — every import path must match an actual file in the project. If you haven't verified the path, add a comment: `// VERIFY: path not confirmed`.
+7. **Maximum 5 files per task.** If a task would create more than 5 files, split it into sub-tasks (e.g., "Task 3a: Schema + context factory", "Task 3b: Repository + seed data", "Task 3c: Barrel export + config"). This prevents the code generator from producing mega-patches that corrupt file contents through content duplication.
 
 ---
 

@@ -39,9 +39,32 @@ These rules apply whenever you create or modify source code files.
 
 - File paths: search and verify before referencing.
 - API methods: read the type definitions.
-- Build/test commands: read `package.json` scripts.
+- Build/test commands: read `package.json` scripts or project docs.
 - Branch names: check with git, do not assume `main`.
 - Package names: read `package.json` `name` field, do NOT use directory names.
+
+## After Every Patch — Merge Detection (MANDATORY)
+
+After generating ANY patch that creates or modifies files, scan each affected file for these corruption signals:
+
+1. **Two `import` blocks** at the top of the file (separated by code, not just grouped imports)
+2. **Two `export default` statements** in the same file
+3. **Two function/class/component definitions** with the same name
+4. **Two complete module bodies** — the file reads like two separate files concatenated
+5. **File length more than 2× what you intended** (e.g., you wrote a 30-line component but the file is 65 lines)
+
+**If ANY of these are true:** The file is corrupted by a generation merge. **Rewrite the entire file from scratch** — do NOT try to "fix" individual compiler errors. The errors are symptoms of structural duplication, not logic bugs. Attempting to fix symptoms without removing the duplication wastes many iterations.
+
+**Why this matters:** Large patches (5+ files) can produce files where two complete implementations are concatenated together. This causes cascading build failures that look like type errors but are actually structural corruption. The fastest recovery is always: detect → rewrite clean → rebuild.
+
+## Patch Size Discipline
+
+- **Maximum 5 files per patch.** If a task requires more, break into sequential patches.
+- After each patch, **read every file you just touched** before proceeding to the next patch.
+- If generating package scaffolding (package.json, tsconfig, source files), split into:
+  - Patch 1: config files (package.json, tsconfig.json, project config)
+  - Patch 2: source files (types, schemas, implementations)
+  - Patch 3: test files
 
 ## Do Not Read
 

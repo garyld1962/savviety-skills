@@ -99,6 +99,7 @@ tests/                     # Tests
 - **Minimum coverage:** each exported function needs happy path + at least one edge case; each API endpoint needs success, validation failure (400), and not-found (404) scenarios
 - Keep tests isolated — no shared mutable state without cleanup
 - Always `await` assertions on async operations
+- **Test count verification (BLOCKING):** Before marking a package as complete, count your test cases against the minimum coverage rules above. If your count is below the minimum, write more tests before proceeding. Do NOT skip tests to save time — under-tested packages hide bugs that surface later as cascading failures.
 
 ### Git & Commits
 - Follow [Conventional Commits](https://www.conventionalcommits.org/): `feat(scope): description`
@@ -106,6 +107,7 @@ tests/                     # Tests
 - Aim for 4-8 commits on a greenfield MVP, not 15-20.
 - **Merge strategy:** Always squash-merge PRs to keep main clean
 - Use `--squash` flag consistently across all skills (PR, Ship, Teams)
+- **Commit gate (BLOCKING):** After each package builds and tests pass, you MUST commit before starting the next package. Commits are checkpoints — they let you `git diff` to verify what changed and recover if the next package introduces corruption. If you find yourself wanting to skip a commit, STOP — that impulse means something is wrong.
 
 ### Waves
 - A **Wave** is a group of related tasks within a story that can be planned and executed as a unit.
@@ -122,6 +124,18 @@ tests/                     # Tests
 - **Repository pattern**: data access behind an interface, injected into the app. Route handlers never import the ORM directly.
 - **API structure**: use a factory pattern (e.g., `createApp({ repository })`) — the app receives its dependencies, making it testable without global state.
 - **Shared logic**: types, enums, validation, and domain logic belong in a shared package when multiple packages need them. Never duplicate.
+
+### Code Generation Strategy
+
+**Patch size limits — MANDATORY:**
+- **NEVER generate more than 5 files in a single patch.** If a task requires more files, break it into multiple sequential patches. Large patches (10+ files) cause file content corruption where two implementations get merged into one file.
+- After each patch, **READ every file you just created** to verify no content was duplicated or concatenated. Look for: two `import` blocks, two `export default` statements, two function definitions with the same name, or file length more than 2× what you intended.
+- If any file shows duplication: **rewrite that file from scratch** — do NOT try to fix individual compiler errors. The root cause is structural corruption, not a logic bug.
+
+**Build-before-fix pattern:**
+- After creating all files for a package, run the build **immediately**.
+- If build fails, **read every file in the package first** (not just the error location) and check for merged/duplicated file bodies BEFORE fixing type errors.
+- Only after confirming all files are structurally clean: fix actual type errors.
 
 ### Execution Strategy
 - **When the PRD or spec is detailed** (data models, endpoints, pages specified): the PRD is the plan. Scaffold immediately, then implement package-by-package. Do NOT spend a separate planning phase re-deriving what the PRD already says.
