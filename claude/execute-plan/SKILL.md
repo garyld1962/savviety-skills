@@ -34,6 +34,8 @@ Read the task description from the plan. Understand what files to create/modify 
 #### 2b. Implement
 Follow the plan exactly. Create/modify files as specified. Do not add unplanned features or refactors.
 
+**Scaffold tasks:** If a task says "scaffold from template" (e.g., `npx degit ...` or `dotnet new blazorstack ...`), run the scaffold command, verify the build passes, then proceed. Do NOT manually create files that the template already provides.
+
 #### 2c. Build
 Run the project build command (from `CLAUDE.md` or `package.json`):
 ```bash

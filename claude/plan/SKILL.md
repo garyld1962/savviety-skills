@@ -58,6 +58,11 @@ description: "Create an implementation plan: explores the codebase, estimates sc
    - Partial implementations or TODOs in the codebase
    - Similar patterns already solved elsewhere in the project
 
+8. **Check for scaffold templates.** If the project is greenfield (empty or near-empty):
+   - Check if `CLAUDE.md` references a scaffold command (e.g., `npx degit ...`, `dotnet new blazorstack ...`)
+   - Check for a `templates/` directory in the repo or in `~/repos/skills/templates/`
+   - If a template is available, Task 1 of the plan should be "Scaffold from template" (one command) instead of manually creating 15-20 config files. This eliminates the entire class of config/dependency errors.
+
 ### Phase 3: Scope & Estimate
 
 8. **List the tasks** at a high level (not detailed yet). One line per task.
