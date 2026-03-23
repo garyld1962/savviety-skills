@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Savviety",
+  "classifications": ["Web", "Blazor", "API", "EF Core", "SQLite"],
+  "identity": "Savviety.BlazorStack",
+  "name": "Blazor Full-Stack (API + EF Core + Blazor Server)",
+  "shortName": "blazorstack",
+  "sourceName": "BlazorStack",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "solution"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "ts-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "concurrently \"pnpm --filter @app/api dev\" \"pnpm --filter @app/web dev\"",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "typescript": "^5.7.0"
+  }
+}

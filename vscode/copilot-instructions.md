@@ -138,7 +138,8 @@ tests/                     # Tests
 - Only after confirming all files are structurally clean: fix actual type errors.
 
 ### Execution Strategy
-- **When the PRD or spec is detailed** (data models, endpoints, pages specified): the PRD is the plan. Scaffold immediately, then implement package-by-package. Do NOT spend a separate planning phase re-deriving what the PRD already says.
+- **Scaffold first** when templates are available. TypeScript monorepo: `npx degit garyld1962/savviety-skills/templates/ts-monorepo .` then install and build. .NET Blazor: `dotnet new blazorstack -n ProjectName`. Templates provide verified configs, dependency versions, and architectural patterns — eliminating the entire class of scaffolding errors.
+- **When the PRD or spec is detailed** (data models, endpoints, pages specified): the PRD is the plan. Implement domain logic in the already-scaffolded packages. Do NOT spend a separate planning phase re-deriving what the PRD already says.
 - **Do NOT use parallel worktrees or `#prompt:teams`** when the dependency chain is linear. Sequential is faster for projects under ~5,000 lines with cross-package type dependencies. Use `#prompt:teams` only when packages have zero shared types and zero file overlap.
 - Build and test each package before moving to the next.
 
