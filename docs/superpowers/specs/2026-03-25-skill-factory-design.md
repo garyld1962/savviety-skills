@@ -4,7 +4,38 @@
 **Status:** Approved (design phase)
 **Author:** Gary + Claude Opus 4.6
 
-## Summary
+## Executive Summary
+
+### The Problem
+
+AI coding skills must be maintained across three platforms (Claude Code, VS Code/Copilot, Copilot Native), each with different file formats, conventions, and capabilities. Today, skills are authored separately per platform, leading to drift, duplication, and manual cross-platform synchronization. There is no way to verify which exact skills were active when code was written, and platform updates require manually reviewing every skill for compatibility.
+
+### The Solution
+
+A **compiler architecture** that treats skills like source code: write once in a platform-agnostic format, compile to each target, publish with a cryptographic audit trail.
+
+**How it works:**
+
+1. **Author** — A factory skill interviews you about what you want to accomplish. It produces an *intent document* — a structured description of the goal, constraints, and components (prompts, skills, agents) needed. You never hand-write platform-specific files.
+
+2. **Compile** — A deterministic Python compiler reads the intent, checks each platform's capabilities (what it can do, what built-ins it has, what extensions are available) and rules (your authoring conventions), then generates the right artifacts for each platform. Claude gets a single SKILL.md with sub-files. VS Code gets separate prompts, skills, and agents. Copilot Native gets thin wrappers where built-ins already cover the need.
+
+3. **Review** — You inspect the compiled output. A quality gate validates frontmatter, structure, shared references, and context budgets before publishing is allowed.
+
+4. **Publish** — The compiler output is pushed to the published repo (the current `skills/` repo). A SHA-256 Merkle tree is computed over every file. The root hash is committed to a MANIFEST.json, creating a verifiable chain: *these exact prompts were active when this code was written.*
+
+**Key properties:**
+
+- **Single source of truth** — Intents live in one place. Platform-specific output is derived.
+- **Deterministic** — Same intent + same platform definitions = same output. Re-compilable at any time.
+- **Auditable** — Merkle tree hashes prove exactly which skills were deployed. Traceable from a PR back to the intent that generated the prompts.
+- **Platform-aware** — The compiler knows what each platform can do natively and only generates custom artifacts for gaps. When a platform adds a new built-in, recompile and the redundant custom skill disappears.
+- **Stack-aware** — Tech stack rules (naming, patterns, testing conventions) are separate from skills. A single `code-review` intent adapts to .NET, Next.js, or Python projects via hierarchical stack definitions.
+- **Extensible** — Vendor extensions (Anthropic superpowers, marketplace skills) are tracked in platform capabilities. The compiler defers to them rather than duplicating their functionality.
+
+**What changes for end users:** Nothing. They still run `deploy-skills` from their project and get skills deployed. The published repo looks the same — it's just produced by a compiler instead of by hand.
+
+### Technical Summary
 
 A compiler architecture for AI coding skills. Intent documents capture *what* and *why*. Platform capability and rule definitions capture *how* and *constraints*. A deterministic compiler bridges the gap, producing platform-specific artifacts from a single source of truth.
 
