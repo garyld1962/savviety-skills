@@ -1,27 +1,55 @@
 ---
 name: monorepo
-description: "Monorepo patterns — workspace structure, package boundaries, shared code, Turborepo, dependency management"
+description: "Monorepo patterns — workspace structure, package boundaries, shared code, dependency management. Turborepo is optional and documented separately."
 ---
 
 # Monorepo Patterns
 
-Opinionated patterns for TypeScript/Node monorepos using pnpm workspaces (or npm/yarn). Applies to Turborepo and non-Turborepo setups.
+Opinionated patterns for TypeScript/Node monorepos using pnpm workspaces (or npm/yarn).
+
+## When to Use Turborepo
+
+**Do NOT add Turborepo by default.** Plain pnpm scripts with `concurrently` are simpler and sufficient for most projects.
+
+| Situation | Use |
+|-----------|-----|
+| ≤5 packages, <5k LoC, linear dependency chain | **pnpm scripts + concurrently** |
+| >5 packages, parallel-safe tasks, CI remote caching needed | **Turborepo** |
+| Template already includes Turborepo | **Keep it** |
+
+If the project template or `package.json` uses `pnpm -r run build` and `concurrently`, do NOT replace them with Turborepo. Follow what exists.
+
+## Default Scripts Pattern (No Turborepo)
+
+```json
+// Root package.json
+{
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "concurrently \"pnpm --filter @myapp/api dev\" \"pnpm --filter @myapp/web dev\"",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint"
+  }
+}
+```
+
+Package-specific commands use `--filter`:
+
+```bash
+pnpm --filter @myapp/api build
+pnpm --filter @myapp/shared test
+```
 
 ## Workspace Structure
 
 ```
 my-monorepo/
-├── apps/                    # Deployable applications
-│   ├── web/                 # Next.js frontend
-│   ├── api/                 # Express/Fastify backend
-│   └── worker/              # Background job processor
-├── packages/                # Shared libraries
+├── packages/                # All workspace packages
 │   ├── shared/              # Types, constants, utilities shared by all
 │   ├── db/                  # Database schema, migrations, client
-│   ├── config/              # Shared ESLint, TypeScript, Tailwind configs
-│   └── ui/                  # Shared UI components (if applicable)
+│   ├── api/                 # Express/Fastify backend
+│   └── web/                 # Next.js frontend
 ├── pnpm-workspace.yaml      # Workspace definition
-├── turbo.json               # Turborepo config (if using)
 └── package.json             # Root scripts, devDependencies
 ```
 
@@ -59,7 +87,6 @@ Rules:
 ```yaml
 # pnpm-workspace.yaml
 packages:
-  - 'apps/*'
   - 'packages/*'
 ```
 
@@ -68,7 +95,35 @@ packages:
 - **Workspace protocol**: Use `"@myapp/shared": "workspace:*"` for internal dependencies.
 - **Never duplicate versions**: If two packages need the same dependency, keep versions aligned. Use `pnpm dedupe`.
 
-## Turborepo Configuration
+## TypeScript Configuration
+
+```json
+// tsconfig.json (root) — shared base
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true
+  }
+}
+
+// packages/api/tsconfig.json — extends root
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": { "outDir": "dist", "rootDir": "src" },
+  "include": ["src"],
+  "exclude": ["__tests__", "dist"]
+}
+```
+
+## Turborepo Configuration (When Opted In)
+
+Only add this if the project explicitly needs Turborepo (>5 packages, CI remote caching, etc.):
 
 ```json
 // turbo.json
@@ -90,14 +145,8 @@ packages:
 }
 ```
 
-- `^build` means "build my dependencies first" — critical for type generation.
-- `lint` has no `dependsOn` — it can run in parallel.
-- `dev` is never cached — it's a long-running process.
-
-## Scripts Pattern
-
+When using Turborepo, root scripts change to:
 ```json
-// Root package.json
 {
   "scripts": {
     "build": "turbo run build",
@@ -108,47 +157,11 @@ packages:
 }
 ```
 
-Run everything from root. Package-specific commands use `--filter`:
-
-```bash
-pnpm --filter @myapp/api build
-pnpm --filter @myapp/web dev
-turbo run test --filter=@myapp/shared
-```
-
-## TypeScript Configuration
-
-```json
-// packages/config/tsconfig.base.json — shared base
-{
-  "compilerOptions": {
-    "strict": true,
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "composite": true
-  }
-}
-
-// apps/api/tsconfig.json — extends base
-{
-  "extends": "@myapp/config/tsconfig.base.json",
-  "compilerOptions": { "outDir": "dist" },
-  "include": ["src"],
-  "references": [
-    { "path": "../../packages/shared" },
-    { "path": "../../packages/db" }
-  ]
-}
-```
-
 ## Common Mistakes
 
 - **Circular dependencies**: Package A imports from B which imports from A. The shared package breaks cycles.
 - **Putting everything in shared**: Only types/constants used by 2+ packages belong there.
-- **Root-level source code**: No application code at the repo root. It goes in `apps/` or `packages/`.
+- **Root-level source code**: No application code at the repo root. It goes in `packages/`.
 - **Mismatched TypeScript versions**: Pin one TS version in root, use it everywhere.
-- **Missing `build` before `test`**: Types from other packages must be built first. Use `dependsOn: ["^build"]`.
+- **Missing `build` before `test`**: Types from other packages must be built first. Build dependencies before running tests.
+- **Adding Turborepo to small projects**: If the project has ≤5 packages and a linear dependency chain, plain pnpm scripts are simpler. Don't add complexity you don't need.

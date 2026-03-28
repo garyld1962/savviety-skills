@@ -263,7 +263,17 @@ Edit `.github/copilot-instructions.md` — every prompt reads this file. Fill in
 
 ### Adding project-specific prompts
 
-Create new files in `.github/prompts/dev/`:
+For committed project-specific prompts, create new files in `.github/prompts/project/`.
+
+For personal prompts that should survive shared asset updates, use
+`.github/prompts/local/` instead and keep that path out of any shared sync
+overwrite list.
+
+Shared repo-managed prompts should stay in the standard shared folders
+(`ba/`, `common/`, `dev/`, `review/`) and should be changed through a PR, not by
+editing them in place locally.
+
+Example prompt shape:
 
 ```yaml
 ---
@@ -283,7 +293,16 @@ Instructions here...
 
 ### Adding domain skills
 
-Create new directories in `.github/skills/`:
+For committed project-specific skills, create new directories in
+`.github/skills/project-<domain>/`.
+
+For personal per-project skills that should survive shared asset updates, use
+`.github/skills/local-<user>/`.
+
+Shared repo-managed skills should stay in `.github/skills/<shared-skill>/` and
+be changed through a PR when the change should benefit everyone.
+
+Example skill shape:
 
 ```yaml
 ---
@@ -297,3 +316,9 @@ Rules and examples here...
 ```
 
 Then reference it in the code-review specialist selection table in `prompts/dev/code-review.prompt.md`.
+
+### Personal instructions
+
+Use `.github/instructions/personal.instructions.md` as the safe place for local
+preferences. Shared asset sync should create this file if needed but never
+overwrite it.

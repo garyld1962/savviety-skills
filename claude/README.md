@@ -1,0 +1,104 @@
+# Claude Code Skills
+
+Skills for **Claude Code** (Anthropic's CLI). Invoked as `/name` in conversations.
+
+## Setup
+
+Deploy to a project with:
+
+```bash
+deploy-skills claude       # From the target project directory
+```
+
+This copies skills into the project's `.claude/skills/` directory.
+
+## Skill Catalog
+
+### Dev Workflow
+
+| Skill | Invocation | Purpose |
+|-------|------------|---------|
+| plan | `/plan` | Create an implementation plan from requirements |
+| execute-plan | `/execute-plan` | Execute a plan file with per-task build/test cycles |
+| checkpoint | `/checkpoint` | Quality gate: lint, build, tests for changed packages |
+| code-review | `/code-review` | Multi-specialist review with structured findings |
+| pr | `/pr` | Create a PR from current branch |
+| teams | `/teams` | Dispatch parallel agent teams for large implementations |
+| hotfix | `/hotfix` | Emergency fix workflow |
+| triage | `/triage` | Bug triage and priority assessment |
+| changelog | `/changelog` | Generate changelog from commits |
+| work-item | `/work-item` | Fetch ADO or Linear work items |
+| sync-main | `/sync-main` | Rebase current branch on main safely |
+| test-plan | `/test-plan` | Generate a test plan with multi-analyst coverage |
+| k8s-deploy-verify | `/k8s-deploy-verify` | Post-deploy Kubernetes health checks |
+| dependency-audit | `/dependency-audit` | Audit dependencies for vulnerabilities and updates |
+| migration-guide | `/migration-guide` | Generate migration guide for breaking changes |
+| acceptance | `/acceptance` | Acceptance criteria validation |
+
+### Review
+
+| Skill | Invocation | Purpose |
+|-------|------------|---------|
+| review-gauntlet | `/review-gauntlet` | Meta-review: challenge a code review's findings |
+| ba-adversarial-review | `/ba-adversarial-review` | Adversarial review of BA deliverables |
+| skill-audit | `/skill-audit` | Audit skill quality and coverage |
+
+## Multi-File Skills
+
+Some skills have sub-files for specialists, analysts, or shared foundations:
+
+```
+code-review/
+├── SKILL.md                           # Orchestrator
+├── foundations/                        # Shared schemas, rubrics, templates
+│   ├── finding-schema.md
+│   ├── severity.md
+│   └── report-template.md
+├── specialists/                       # Domain-specific reviewers
+│   ├── typescript-quality/SKILL.md
+│   ├── security/SKILL.md
+│   └── ...
+└── report-writer/SKILL.md             # Report formatter
+
+test-plan/
+├── SKILL.md                           # Orchestrator
+├── foundations/                        # Shared schemas, rubrics
+├── analysts/                          # Domain-specific analysts
+└── test-writer/SKILL.md               # Test case writer
+
+teams/
+├── SKILL.md                           # Orchestrator
+└── agents/                            # Role definitions
+    ├── implementer.md
+    ├── reviewer.md
+    └── fixer.md
+```
+
+## Adding a Skill
+
+```bash
+mkdir -p claude/my-skill
+cat > claude/my-skill/SKILL.md << 'EOF'
+---
+name: my-skill
+description: "What it does"
+---
+
+# My Skill
+
+Instructions here.
+EOF
+```
+
+Then run `deploy-skills claude` from your project.
+
+## BA Skills
+
+Most BA skills (problem-thesis, stakeholder, requirements, etc.) live in the [superpowers plugin](https://github.com/anthropics/superpowers) rather than this repo. The `ba-adversarial-review` skill here is the exception — it's a standalone Claude Code skill for adversarial review of BA deliverables.
+
+## Platform Notes
+
+- Claude Code loads `SKILL.md` files from `.claude/skills/` automatically
+- Skills can reference sub-files using relative paths
+- Project-specific skills go in `.claude/skills/_project/` (never overwritten by deploy)
+- Personal overrides go in `CLAUDE.local.md` (add `@CLAUDE.local.md` to your project's CLAUDE.md)
