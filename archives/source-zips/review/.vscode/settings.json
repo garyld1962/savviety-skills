@@ -1,0 +1,75 @@
+{
+  "github.copilot.chat.runCommand.autoApprove": [
+    // --- Package managers & runtimes ---
+    "pnpm *",
+    "npm *",
+    "npx *",
+    "node *",
+    "dotnet *",
+    "wsl *",
+    // --- Azure CLI (all subcommands) ---
+    "az *",
+
+    // --- GitHub CLI (pr, issue, release, etc.) ---
+    "gh *",
+
+    // --- Git ---
+    "git *",
+
+    // --- Build & test tools ---
+    "vitest *",
+    "eslint *",
+    "prettier *",
+    "tsc *",
+    "drizzle-kit *",
+    "cargo *",
+    "turbo *",
+    "tsx *",
+    "next *",
+
+    // --- Script sourcing ---
+    ". *",
+
+    // --- Read commands (PowerShell + Unix) ---
+    "cat *",
+    "type *",
+    "head *",
+    "tail *",
+    "grep *",
+    "Get-Content *",
+    "Get-ChildItem *",
+    "Get-Location *",
+    "Set-Location *",
+    "Push-Location *",
+    "Pop-Location *",
+    "Test-Path *",
+    "Select-String *",
+    "Select-Object *",
+    "Where-Object *",
+    "Format-Table *",
+    "Format-List *",
+    "Out-String *",
+    "ls *",
+    "dir *",
+    "cd *",
+    "pwd",
+
+    // --- Write commands (PowerShell + Unix) ---
+    "mkdir *",
+    "New-Item *",
+    "Copy-Item *",
+    "Move-Item *",
+    "Remove-Item *",
+    "Rename-Item *",
+    "Write-Output *",
+    "echo *",
+    "touch *"
+],
+"chat.tools.terminal.autoApprove": {
+    "pnpm": true,
+     "wsl": true
+},
+"chat.promptFilesLocations": {
+    ".github/prompts/**/*.prompt.md": true
+}
+}

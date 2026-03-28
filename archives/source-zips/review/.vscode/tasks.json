@@ -1,0 +1,77 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Restore",
+      "type": "shell",
+      "command": "wsl",
+      "args": ["-d", "Ubuntu-24.04", "-e", "bash", ".scripts/run.sh", "restore"],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Build All",
+      "type": "shell",
+      "command": "wsl",
+      "args": ["-d", "Ubuntu-24.04", "-e", "bash", ".scripts/run.sh", "build"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Test All",
+      "type": "shell",
+      "command": "wsl",
+      "args": ["-d", "Ubuntu-24.04", "-e", "bash", ".scripts/run.sh", "test"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Run Web",
+      "type": "shell",
+      "command": "wsl",
+      "args": ["-d", "Ubuntu-24.04", "-e", "bash", ".scripts/run.sh", "run", "web"],
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Precalc",
+      "type": "shell",
+      "command": "wsl",
+      "args": ["-d", "Ubuntu-24.04", "-e", "bash", ".scripts/run.sh", "run", "precalc"],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Watch Web",
+      "type": "shell",
+      "command": "wsl",
+      "args": ["-d", "Ubuntu-24.04", "-e", "bash", ".scripts/run.sh", "watch", "web"],
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Clean",
+      "type": "shell",
+      "command": "wsl",
+      "args": ["-d", "Ubuntu-24.04", "-e", "bash", ".scripts/run.sh", "clean"],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Full Pipeline",
+      "type": "shell",
+      "command": "wsl",
+      "args": ["-d", "Ubuntu-24.04", "-e", "bash", ".scripts/run.sh", "all"],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

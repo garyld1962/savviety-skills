@@ -1,0 +1,23 @@
+{
+  "projectName": "Technical Debt Tracker",
+  "dateCreated": "2026-03-13",
+  "currentPhase": 2,
+  "sessions": 1,
+  "thesis": { "statement": "We believe the organization cannot manage technical debt effectively because debt has historically been treated as a local team concern with no standardized process for identification, scoring, or cross-BU visibility — and cross-team project dependencies have now made this an organizational-level risk that no single team can manage alone.", "status": "formed" },
+  "phases": {
+    "1": "complete", "2": "not-started", "3": "not-started",
+    "4": "not-started", "5": "not-started", "6": "not-started"
+  },
+  "openQuestions": [
+    "What is the actual cross-team project delay baseline?",
+    "Who will own the tech debt governance process?",
+    "Do all BUs define 'tech debt' the same way?"
+  ],
+  "assumptions": [
+    "Teams will adopt a centralized tool if mandated",
+    "Workload is the only resistance",
+    "ADO export is sufficient for scheduling",
+    "Cursory SecOps review is sufficient",
+    "5-10% sprint capacity is achievable"
+  ]
+}

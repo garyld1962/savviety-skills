@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CodeReviewFinding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "domain",
+    "severity",
+    "confidence",
+    "title",
+    "rationale",
+    "recommendation",
+    "file",
+    "evidence"
+  ],
+  "properties": {
+    "domain": {
+      "type": "string",
+      "enum": ["csharp-quality", "async-safety", "security", "complexity", "k8s-readiness", "di-architecture"],
+      "description": "The specialist domain that produced this finding."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["Blocker", "High", "Medium", "Low", "Info"],
+      "description": "Impact level per the severity rubric (Blocker > High > Medium > Low > Info)."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "How certain you are (0.0–1.0). Do not emit findings below 0.50."
+    },
+    "file": {
+      "type": "string",
+      "description": "Repo-relative path to the file where the issue was found."
+    },
+    "lineRange": {
+      "type": "string",
+      "description": "Line range in the file, e.g. '42-58'. Omit only if the finding is file-wide."
+    },
+    "title": {
+      "type": "string",
+      "description": "One-line summary of the finding (≤120 chars preferred)."
+    },
+    "rationale": {
+      "type": "string",
+      "description": "Why this is a problem: root cause, risk, and impact."
+    },
+    "recommendation": {
+      "type": "string",
+      "description": "Concrete, actionable fix or next step."
+    },
+    "evidence": {
+      "type": "string",
+      "description": "Short code snippet, log line, or reference proving the issue exists."
+    },
+    "suggestedPatch": {
+      "type": "string",
+      "description": "Optional unified-diff style patch showing the suggested fix."
+    }
+  }
+}
