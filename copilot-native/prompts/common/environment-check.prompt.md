@@ -16,6 +16,8 @@ tools:
 
 Use this prompt when the same repo may be used from both PowerShell and WSL and you need a safe execution strategy.
 
+Do not use this prompt when the execution environment is already obvious and no shell-specific guidance is needed.
+
 Follow the skill: `.github/skills/execution-environment/SKILL.md`
 
 ## What to do
@@ -30,7 +32,7 @@ Determine:
 
 ## Output
 
-Return:
+Return only the fields that help resolve a real execution ambiguity:
 
 - detected mode
 - evidence
@@ -45,3 +47,4 @@ Return:
 - Do NOT recommend `wsl.exe -e bash -lc` as the default answer.
 - Do NOT emit Bash syntax in PowerShell mode.
 - Do NOT emit PowerShell syntax in WSL/Linux mode.
+- Do NOT force a structured environment report when a silent check is sufficient to proceed safely.
