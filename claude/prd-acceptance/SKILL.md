@@ -1,9 +1,9 @@
 ---
-name: acceptance
+name: prd-acceptance
 description: "Validate implementation against PRD acceptance criteria. Reads a PRD, extracts checkboxes, verifies each with evidence, produces a pass/fail scorecard."
 ---
 
-# /acceptance — PRD Acceptance Validation
+# /prd-acceptance — PRD Acceptance Validation
 
 **Purpose:** Compare finished implementation against the PRD's acceptance criteria. For each criterion, determine HOW to verify it, execute the check, and report pass/fail with evidence.
 
@@ -129,10 +129,10 @@ Run the test suite. Check for specific test file existence if the PRD mentions i
 
 ## Step 5: Produce Report
 
-Write the report to `docs/acceptance/` with this format:
+Write the report to `docs/prd-acceptance/` with this format:
 
 ```
-docs/acceptance/<YYYY-MM-DD>--<PRD-filename>--acceptance.md
+docs/prd-acceptance/<YYYY-MM-DD>--<PRD-filename>--acceptance.md
 ```
 
 ### Report Format
@@ -207,7 +207,7 @@ Manual (verify by hand):
 Next steps:
   1. Fix validation error handling in POST /items
   2. Implement /stats endpoint aggregation
-  3. Run `/acceptance --recheck` after fixes
+  3. Run `/prd-acceptance --recheck` after fixes
 ```
 
 ## Rules

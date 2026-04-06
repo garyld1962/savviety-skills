@@ -1,13 +1,13 @@
 ---
-name: adversarial-review
+name: review-adversarial
 description: >-
   Optional adversarial code review using an opposing AI model. Spawns 1–3 reviewers
   on a different model (Codex or Gemini) to challenge work from distinct critical lenses.
-  Triggers: "adversarial review", "/adversarial-review".
+  Triggers: "adversarial review", "/review-adversarial".
 schedule: "Optional step after /code-review passes, before creating a PR. Use for large changes (200+ lines) or high-risk code (auth, payments, data migrations)."
 ---
 
-# /adversarial-review — Cross-Model Adversarial Review
+# /review-adversarial — Cross-Model Adversarial Review
 
 Spawn reviewers on a **different AI model** to challenge work. Reviewers attack from distinct
 lenses grounded in project conventions. The deliverable is a synthesized verdict — do NOT make
@@ -170,7 +170,7 @@ This is an **optional step** in the development workflow. The typical flow:
 working  → /code-review --quick     (periodic mid-development check)
 "done"   → /simplify                (auto-refactor: reuse, quality, efficiency)
 clean    → /code-review             (full review — REQUIRED)
-passing  → /adversarial-review      (cross-model review — OPTIONAL)
+passing  → /review-adversarial      (cross-model review — OPTIONAL)
 reviewed → create PR
 ```
 

@@ -1,9 +1,9 @@
 ---
-name: dependency-audit
+name: dep-audit
 description: "Audit project dependencies: check for vulnerabilities, outdated packages, unused deps, and license compliance. Use periodically or before releases."
 ---
 
-# /dependency-audit — Dependency Health Check
+# /dep-audit — Dependency Health Check
 
 **Purpose:** Comprehensive audit of project dependencies — security vulnerabilities, outdated packages, unused dependencies, and license compliance. Project-agnostic — adapts to npm/pnpm/yarn/cargo/pip.
 
@@ -18,11 +18,11 @@ description: "Audit project dependencies: check for vulnerabilities, outdated pa
 ## Usage
 
 ```
-/dependency-audit                           # Full audit
-/dependency-audit --security-only           # Just vulnerability check
-/dependency-audit --check outdated          # Just outdated packages
-/dependency-audit --check unused            # Just unused dependency detection
-/dependency-audit --check licenses          # Just license compliance
+/dep-audit                           # Full audit
+/dep-audit --security-only           # Just vulnerability check
+/dep-audit --check outdated          # Just outdated packages
+/dep-audit --check unused            # Just unused dependency detection
+/dep-audit --check licenses          # Just license compliance
 ```
 
 ## Arguments

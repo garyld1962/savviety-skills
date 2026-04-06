@@ -1,9 +1,9 @@
 ---
-name: k8s-deploy-verify
+name: k8s-verify
 description: "Post-deploy verification for Kubernetes: checks pod health, service endpoints, recent events, log errors, and rollout status. Use after any K8s deployment to verify it succeeded."
 ---
 
-# /k8s-deploy-verify — Kubernetes Post-Deploy Verification
+# /k8s-verify — Kubernetes Post-Deploy Verification
 
 **Purpose:** Systematic post-deploy health check for Kubernetes deployments. Verifies pods are running, services have endpoints, no error events, and applications are responding. Project-agnostic — adapts to any namespace.
 
@@ -17,9 +17,9 @@ description: "Post-deploy verification for Kubernetes: checks pod health, servic
 ## Usage
 
 ```
-/k8s-deploy-verify                          # Auto-detect namespace from context
-/k8s-deploy-verify --namespace myapp        # Specific namespace
-/k8s-deploy-verify --namespace myapp --full # Include log analysis
+/k8s-verify                          # Auto-detect namespace from context
+/k8s-verify --namespace myapp        # Specific namespace
+/k8s-verify --namespace myapp --full # Include log analysis
 ```
 
 ## Arguments

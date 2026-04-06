@@ -30,22 +30,22 @@ This copies skills into the project's `.claude/skills/` directory.
 | work-item | `/work-item` | Fetch ADO or Linear work items |
 | sync-main | `/sync-main` | Rebase current branch on main safely |
 | test-plan | `/test-plan` | Generate a test plan with multi-analyst coverage |
-| k8s-deploy-verify | `/k8s-deploy-verify` | Post-deploy Kubernetes health checks |
-| dependency-audit | `/dependency-audit` | Audit dependencies for vulnerabilities and updates |
-| migration-guide | `/migration-guide` | Generate migration guide for breaking changes |
-| acceptance | `/acceptance` | Acceptance criteria validation |
+| k8s-verify | `/k8s-verify` | Post-deploy Kubernetes health checks |
+| dep-audit | `/dep-audit` | Audit dependencies for vulnerabilities and updates |
+| dep-migrate | `/dep-migrate` | Generate migration guide for breaking changes |
+| prd-acceptance | `/prd-acceptance` | Post-implementation acceptance criteria validation |
 
 ### Review
 
 | Skill | Invocation | Purpose |
 |-------|------------|---------|
-| adversarial-review | `/adversarial-review` | Cross-model adversarial review using an opposing CLI/model |
+| review-adversarial | `/review-adversarial` | Cross-model adversarial review using an opposing CLI/model |
 | review-api | `/review-api` | Quick API/service pattern compliance check |
 | review-db | `/review-db` | Quick database/schema pattern compliance check |
 | review-design | `/review-design` | Quick design system and UI compliance check |
 | review-tests | `/review-tests` | Quick test quality and coverage pattern check |
 | review-gauntlet | `/review-gauntlet` | Meta-review: challenge a code review's findings |
-| ba-adversarial-review | `/ba-adversarial-review` | Adversarial review of BA deliverables |
+| ba-review-adversarial | `/ba-review-adversarial` | Adversarial review of BA deliverables |
 | skill-audit | `/skill-audit` | Audit skill quality and coverage |
 
 ### Technology / Reference

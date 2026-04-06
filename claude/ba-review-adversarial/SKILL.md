@@ -1,9 +1,9 @@
 ---
-name: ba-adversarial-review
+name: ba-review-adversarial
 description: "Adversarial review of BA work products. Spawns 1-3 reviewer lenses based on deliverable phase. Targets requirements, user stories, and acceptance criteria -- not code. Produces PASS/CONTESTED/REJECT verdict with evidence-based findings."
 ---
 
-# /ba-adversarial-review -- Adversarial Review of BA Deliverables
+# /ba-review-adversarial -- Adversarial Review of BA Deliverables
 
 **Purpose:** Stress-test business analysis work products (requirements, user stories, acceptance criteria, process flows) by applying adversarial reviewer lenses. Finds gaps, contradictions, and ambiguities BEFORE they become code defects. This skill reviews BA deliverables, not code -- use /code-review for code.
 
@@ -23,11 +23,11 @@ description: "Adversarial review of BA work products. Spawns 1-3 reviewer lenses
 ## Usage
 
 ```
-/ba-adversarial-review <file-or-text>
-/ba-adversarial-review docs/requirements/auth-flow.md
-/ba-adversarial-review --ado 12345
-/ba-adversarial-review --linear BF-42
-/ba-adversarial-review --phase discovery
+/ba-review-adversarial <file-or-text>
+/ba-review-adversarial docs/requirements/auth-flow.md
+/ba-review-adversarial --ado 12345
+/ba-review-adversarial --linear BF-42
+/ba-review-adversarial --phase discovery
 ```
 
 ## Arguments

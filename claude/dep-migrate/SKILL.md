@@ -1,9 +1,9 @@
 ---
-name: migration-guide
+name: dep-migrate
 description: "Plan a dependency migration: analyze breaking changes, assess impact on your codebase, produce a step-by-step migration plan. Use when upgrading Node, TypeScript, frameworks, or major dependencies."
 ---
 
-# /migration-guide — Dependency Migration Planner
+# /dep-migrate — Dependency Migration Planner
 
 **Purpose:** Analyze breaking changes for a dependency upgrade and produce a codebase-specific migration plan. Reads the changelog, maps breaking changes to your code, estimates scope, and generates an ordered task list. Project-agnostic.
 
@@ -13,7 +13,7 @@ description: "Plan a dependency migration: analyze breaking changes, assess impa
 - Upgrading TypeScript (e.g., 5.3 → 5.7)
 - Upgrading a framework (React 18 → 19, Next.js 14 → 15, Express 4 → 5)
 - Upgrading a major dependency (Vitest 1 → 2, ESLint 8 → 9)
-- When `/dependency-audit` flags a major version update
+- When `/dep-audit` flags a major version update
 
 ## When NOT to Use
 
@@ -24,11 +24,11 @@ description: "Plan a dependency migration: analyze breaking changes, assess impa
 ## Usage
 
 ```
-/migration-guide typescript 5.3 5.7
-/migration-guide node 20 22
-/migration-guide react 18 19
-/migration-guide vitest 1 2
-/migration-guide eslint 8 9 --scope=packages/api
+/dep-migrate typescript 5.3 5.7
+/dep-migrate node 20 22
+/dep-migrate react 18 19
+/dep-migrate vitest 1 2
+/dep-migrate eslint 8 9 --scope=packages/api
 ```
 
 ## Arguments

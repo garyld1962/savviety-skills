@@ -17,7 +17,7 @@ description: "Meta-review of code review output. Reviews THE REVIEW, not the cod
 ## When NOT to Use
 
 - You need a code review -- use /code-review
-- You need to review BA deliverables -- use /ba-adversarial-review
+- You need to review BA deliverables -- use /ba-review-adversarial
 - The review is short (< 5 findings) and clearly correct -- just act on it
 
 ## Usage
