@@ -4,6 +4,8 @@ Experimental GitHub Copilot assets designed to be **Copilot-first**, not just Cl
 
 This folder is intentionally separate from `vscode/` so we can explore a better architecture without destabilizing the current deployed prompt set.
 
+For a file-by-file inventory of prompts, agents, skills, instructions, and related control files, see [asset-catalog.md](asset-catalog.md).
+
 ## Why this exists
 
 The existing `vscode/` tree is already strong, but much of it mirrors Claude-era workflow commands one-for-one. GitHub Copilot has a different platform shape:
@@ -61,6 +63,7 @@ The goal here is to build a thinner, more native layer that:
 
 ### Prompts
 
+- `prompts/ba/ideate.prompt.md`
 - `prompts/ba/prd-validator.prompt.md`
 - `prompts/ba/ba-problem-refiner.prompt.md`
 - `prompts/ba/ba-spec-engineer.prompt.md`
@@ -69,16 +72,21 @@ The goal here is to build a thinner, more native layer that:
 - `prompts/ba/ba-knowledge-capture.prompt.md`
 - `prompts/common/environment-check.prompt.md`
 - `prompts/dev/adversarial-review.prompt.md`
+- `prompts/dev/autonomous-development-kickoff.prompt.md`
 - `prompts/dev/copilot-asset-audit.prompt.md`
 - `prompts/dev/execute-plan.prompt.md`
 - `prompts/dev/checkpoint.prompt.md`
+- `prompts/dev/execute-workflow.prompt.md`
+- `prompts/dev/investigate-code.prompt.md`
 - `prompts/dev/k8s-deploy-verify.prompt.md`
 - `prompts/dev/ship.prompt.md`
 - `prompts/dev/hotfix.prompt.md`
+- `prompts/dev/postmortem.prompt.md`
 - `prompts/dev/test-plan.prompt.md`
 - `prompts/dev/migration-guide.prompt.md`
 - `prompts/dev/dependency-audit.prompt.md`
 - `prompts/dev/ado-item.prompt.md`
+- `prompts/review/adversarial-review-gauntlet.prompt.md`
 - `prompts/review/review-api.prompt.md`
 - `prompts/review/review-db.prompt.md`
 - `prompts/review/review-design.prompt.md`
@@ -87,13 +95,19 @@ The goal here is to build a thinner, more native layer that:
 ### Skills
 
 - `skills/adversarial-review/SKILL.md`
+- `skills/ba-ideation/SKILL.md`
 - `skills/prd-readiness/SKILL.md`
 - `skills/project-context/SKILL.md`
 - `skills/ba-knowledge-ops/SKILL.md`
+- `skills/code-investigation-orchestrator/SKILL.md`
+- `skills/code-investigation-search/SKILL.md`
 - `skills/execution-environment/SKILL.md`
+- `skills/investigation-report-writer/SKILL.md`
+- `skills/review-disposition-governance/SKILL.md`
 - `skills/repo-delivery/SKILL.md`
 - `skills/k8s-verification/SKILL.md`
 - `skills/dependency-change-management/SKILL.md`
+- `skills/tech-ideation/SKILL.md`
 - `skills/test-planning/SKILL.md`
 - `skills/ado-work-items/SKILL.md`
 - `skills/review-foundations/SKILL.md`
@@ -105,7 +119,20 @@ The goal here is to build a thinner, more native layer that:
 
 ### Other assets
 
+- `agents/ba-ideation.agent.md`
+- `agents/adversarial-reviewer.agent.md`
+- `agents/code-reviewer.agent.md`
+- `agents/disposition-coordinator.agent.md`
+- `agents/execute-orchestrator.agent.md`
+- `agents/orchestrator-code-investigation.agent.md`
+- `agents/plan-reviewer.agent.md`
+- `agents/postmortem-analyst.agent.md`
 - `agents/prd-quality-gate.agent.md`
+- `agents/specialist-code-investigation-search.agent.md`
+- `agents/tech-ideation.agent.md`
+- `agents/writer-investigation-report.agent.md`
+- `.github/docs/process/*.md`
+- `.github/docs/templates/*.template.md`
 - `instructions/copilot-asset-authoring.instructions.md`
 - `instructions/execution-environment.instructions.md`
 - `instructions/personal.instructions.md`
@@ -115,10 +142,16 @@ The goal here is to build a thinner, more native layer that:
 - Use built-in `/plan` instead of creating another custom planning prompt unless the repo needs special orchestration.
 - Use `prd-validator` before planning when the source artifact is still business-oriented, incomplete, or not yet an AERS.
 - Use BA prompts like `ba-problem-refiner`, `ba-spec-engineer`, `ba-context-builder`, `ba-eval-harness`, and `ba-knowledge-capture` when the missing piece is business precision or durable context, not implementation orchestration.
+- Use `ideate` when the work is still exploratory and you need shared, BA, or technical option-shaping before `/plan`.
 - Use `environment-check` when a repo must support both PowerShell and WSL execution patterns.
 - Use built-in `/model` and then `adversarial-review` when you want a deliberate second-opinion code challenge instead of the default `/review` path.
+- Use `adversarial-review-gauntlet` when the thing you need to challenge is the review output itself, not the code.
+- Use `autonomous-development-kickoff` when you want a thin built-in-first path from requirements readiness into `/plan`, implementation, and `/review`.
+- Use `execute-workflow` when the work needs governed execution artifacts, required review gates, and explicit disposition handling.
 - Use `execute-plan`, `checkpoint`, `ship`, and `hotfix` for repo-specific delivery flows that built-in Copilot does not model directly.
 - Use `dependency-audit`, `migration-guide`, and `ado-item` when the workflow depends on repo-local dependency state or external Azure DevOps context.
+- Use `investigate-code` when you need an evidence-backed index of where a behavior or API appears across one repo, several repos, or a repo folder.
+- Use `postmortem` after a governed run when you want a structured process retrospective tied to the run artifacts.
 - Use `review-api`, `review-db`, `review-design`, and `review-tests` when you want narrow compliance checks rather than the broader default `/review`.
 - Use `copilot-asset-audit` when reviewing or porting prompt/agent/skill/instruction sets.
 - Use the platform playbook skill when authoring new Copilot assets.
@@ -136,6 +169,8 @@ upstream:
 - `.github/prompts/common/`
 - `.github/prompts/dev/`
 - `.github/prompts/review/`
+- `.github/docs/process/`
+- `.github/docs/templates/`
 - `.github/skills/<shared-skill>/`
 - `.github/agents/`
 - `.github/instructions/*.instructions.md`
