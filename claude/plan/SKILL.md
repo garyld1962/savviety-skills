@@ -63,6 +63,34 @@ description: "Create an implementation plan: explores the codebase, estimates sc
    - Check for a `templates/` directory in the repo or in `~/repos/skills/templates/`
    - If a template is available, Task 1 of the plan should be "Scaffold from template" (one command) instead of manually creating 15-20 config files. This eliminates the entire class of config/dependency errors.
 
+### Phase 2b: Design-It-Twice (Architectural Decisions)
+
+**When to run:** Feature or refactor plans with significant architectural decisions — a new service boundary, data model shape, API contract, or module interface. Skip for bug fixes, small refactors, and infra changes.
+
+When you identify a key architectural decision during Phase 2, pause and explore alternatives before committing:
+
+8. **Identify the decision.** State the architectural choice clearly: "We need to decide how module X exposes its interface" or "We need to choose the data model for Y."
+
+9. **Spawn 3 sub-agents in parallel** using the Agent tool. Each gets the same context (requirements, codebase findings, constraints) but a **radically different design constraint**:
+
+   | Agent | Constraint | Focus |
+   |-------|-----------|-------|
+   | Agent 1 | Minimize surface area | 1-3 methods/endpoints max, hide everything else |
+   | Agent 2 | Maximize flexibility | Support the most use cases, extensible |
+   | Agent 3 | Optimize for the common case | Make the 80% path trivial, accept trade-offs for edge cases |
+
+   Each agent produces: interface signature, usage example, what it hides, and trade-offs.
+
+10. **Compare designs** on:
+    - Interface simplicity (fewer methods, simpler params)
+    - Depth (small interface hiding complex implementation = good)
+    - Implementation efficiency (does the shape allow efficient internals?)
+    - Ease of correct use vs ease of misuse
+
+11. **Present to user** with an opinionated recommendation. Often the best design combines insights from multiple options. User picks the approach, which then informs Phase 3 task decomposition.
+
+**If no significant architectural decisions exist**, skip directly to Phase 3.
+
 ### Phase 3: Scope & Estimate
 
 8. **List the tasks** at a high level (not detailed yet). One line per task.

@@ -83,6 +83,17 @@ Read all relevant source files to build the specification context.
 4. **Reference implementation** — find an existing service/router for a similar entity to learn the established patterns
 5. **CLAUDE.md conventions** — error handling patterns, logging, boundary rules, testing expectations
 
+6. **Classify dependencies** by testing strategy:
+
+   | Category | Description | Testing Strategy | Example |
+   |----------|-------------|-----------------|---------|
+   | **In-process** | Pure computation, no I/O | Test directly — no mocks, no substitutes | Validation logic, data transforms, calculations |
+   | **Local-substitutable** | Real test stand-ins exist | Use the substitute — faster than mocks, higher fidelity | PGLite for Postgres, in-memory FS, SQLite for SQL |
+   | **Remote but owned** | Services you control across a network boundary | Ports & Adapters — define an interface, inject real or in-memory adapter | Your own API services, message queues, cache layers |
+   | **True external** | Third-party services you don't control | Mock at boundary — only category where mocking is the right default | Stripe API, SendGrid, AWS S3, external OAuth |
+
+   Include the dependency classification in the plan output so the test writer knows which approach to use for each dependency. Never mock in-process or local-substitutable dependencies — this hides real bugs.
+
 **For `--validate` mode:** Skip. Context already in plan file.
 
 ### State 3: SELECT_ANALYSTS

@@ -49,6 +49,19 @@ When implementation changed after the original plan:
 - refresh stale specs
 - keep the test plan aligned with current signatures and behavior
 
+## Dependency classification
+
+Classify each dependency to determine the testing approach:
+
+| Category | Testing Strategy | Example |
+|----------|-----------------|---------|
+| **In-process** | Test directly — no mocks | Validation, transforms, calculations |
+| **Local-substitutable** | Use real substitute — higher fidelity than mocks | PGLite for Postgres, in-memory FS |
+| **Remote but owned** | Ports & Adapters — inject in-memory adapter | Your own API services, queues |
+| **True external** | Mock at boundary — only valid mock target | Stripe, SendGrid, AWS S3 |
+
+Do NOT mock in-process or local-substitutable dependencies — mocks hide real bugs.
+
 ## Guardrails
 
 - Do not invent framework, file layout, or API signatures.

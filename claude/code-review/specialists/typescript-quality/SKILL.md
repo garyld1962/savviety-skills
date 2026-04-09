@@ -118,6 +118,42 @@ const unused = computeValue();           // unused never read
 ```
 Most projects catch this via linting — only flag if no linter is configured.
 
+### 9. Shallow Module Detection (Medium, 0.70)
+
+A **shallow module** has a large public interface relative to its implementation — it exposes complexity rather than hiding it. Flag modules where the ratio of exported surface to internal logic suggests the module adds indirection without encapsulation.
+
+**Signals (flag when 2+ are present):**
+- Module exports 5+ functions/classes but each is under ~10 lines
+- Module re-exports or passes through to another module without transformation
+- Module's public API is nearly as complex as its implementation (thin wrapper)
+- File is essentially a namespace — groups functions with no shared internal state
+
+```typescript
+// SHALLOW — large interface, trivial implementation
+export const getName = (u: User) => u.name;
+export const getEmail = (u: User) => u.email;
+export const getAge = (u: User) => u.age;
+export const getFullName = (u: User) => `${u.first} ${u.last}`;
+export const isActive = (u: User) => u.status === 'active';
+export const isAdmin = (u: User) => u.role === 'admin';
+```
+
+```typescript
+// DEEP — small interface, significant hidden complexity
+export function resolveUser(id: string): Promise<ResolvedUser> {
+  // internally: cache check, DB query, permission resolution,
+  // org hierarchy traversal, role aggregation, profile hydration
+}
+```
+
+**Do NOT flag:**
+- Barrel/index files (re-export is their purpose)
+- Type-only modules (interfaces, types, enums) — these are definitions, not logic
+- Utility modules explicitly marked as helpers in CLAUDE.md
+- Test helpers and fixtures
+
+**Confidence is lower (0.70)** because module depth involves architectural judgment. Flag for human review, not as a hard rule.
+
 ## Output
 
 Emit findings conforming to `foundations/finding-schema.md` with domain `typescript-quality`.
