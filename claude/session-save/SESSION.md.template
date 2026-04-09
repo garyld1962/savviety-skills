@@ -1,0 +1,24 @@
+# Session State: <FILL IN: project name>
+
+**Last updated:** <ISO timestamp>
+**Machine:** <hostname>
+**Branch:** <current branch>
+**Last commit:** <short sha> — <subject>
+
+## Where we left off
+
+<2-4 sentence prose summary of current work in progress. Be specific — what files were touched, what's the state of the change, is it complete or partial?>
+
+## Next action
+
+<One specific concrete thing to do when you come back. Not "continue working" — something like "run tests for the auth module, fix the failing test_token_refresh case, then open PR.">
+
+## Open questions
+
+- <Things that came up but weren't resolved>
+- <Decisions deferred, unknowns needing investigation>
+
+## Don't forget
+
+- <Gotchas, notes, reminders not obvious from the code>
+- <e.g., "staging DB needs migration before testing", "PR #42 awaiting review from @alice">
