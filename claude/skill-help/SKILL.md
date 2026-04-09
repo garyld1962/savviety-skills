@@ -32,6 +32,7 @@ description: "List available agents or show detailed help for a specific agent. 
    | **Source Control** | pr, ship, sync-main, changelog |
    | **Operations** | k8s-verify, dep-audit, dep-migrate, env-check |
    | **Team & Workflow** | teams, work-item |
+   | **Session** | whereami, session-save |
    | **Configuration** | configure |
    | **Meta** | skill-help, skill-audit |
 
