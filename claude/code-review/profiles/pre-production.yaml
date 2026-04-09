@@ -1,0 +1,50 @@
+---
+id: pre-production
+title: Pre-Production Review
+description: >
+  The paranoid profile. Used before a release, before a change hits a
+  regulated environment, or before any change to a high-blast-radius
+  subsystem. Focuses on the lenses that predict production pain. Skips style,
+  commits, and architecture — those should have been resolved earlier.
+
+  The bar for this profile is explicitly higher than for pre-merge. Findings
+  that pre-merge would mark minor may be blocking here.
+
+domains:
+  - id: concept/security
+    mode: always
+  - id: concept/resilience
+    mode: always
+  - id: concept/operability
+    mode: always
+  - id: concept/performance
+    mode: always
+  - id: concept/concurrency
+    mode: always
+  - id: concept/correctness
+    mode: always
+  - id: concept/async
+    mode: conditional
+  - id: concept/data-integrity
+    mode: conditional
+  - id: concept/dependencies
+    mode: conditional
+  - id: concept/api-contract
+    mode: conditional
+  - id: concept/requirements
+    mode: always          # "is the rollout/rollback plan stated?" lives here
+
+overlays:
+  - dialect/csharp-async
+  - dialect/typescript-async
+  - dialect/python-async
+  - dialect/typescript-types
+  - platform/azure-service-bus
+  - platform/nats-jetstream
+  - platform/postgres
+
+# Profile-level severity bump: things the concept domains would normally call
+# "minor" are treated as "major" in the merged report for this profile. The
+# controller applies this after merging worker findings.
+severity_bump:
+  minor: major
