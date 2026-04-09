@@ -4,6 +4,8 @@ Experimental GitHub Copilot assets designed to be **Copilot-first**, not just Cl
 
 This folder is intentionally separate from `vscode/` so we can explore a better architecture without destabilizing the current deployed prompt set.
 
+For a file-by-file inventory of prompts, agents, skills, instructions, and related control files, see [asset-catalog.md](asset-catalog.md).
+
 ## Why this exists
 
 The existing `vscode/` tree is already strong, but much of it mirrors Claude-era workflow commands one-for-one. GitHub Copilot has a different platform shape:
