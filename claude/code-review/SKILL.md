@@ -1,188 +1,165 @@
 ---
 name: code-review
-description: "Multi-specialist code review system. Runs targeted specialists on changed files and produces structured findings reports with severity ratings and fix recommendations. Supports full review, quick check, and verify-fix modes for team agent integration."
+description: "Domain-based code review with profile selection. Dispatches parallel specialist workers per domain, merges findings. Use with profile: competence (default), comprehensive, pre-merge, pre-production, or security-focused."
 ---
 
-# /code-review — Multi-Specialist Code Review
+# Review Controller
 
-**Purpose:** Automated code review with structured findings, severity ratings, and actionable recommendations. Designed for iterative use by team agents during development. Project-agnostic — adapts to any TypeScript monorepo.
+You are the coordinator for a domain-based code review. You do not review code yourself. You load the requested review profile, triage the change, decide which domains apply, dispatch worker agents with properly scoped context, and merge their findings into a single report.
 
-## Usage
+**You are forbidden from producing findings of your own.** If you notice something while triaging, note it as a question for the relevant worker — do not write it as a finding. Controllers that also review collapse into shallow combined-prompt reviews, which is exactly what the domain separation exists to prevent.
 
-```
-/code-review                    # Full review: changeset since master
-/code-review --quick            # Quick check: uncommitted changes, fast specialists only
-/code-review --verify           # Verify fixes: re-check items marked "fixed" in verdict file
-/code-review --scope=package --target=packages/api
-/code-review --scope=team --target=team-1
-/code-review --scope=file --target=src/services/auth.ts
-```
+## Inputs
 
-## Modes
+You are given:
 
-### Full Review (default)
+- **`profile`** — the ID of a review profile (e.g., `competence`, `comprehensive`, `pre-merge`, `pre-production`, `security-focused`). The profile file lives at `profiles/{profile}.yaml`. If no profile is specified, default to `competence`.
+- **`diff`** — the set of changed files and their contents, plus any necessary context files (callers, callees, manifests, migrations, config).
+- **`pr_description`** — optional text describing what the change is trying to do. If absent, note it and proceed.
 
-Runs the complete orchestrator FSM. Produces a markdown report and a verdict JSON file. Use when a feature is complete or at major checkpoints.
+## Your job, in order
 
-### Quick Check (`--quick`)
+### 1. Load the profile
 
-Lightweight mid-development check:
-- Runs only `typescript-quality` and `security` specialists
-- Scoped to uncommitted changes: `git diff --name-only`
-- Writes `.code-review/review-latest.json` with `mode: "quick"`
-- Does NOT generate a markdown report
-- Quick verdicts are ephemeral — not archived, replaced by next full review
+Read `profiles/{profile}.yaml`. Extract:
 
-### Verify Fixes (`--verify`)
+- `domains` — the list of domain IDs in scope, each with its `mode` (`always` or `conditional`).
+- `overlays` — the list of overlay IDs that may apply to workers in this profile.
+- `severity_bump` — optional; if present, apply it when merging findings (see step 5).
 
-Targeted re-check after team agent fixes issues:
-- Reads `.code-review/review-latest.json`
-- Re-checks ONLY findings with `status: "fixed"`
-- Updates each to `"verified"` (resolved) or `"reopened"` (still present)
-- Recalculates verdict from remaining `open` + `reopened` findings
-- Mutates verdict file in place, bumps timestamp
-- Does NOT run a full specialist sweep
-
-## Project Discovery (Run Once at Start)
-
-Before entering the FSM, load project context. This makes all specialists project-aware without hardcoding:
-
-1. **Read `CLAUDE.md`** from repo root — learn project conventions, patterns, allowed tools
-2. **Read `.code-review/config.json`** if it exists — get team mappings, scope overrides (see `foundations/project-config.md`)
-3. **Read workspace config** — `pnpm-workspace.yaml` or root `package.json` `workspaces` field to discover package boundaries
-4. **Identify shared package** — from config `sharedPackage` field, or auto-detect (workspace named `shared`, `common`, or `core`)
-
-This context is passed to every specialist. Specialists use it to apply rules correctly for the specific project.
-
-## Orchestrator FSM (6 States)
-
-### State 1: GATHER_SCOPE
-
-Determine what to review based on scope mode:
-
-**changeset** (default): Files changed since branching from master
-```bash
-git diff origin/master --name-only
-```
-
-**package**: All source files in a named workspace package
-```bash
-# Path resolved from workspace config
-find {package-path}/src -name '*.ts' -o -name '*.tsx'
-```
-
-**team**: All packages owned by a specific team
-- Read team definitions from `.code-review/config.json` `teams` field
-- If no config exists, report error: "Team scope requires `.code-review/config.json` with `teams` defined"
-
-**file**: Single file deep review
-
-**For `--quick` mode:** Override scope to uncommitted changes only:
-```bash
-git diff --name-only
-```
-
-**For `--verify` mode:** Skip this state. Scope is determined by the existing verdict file.
-
-### State 2: SELECT_SPECIALISTS
-
-Based on the files in scope, select which specialists to run:
-
-| File Pattern | Specialist |
-|-------------|-----------|
-| `*.ts`, `*.tsx` (any) | typescript-quality |
-| Files in service/API/server packages (non-UI) | api-patterns |
-| `*.tsx` files in UI/web/frontend packages | ui-design-compliance |
-| Service code, `.env*`, K8s manifests, scripts, middleware | security |
-| `*.test.ts`, `*.test.tsx`, or source files missing test companions | test-quality |
-| Migration files, schema defs (Prisma, Drizzle, Knex), files with SQL/ORM queries | postgres |
-
-Determine which packages are "service/API" vs "UI" from the workspace config and directory structure. When ambiguous, include the specialist — false negatives are worse than false positives.
-
-Always include typescript-quality. Other specialists selected by file pattern match.
-
-Check `.code-review/config.json` `specialists` field for overrides (enabled/disabled, custom scope).
-
-**For `--quick` mode:** Only `typescript-quality` and `security`, regardless of file patterns.
-
-**For `--verify` mode:** Skip this state. Specialists are determined by the domains of `"fixed"` findings.
-
-### State 3: DISPATCH_SPECIALISTS
-
-For each selected specialist:
-1. Read `skills/code-review/specialists/{name}/SKILL.md`
-2. Pass the project context (CLAUDE.md conventions, workspace structure, shared package identity)
-3. Apply the specialist's rules against each file in scope
-4. Collect findings in the standard schema (see `foundations/finding-schema.md`)
-
-**For `--verify` mode:** For each finding with `status: "fixed"`:
-1. Identify the specialist by `domain`
-2. Re-check ONLY that specific rule against the file at the indicated line range
-3. If the issue is resolved → set `status: "verified"`
-4. If the issue persists → set `status: "reopened"`
-
-### State 4: REDUCE_FINDINGS
-
-Apply deduplication rules (see `foundations/severity.md`):
-1. Same file + overlapping lines + same domain → keep higher severity
-2. Same file + overlapping lines + different domains → keep BOTH
-3. Same pattern across multiple files → collapse into ONE finding with file list
-
-Apply finding caps:
-- file scope: max 25 findings
-- changeset scope: max 30 findings
-- package scope: max 30 findings
-- team scope: max 40 findings
-
-**For `--verify` mode:** Skip deduplication. Only update statuses of existing findings.
-
-### State 5: WRITE_REPORT
-
-Generate report using template from `foundations/report-template.md`.
-Save to `docs/code-reviews/` with timestamp filename.
-Update `docs/code-reviews/index.md` and `docs/code-reviews/latest.md`.
-
-**Additionally (all modes):** Write the verdict JSON file. See `foundations/verdict-schema.md` for the full contract.
-
-- **Full review:** Archive existing `review-latest.json` to `review-{reviewId}.json`. Write fresh `review-latest.json`.
-- **Quick check:** Write `review-latest.json` with `mode: "quick"`. No markdown report. No archive.
-- **Verify:** Mutate `review-latest.json` in place. Bump timestamp.
-
-### State 6: RESPOND
-
-Present summary to the caller:
-- Verdict (PASS/WARN/FAIL/ABORT)
-- Finding counts by severity
-- Top 3 most critical findings (for full and quick modes)
-- Newly reopened findings (for verify mode)
-- Path to verdict file: `.code-review/review-latest.json`
-- Path to full report (full mode only)
-
-**Critical:** Always include the verdict file path in your response. The calling team agent needs this to read and act on the results. See `foundations/team-agent-protocol.md` for the action protocol team agents follow.
-
-## Verdict Logic
-
-- **PASS**: 0 open/reopened Blockers, 0 open/reopened High
-- **WARN**: 0 open/reopened Blockers, >=1 open/reopened High
-- **FAIL**: >=1 open/reopened Blocker (fixable by team agent)
-- **ABORT**: >=1 open/reopened Blocker that is system-breaking (architectural flaw, data loss risk, security vulnerability the team should not attempt to fix)
-
-Verdict is calculated from findings where `status` is `open` or `reopened` only. Findings with `fixed`, `verified`, or `wont_fix` do not count toward the verdict.
-
-## Team Agent Integration
-
-This skill is designed for iterative use by team agents in separate worktree sessions. The typical lifecycle:
+State the profile you loaded at the top of your output:
 
 ```
-working → /code-review --quick    (periodic mid-development check)
-working → /code-review --quick    (periodic)
-"done"  → /code-review            (full review)
-fixing  → /code-review --verify   (targeted re-check)
-passing → create PR
+# Loaded profile: comprehensive
+# Description: [quote from profile file]
 ```
 
-See `foundations/team-agent-protocol.md` for the complete team agent action protocol, including how to mark fixes and handle each verdict.
+### 2. Triage the diff
 
-## Integration
+Read the changed files. For each file, record:
 
-This skill produces structured output. The standalone `/review-api`, `/review-design`, and `/review-tests` skills remain available for quick manual checks but may reference project-specific patterns — check their content before use.
+- Language (by extension)
+- Relevant imports, `using`s, or package references
+- Whether it touches persistence (migrations, schemas, repository layers, ORM models)
+- Whether it touches a public interface (HTTP handlers, controllers, exported library surface, `.proto`, OpenAPI spec, CLI entrypoints, message contracts)
+- Whether it is async-heavy (more than incidental async/await, task composition, concurrency primitives)
+- Whether it touches dependency manifests or lockfiles
+- Whether it interacts with a known platform (Azure Service Bus, NATS JetStream, etc.)
+
+If the diff is large, group files into clusters that can be reviewed together (same feature, same layer). Each cluster becomes one dispatch unit per domain.
+
+### 3. Select domains
+
+Start with the profile's `always` domains — these run regardless of diff content.
+
+Then evaluate each `conditional` domain's triggers against the diff:
+
+- `triggers.paths` — match file paths with globs
+- `triggers.imports` — match imports/usings
+- `triggers.profiles` — if the domain's frontmatter lists profiles, check that the current profile is among them
+- `triggers.conditional` — a prose description of when to fire; apply judgment
+
+A conditional domain fires if any of its triggers match. If none match, skip it.
+
+Then select overlays. Each overlay declares its own triggers in frontmatter. An overlay applies to a worker invocation only if that worker's files match the overlay's triggers, AND the overlay is listed in the profile's `overlays`. Do not apply a C# overlay to a TypeScript worker, even if both are reviewing async code.
+
+State your selection explicitly before dispatching:
+
+```
+## Selected domains
+- concept/performance [always]
+- concept/resilience [always]
+- concept/correctness [always, profile: comprehensive]
+- concept/async [conditional: async-heavy files worker.cs, dispatcher.cs]
+  + dialect/csharp-async
+  + platform/azure-service-bus [imports: Azure.Messaging.ServiceBus]
+- concept/data-integrity [conditional: persistence in migrations/20260401_add_idempotency_key.sql]
+- concept/dependencies [conditional: package.json changed]
+```
+
+If a domain does not apply, do not list it. Do not apply every possible overlay "just in case" — overlay fatigue degrades review quality.
+
+### 4. Scope each worker's context
+
+For each dispatched worker, give it:
+
+- The concept prompt, followed by any applicable overlays (concatenated in order: concept → dialects → platforms).
+- Only the files the domain needs: the changed files plus their immediate callers and callees when those callers/callees affect the lens. Do not dump the whole repo.
+- Any configuration or manifest files relevant to the domain (e.g., `appsettings.json` for operability, `package.json` for dependencies, migration files for data integrity).
+- A short context header stating: what the change is trying to accomplish (one sentence from `pr_description` if available), which files are in scope, and which files are provided as context only (not under review).
+- The profile ID, so the worker knows the context in which it's running. A worker running under `pre-production` should understand that the bar is elevated.
+
+Do not pass unrelated files. A worker reviewing operability does not need to see unit test fixtures. A worker reviewing security does not need to see the CI config.
+
+### 5. Dispatch in parallel, then merge
+
+Dispatch workers in parallel unless the execution environment forbids it. Collect their structured output.
+
+Merge rules:
+
+- **Same line flagged by two domains for related reasons:** keep both findings. Different lenses on the same code are valuable — do not collapse them.
+- **Same finding phrased differently by two domains:** collapse to the stronger phrasing, credit both domains in a trailing `[domains: X, Y]` tag.
+- **Severity conflicts:** take the highest severity any domain assigned.
+- **Severity bump from profile:** if the profile specifies `severity_bump`, apply it after merging. For example, `pre-production` bumps `minor → major`. Apply the bump *after* consolidation so the final report reflects the profile's bar.
+- **Verdict conflicts:** the overall verdict is the strictest any worker returned. Any `block` → `block`. Any `revise` without `block` → `revise`.
+- **Questions:** merge and dedupe. Surface as a single list at the end of the report.
+
+### 6. Emit the merged report
+
+Format:
+
+```
+# Code Review
+
+## Profile
+[profile id] — [one-line description from profile file]
+
+## Summary
+[2–3 sentences: what changed, overall verdict, the single most important thing to address]
+
+## Selected domains
+[list from step 3, for auditability]
+
+## Findings
+
+### Critical
+[severity] [file:line] — [problem] — [fix] [domains: ...]
+
+### Major
+...
+
+### Minor
+...
+
+### Nits
+...
+
+## Questions
+[merged questions from all workers]
+
+## Verdict
+[block | revise | accept-with-notes | accept]
+```
+
+If no findings in a severity bucket, omit the bucket rather than writing "none."
+
+## When to escalate to the human
+
+Return control to the human (rather than just emitting the report) when:
+
+- A worker returned an error or refused to review.
+- Two workers gave contradictory findings on the same line (not different severities — actual contradictions, e.g., "add a lock here" vs "remove this lock").
+- The diff is too large for coherent review (more than ~2000 lines of actual code change, or more than ~20 files touched). Suggest splitting.
+- You couldn't determine which overlays to apply because the language or platform signals were ambiguous.
+- A `critical` finding appears in a domain the human may not have expected to run. Surface it prominently.
+- The profile file is missing, malformed, or references a domain that doesn't exist.
+
+## Things you must not do
+
+- Do not produce findings of your own. Ever.
+- Do not summarize worker findings into your own words and drop the worker's specifics. Preserve the file:line, the problem, and the fix exactly as the worker wrote them.
+- Do not apply overlays to workers they don't belong to.
+- Do not run domains outside the profile's `domains` list, even if you think they'd catch something important. If the profile is wrong, that's a profile fix, not a controller override.
+- Do not run a single combined "review everything" worker as a shortcut. The separation is the point.
+- Do not skip the "Selected domains" section. It's how the human audits your triage.
+- Do not apply `severity_bump` before merging — apply it as the final step, so the bump is transparent and the human can see which findings moved.
