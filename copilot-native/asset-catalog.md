@@ -117,10 +117,12 @@ The specialist review path is intentionally thinner than a general `/review`:
 | Prompt | File | Purpose | Main related assets |
 |---|---|---|---|
 | `adversarial-review-gauntlet` | [prompts/review/adversarial-review-gauntlet.prompt.md](prompts/review/adversarial-review-gauntlet.prompt.md) | Challenge review output itself from one or more adversarial lenses. | `adversarial-review`, `adversarial-reviewer.agent.md` |
-| `review-api` | [prompts/review/review-api.prompt.md](prompts/review/review-api.prompt.md) | Run a specialist backend and service compliance pass. | `review-foundations`, `api-patterns` |
-| `review-db` | [prompts/review/review-db.prompt.md](prompts/review/review-db.prompt.md) | Run a specialist database schema and migration compliance pass. | `review-foundations`, `db-schema-review` |
-| `review-design` | [prompts/review/review-design.prompt.md](prompts/review/review-design.prompt.md) | Run a specialist UI design-system and accessibility pass. | `review-foundations`, `ui-design-compliance` |
-| `review-tests` | [prompts/review/review-tests.prompt.md](prompts/review/review-tests.prompt.md) | Run a specialist test quality and isolation pass. | `review-foundations`, `test-quality` |
+| `code-review` | [prompts/review/code-review.prompt.md](prompts/review/code-review.prompt.md) | Run the structured defect-focused review lane when built-in `/review` is not enough. | `review-engine` |
+| `professional-review` | [prompts/review/professional-review.prompt.md](prompts/review/professional-review.prompt.md) | Run the senior-bar engineering judgment lane for scale, failure, operations, and design quality. | `review-engine` |
+| `review-api` | [prompts/review/review-api.prompt.md](prompts/review/review-api.prompt.md) | Run a targeted backend/service review backed by the shared review engine. | `review-engine`, `api-patterns` |
+| `review-db` | [prompts/review/review-db.prompt.md](prompts/review/review-db.prompt.md) | Run a targeted database review backed by the shared review engine. | `review-engine`, `db-schema-review` |
+| `review-design` | [prompts/review/review-design.prompt.md](prompts/review/review-design.prompt.md) | Run a targeted UI and accessibility review backed by the shared review engine. | `review-engine`, `ui-design-compliance` |
+| `review-tests` | [prompts/review/review-tests.prompt.md](prompts/review/review-tests.prompt.md) | Run a targeted test-quality review backed by the shared review engine. | `review-engine`, `test-quality` |
 
 ## Agent catalog
 
@@ -128,7 +130,7 @@ The specialist review path is intentionally thinner than a general `/review`:
 |---|---|---|---|
 | `adversarial-reviewer` | [agents/adversarial-reviewer.agent.md](agents/adversarial-reviewer.agent.md) | Perform the skeptical second-pass review and write `adversarial-review.md`. | `adversarial-review.prompt.md`, `review-disposition-governance`, workflow docs/templates |
 | `ba-ideation` | [agents/ba-ideation.agent.md](agents/ba-ideation.agent.md) | Facilitate ideation for mixed business and technical audiences. | `ba-ideation` |
-| `code-reviewer` | [agents/code-reviewer.agent.md](agents/code-reviewer.agent.md) | Perform the standard evidence-based code review and write `review-code.md`. | `review-disposition-governance`, workflow docs/templates |
+| `code-reviewer` | [agents/code-reviewer.agent.md](agents/code-reviewer.agent.md) | Perform the defect-focused code-review lane for a governed run and write `review-code.md`. | `review-disposition-governance`, workflow docs/templates |
 | `disposition-coordinator` | [agents/disposition-coordinator.agent.md](agents/disposition-coordinator.agent.md) | Reconcile review findings into a disposition log. | `review-disposition-governance`, workflow docs/templates |
 | `execute-orchestrator` | [agents/execute-orchestrator.agent.md](agents/execute-orchestrator.agent.md) | Orchestrate the governed execution workflow and produce the execution report. | `execute-workflow.prompt.md`, `review-disposition-governance`, workflow docs/templates |
 | `orchestrator-code-investigation` | [agents/orchestrator-code-investigation.agent.md](agents/orchestrator-code-investigation.agent.md) | Coordinate cross-repository code investigations and dispatch search/report workers. | `code-investigation-orchestrator`, investigation worker agents |
@@ -160,7 +162,8 @@ The specialist review path is intentionally thinner than a general `/review`:
 | `project-context` | [skills/project-context/SKILL.md](skills/project-context/SKILL.md) | Structured interview and output shape for reusable BA project context documents. |
 | `repo-delivery` | [skills/repo-delivery/SKILL.md](skills/repo-delivery/SKILL.md) | Delivery playbook for execution, checkpointing, shipping, and hotfixes. |
 | `review-disposition-governance` | [skills/review-disposition-governance/SKILL.md](skills/review-disposition-governance/SKILL.md) | Governance rules for plan review, code review, adversarial review, and finding disposition. |
-| `review-foundations` | [skills/review-foundations/SKILL.md](skills/review-foundations/SKILL.md) | Shared evidence and verdict rules for specialist review prompts. |
+| `review-engine` | [skills/review-engine/SKILL.md](skills/review-engine/SKILL.md) | Shared domain-based review controller and profile library for `code-review` and `professional-review`. |
+| `review-foundations` | [skills/review-foundations/SKILL.md](skills/review-foundations/SKILL.md) | Compatibility bridge for specialist review prompts that now route into the shared review engine. |
 | `tech-ideation` | [skills/tech-ideation/SKILL.md](skills/tech-ideation/SKILL.md) | Technical ideation workflow for exploring architecture and systems options without jumping to implementation. |
 | `test-planning` | [skills/test-planning/SKILL.md](skills/test-planning/SKILL.md) | TDD-first rubric for generating or refreshing test plans. |
 | `test-quality` | [skills/test-quality/SKILL.md](skills/test-quality/SKILL.md) | Test review rubric for coverage quality, async correctness, isolation, and naming. |

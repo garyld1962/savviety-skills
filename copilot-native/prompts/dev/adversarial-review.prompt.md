@@ -35,3 +35,5 @@ second-opinion pass from a **different model**.
 - Prefer built-in `/review` for the default quick review path.
 - Use this prompt when you want a stricter, cross-model challenge with explicit
   adversarial lenses and a persisted markdown report.
+- This can challenge output from built-in `/review`, `code-review`, or
+  `professional-review`.

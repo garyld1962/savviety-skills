@@ -1,19 +1,19 @@
 ---
 description: >-
-  List available agents or show detailed help for a specific agent.
-argument-hint: '[agent-name]'
+  List available prompts or show detailed help for a specific prompt.
+argument-hint: '[prompt-name]'
 ---
 
-# Agent Reference
+# Prompt Reference
 
-List available agents or show help for a specific one.
+List available prompts or show help for a specific one.
 
 ## List Mode (no argument)
 
-1. Discover all `.github/prompts/**/*.prompt.md` files (user-invokable agents only)
+1. Discover all `.github/prompts/**/*.prompt.md` files (user-invokable prompts only)
 2. Read `description` from each frontmatter
 3. Group by directory (dev, review, ba, common)
-4. Present as a table per group with agent name and description
+4. Present as a table per group with prompt name and description
 5. Footer: `Use #prompt:skill-help <name> for details.`
 
 ## Detail Mode (`<name>` provided)
@@ -26,4 +26,4 @@ List available agents or show help for a specific one.
 
 - Discover from filesystem — don't hardcode
 - User-invokable prompts only — never list agents/ or skills/ entries
-- Use "agent" terminology
+- Use "prompt" terminology

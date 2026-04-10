@@ -71,6 +71,10 @@ Produce, when applicable:
 - Use the small change fast path for routine edits that do not merit governed artifacts, formal review loops, or phase-by-phase status updates.
 - Use `/plan` for planning.
 - Use built-in review where it helps, but do not skip the required governed artifacts.
+- When the default review path is not enough, use the structured `code-review`
+  lane for direct defects and `professional-review` for senior-bar engineering
+  judgment, then reconcile the important conclusions into the governed review
+  and disposition artifacts.
 - Require a senior baseline at high-leverage seams, then run an explicit elevation pass after green validation for any worthwhile non-functional improvements.
 - Prefer a different frontier model family for adversarial review when available; otherwise use a distinct reviewer role and preferably a different model variant.
 - Keep this prompt thin; let process docs, templates, skills, and specialist assets define the durable rules.

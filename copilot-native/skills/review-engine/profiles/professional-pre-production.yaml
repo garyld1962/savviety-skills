@@ -1,0 +1,45 @@
+---
+id: professional-pre-production
+title: Professional Review — Pre-Production
+description: >
+  The high-paranoia professional bar for release-critical or high-blast-radius
+  work. Focuses on whether the implementation will survive real scale, real
+  failure, and real operational pressure before it ships.
+
+domains:
+  - id: concept/security
+    mode: always
+  - id: concept/performance
+    mode: always
+  - id: concept/resilience
+    mode: always
+  - id: concept/concurrency
+    mode: always
+  - id: concept/operability
+    mode: always
+  - id: concept/maintainability
+    mode: always
+  - id: concept/architecture
+    mode: always
+  - id: concept/requirements
+    mode: always
+  - id: concept/async
+    mode: conditional
+  - id: concept/data-integrity
+    mode: conditional
+  - id: concept/api-contract
+    mode: conditional
+  - id: concept/dependencies
+    mode: conditional
+
+overlays:
+  - dialect/csharp-async
+  - dialect/typescript-async
+  - dialect/python-async
+  - dialect/typescript-types
+  - platform/azure-service-bus
+  - platform/nats-jetstream
+  - platform/postgres
+
+severity_bump:
+  minor: major

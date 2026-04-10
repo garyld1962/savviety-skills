@@ -23,4 +23,6 @@ Follow the skills:
 
 - Prefer configured repo commands over invented ones.
 - Report PASS, FAIL, and SKIP with enough evidence to act.
-- Use built-in `/review` separately when a code review is also needed.
+- Use built-in `/review` separately for the quick/default review path.
+- Use `prompts/review/code-review.prompt.md` when a deeper defect-focused review is needed.
+- Use `prompts/review/professional-review.prompt.md` when the implementation also needs a senior engineering-judgment pass.

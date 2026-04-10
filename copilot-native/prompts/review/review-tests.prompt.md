@@ -1,7 +1,8 @@
 ---
 description: >-
-  Specialist test review that checks coverage gaps, behavior focus, async
-  correctness, and isolation using the project's real test conventions.
+  Targeted test review that uses the shared review engine with coverage,
+  behavior, async, and isolation focus using the project's real test
+  conventions.
 argument-hint: '[files or scope to review]'
 agent: 'agent'
 tools:
@@ -17,8 +18,16 @@ test-quality pass.
 
 Follow the skills:
 
-- `.github/skills/review-foundations/SKILL.md`
+- `.github/skills/review-engine/SKILL.md`
 - `.github/skills/test-quality/SKILL.md`
+
+## Routing
+
+- Start from the `code-review` lane and emphasize correctness, tests, async, and
+  isolation concerns from `test-quality`.
+- Only elevate to `professional-review` when the real issue is broader
+  engineering judgment (for example, a test strategy that makes the system
+  operationally unsafe to change).
 
 ## Copilot-native usage
 
