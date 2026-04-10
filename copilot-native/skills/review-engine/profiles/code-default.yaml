@@ -1,0 +1,32 @@
+---
+id: code-default
+title: Code Review
+description: >
+  Defect-focused review for ordinary implementation work. Optimized for direct
+  correctness issues, test gaps, async mistakes, API misuse, boundary
+  validation problems, and other concrete implementation defects.
+
+domains:
+  - id: concept/correctness
+    mode: always
+  - id: concept/tests
+    mode: always
+  - id: concept/security
+    mode: always
+  - id: concept/async
+    mode: conditional
+  - id: concept/data-integrity
+    mode: conditional
+  - id: concept/api-contract
+    mode: conditional
+  - id: concept/ui-design
+    mode: conditional
+
+overlays:
+  - dialect/csharp-async
+  - dialect/typescript-async
+  - dialect/python-async
+  - dialect/typescript-types
+  - platform/azure-service-bus
+  - platform/nats-jetstream
+  - platform/postgres

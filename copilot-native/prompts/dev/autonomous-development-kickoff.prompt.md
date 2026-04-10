@@ -48,7 +48,11 @@ Use the **small change fast path** when the ask is a routine, low-risk, conventi
    - run only the existing build, test, lint, or validation commands that already belong to the repo
    - use background tasks or agents when helpful
    - continue until the change is verified or a real blocker is reached
-6. After implementation, use `/review` for a default review pass. If deeper skepticism is needed, use `.github/prompts/dev/adversarial-review.prompt.md` after switching models.
+6. After implementation, choose the review depth that fits the risk:
+   - use built-in `/review` for the quick/default path
+   - use `prompts/review/code-review.prompt.md` for a deeper defect-focused pass
+   - use `prompts/review/professional-review.prompt.md` when the code may work but the engineering choices need a senior-bar review
+   - if deeper skepticism is needed after that, use `.github/prompts/dev/adversarial-review.prompt.md` after switching models
 
 ## Output contract
 

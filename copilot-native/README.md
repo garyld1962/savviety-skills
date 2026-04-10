@@ -87,6 +87,8 @@ The goal here is to build a thinner, more native layer that:
 - `prompts/dev/dependency-audit.prompt.md`
 - `prompts/dev/ado-item.prompt.md`
 - `prompts/review/adversarial-review-gauntlet.prompt.md`
+- `prompts/review/code-review.prompt.md`
+- `prompts/review/professional-review.prompt.md`
 - `prompts/review/review-api.prompt.md`
 - `prompts/review/review-db.prompt.md`
 - `prompts/review/review-design.prompt.md`
@@ -115,6 +117,7 @@ The goal here is to build a thinner, more native layer that:
 - `skills/db-schema-review/SKILL.md`
 - `skills/ui-design-compliance/SKILL.md`
 - `skills/test-quality/SKILL.md`
+- `skills/review-engine/SKILL.md`
 - `skills/copilot-platform-playbook/SKILL.md`
 
 ### Other assets
@@ -144,7 +147,10 @@ The goal here is to build a thinner, more native layer that:
 - Use BA prompts like `ba-problem-refiner`, `ba-spec-engineer`, `ba-context-builder`, `ba-eval-harness`, and `ba-knowledge-capture` when the missing piece is business precision or durable context, not implementation orchestration.
 - Use `ideate` when the work is still exploratory and you need shared, BA, or technical option-shaping before `/plan`.
 - Use `environment-check` when a repo must support both PowerShell and WSL execution patterns.
-- Use built-in `/model` and then `adversarial-review` when you want a deliberate second-opinion code challenge instead of the default `/review` path.
+- Use built-in `/review` for the quick/default code review path.
+- Use `code-review` when you want a deeper defect-focused review with explicit domain selection and merged findings.
+- Use `professional-review` when the code may work but you need a senior-bar judgment about scalability, failure behavior, operability, and engineering choice quality.
+- Use built-in `/model` and then `adversarial-review` when you want a deliberate second-opinion challenge after `/review`, `code-review`, or `professional-review`.
 - Use `adversarial-review-gauntlet` when the thing you need to challenge is the review output itself, not the code.
 - Use `autonomous-development-kickoff` when you want a thin built-in-first path from requirements readiness into `/plan`, implementation, and `/review`.
 - Use `execute-workflow` when the work needs governed execution artifacts, required review gates, and explicit disposition handling.
@@ -152,7 +158,7 @@ The goal here is to build a thinner, more native layer that:
 - Use `dependency-audit`, `migration-guide`, and `ado-item` when the workflow depends on repo-local dependency state or external Azure DevOps context.
 - Use `investigate-code` when you need an evidence-backed index of where a behavior or API appears across one repo, several repos, or a repo folder.
 - Use `postmortem` after a governed run when you want a structured process retrospective tied to the run artifacts.
-- Use `review-api`, `review-db`, `review-design`, and `review-tests` when you want narrow compliance checks rather than the broader default `/review`.
+- Use `review-api`, `review-db`, `review-design`, and `review-tests` as targeted launchers into the shared review engine when you want a narrower domain emphasis than the default review paths.
 - Use `copilot-asset-audit` when reviewing or porting prompt/agent/skill/instruction sets.
 - Use the platform playbook skill when authoring new Copilot assets.
 

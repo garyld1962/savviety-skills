@@ -1,22 +1,29 @@
 ---
 name: review-foundations
-description: Shared review principles for specialist compliance prompts in copilot-native.
+description: Legacy compatibility bridge for specialist review prompts. The primary shared review logic now lives in review-engine.
 ---
 
 # Review Foundations
 
-Use this skill as the base layer for specialist review prompts such as:
+This skill exists as a compatibility bridge for older specialist prompts such as:
 
 - `review-api`
 - `review-db`
 - `review-design`
 - `review-tests`
 
+For new work, prefer:
+
+- built-in `/review` for the quick/default path
+- `code-review` for deeper defect-focused review
+- `professional-review` for senior engineering judgment
+- `.github/skills/review-engine/SKILL.md` as the shared domain engine
+
 ## Relationship to Copilot built-ins
 
 - Built-in `/review` is the default quick review path.
-- Specialist review prompts exist for targeted compliance checks with a narrower
-  rubric and more explicit evidence gathering.
+- Specialist review prompts are now thin launchers into the shared review engine
+  with extra domain emphasis, not separate review systems.
 
 ## Core review rules
 
@@ -26,6 +33,7 @@ Use this skill as the base layer for specialist review prompts such as:
   patterns.
 - Cite exact file and line references for findings.
 - Prefer a small number of high-signal findings over a noisy audit dump.
+- Distinguish direct code defects from broader professional-engineering concerns.
 
 ## Finding shape
 
@@ -47,3 +55,5 @@ Use this skill as the base layer for specialist review prompts such as:
 - Do not flag approximate locations.
 - Do not treat style preferences as correctness failures.
 - Do not review without first discovering the relevant local conventions.
+- Do not use this compatibility layer as a substitute for the shared
+  `review-engine` domain selection model.
