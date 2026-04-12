@@ -25,7 +25,32 @@ definitions.
 - new tables should follow the project's timestamp convention
 - irreversible drops deserve explicit attention
 
+## Examples
+
+- **Migration safety review:** A migration adds a non-null column to an existing
+  table. Check whether it backfills or supplies a safe default before flagging
+  it as migration-risky.
+- **Schema convention review:** A new table uses ad-hoc timestamp or ID fields.
+  Compare it to the repo's existing schema conventions before deciding whether
+  the shape is actually inconsistent.
+
 ## Guardrails
 
 - Read existing schema files before reviewing.
 - Match the repo's ORM conventions, not a generic favorite ORM.
+
+## Do Nots
+
+- Do not recommend ORM patterns from a different stack than the one the repo
+  uses.
+- Do not call a destructive migration safe just because it passes syntax
+  validation.
+- Do not ignore existing-row impact when reviewing new required columns or data
+  transformations.
+
+## Closed Decisions
+
+- Existing ORM, schema, naming, ID, and timestamp conventions are authoritative.
+- Migration safety matters more than stylistic database preferences.
+- Raw SQL must be parameterized.
+- Irreversible or destructive changes require explicit scrutiny.

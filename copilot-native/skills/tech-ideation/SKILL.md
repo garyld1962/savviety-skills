@@ -188,13 +188,31 @@ Suggested sections:
 - questions to resolve
 - outputs to leave the session with
 
-## Guardrails
+## Examples
+
+- **Architecture comparison:** Compare event-driven and synchronous integration
+  options, surface tradeoffs and failure modes, and recommend what to validate
+  next without choosing implementation details prematurely.
+- **Folder-based technical synthesis:** Read the lightest useful architecture
+  docs, summarize the repeated technical constraints, identify contradictions,
+  and produce a concise option brief.
+
+## Do Nots
 
 - Do NOT turn ideation into implementation planning unless the user asks
 - Do NOT invent architecture certainty where the source material is ambiguous
 - Do NOT present speculative technical direction as a settled design
 - Do NOT force low-value implementation defaults into technical decision making
 - Do NOT overload the output with diagrams or templates when a concise comparison is enough
+
+## Closed Decisions
+
+- This skill runs before `/plan`; it shapes technical direction rather than
+  implementation sequencing.
+- Facts, assumptions, constraints, risks, and open decisions remain distinct.
+- The default audience is mixed technical and business stakeholders.
+- Prefer the lightest useful comparison over heavyweight design artifacts unless
+  the user explicitly wants them.
 
 ## Handoff guidance
 

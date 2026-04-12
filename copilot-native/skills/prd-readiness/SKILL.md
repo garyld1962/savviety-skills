@@ -87,6 +87,15 @@ Tell me what you want to achieve in plain language. You do not need to format it
 - Challenge ambiguity instead of smoothing over it
 - If the user says "you choose", propose a default and ask for confirmation
 
+## Examples
+
+- **Upgrade a business PRD:** Preserve the known business context, extract the
+  missing behavioral rules, add `Closed Decisions`, `Open Decisions`, example
+  contracts, and a verification matrix, then hand off to `/plan`.
+- **Blank-start refinement:** Start from a plain-language ask, ask one targeted
+  question at a time, and turn the answers into an AERS instead of jumping into
+  implementation steps.
+
 ## What to extract or create
 
 The output should be engineering-oriented, not merely descriptive.
@@ -265,6 +274,24 @@ Include settled implementation choices such as:
 List decisions that are still unresolved and could materially change implementation.
 
 Do not hide these in narrative prose.
+
+## Do Nots
+
+- Do not reopen facts the author already settled just to create more option
+  space.
+- Do not drift into implementation planning, task waves, or code-level design.
+- Do not hide unresolved ambiguity in narrative prose; surface it as `Open
+  Decisions`, explicit gaps, or blocking readiness issues.
+
+## Closed Decisions
+
+- The target artifact is an **AERS**, even when the input is a PRD, BRD, story,
+  or rough notes.
+- This skill runs before `/plan`; it refines requirements rather than planning
+  execution.
+- Settled facts belong in the artifact as `Closed Decisions` so downstream work
+  does not need to re-derive them.
+- Ask only about decisions that are still materially open.
 
 ### Public API / Interface
 

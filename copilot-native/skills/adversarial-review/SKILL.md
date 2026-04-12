@@ -162,9 +162,28 @@ Also maintain `docs/code-reviews/index.md`:
   context materially lowers confidence
 - `REJECT` when strong high-severity findings hold up across the selected lenses
 
-## Guardrails
+## Examples
+
+- **Small diff challenge:** Review a one-file bug fix through the Skeptic lens
+  only, verify the author's intent, and emit a short persisted report with any
+  concrete failure cases.
+- **Large change-set challenge:** Review a multi-file feature through Skeptic,
+  Architect, and Minimalist lenses, dedupe overlapping root causes, and persist
+  a single adversarial report rather than scattered chat comments.
+
+## Do Nots
 
 - Do not invent intent.
 - Do not review unchanged code by accident.
 - Do not turn style preferences into correctness findings.
 - Do not skip the persisted report.
+
+## Closed Decisions
+
+- This is a second-opinion workflow that runs after model switching, not the
+  default review path.
+- Review scope is limited to actual changed code unless the user explicitly
+  broadens it.
+- Findings must use the declared adversarial lenses and the fixed finding shape.
+- The review result is persisted under `docs/code-reviews/` with the declared
+  report template.

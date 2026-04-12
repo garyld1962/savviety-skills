@@ -151,6 +151,18 @@ If the invoking prompt is `professional-review`, keep the summary and questions 
 - Are the operational and failure-mode choices mature?
 - Is the design professional-grade, not merely functional?
 
+## Examples
+
+- **Async service diff:** Select always-on domains from the profile, then add
+  `concept/async` plus the relevant dialect and platform overlays only for the
+  async-heavy files that actually match the triggers.
+- **Manifest-only diff:** If the change is limited to dependency manifests,
+  select the dependency-related domains and skip unrelated overlays instead of
+  dispatching a full-spectrum review.
+- **Large feature diff:** Cluster files by feature or layer first, then dispatch
+  per-domain workers against those clusters rather than dumping the whole repo
+  into every worker.
+
 ## When to escalate to the human
 
 Return control to the human (rather than just emitting the report) when:
@@ -162,7 +174,7 @@ Return control to the human (rather than just emitting the report) when:
 - A `critical` finding appears in a domain the human may not have expected to run. Surface it prominently.
 - The profile file is missing, malformed, or references a domain that doesn't exist.
 
-## Things you must not do
+## Do Nots
 
 - Do not produce findings of your own. Ever.
 - Do not summarize worker findings into your own words and drop the worker's specifics. Preserve the file:line, the problem, and the fix exactly as the worker wrote them.
@@ -171,3 +183,13 @@ Return control to the human (rather than just emitting the report) when:
 - Do not run a single combined "review everything" worker as a shortcut. The separation is the point.
 - Do not skip the "Selected domains" section. It's how the human audits your triage.
 - Do not apply `severity_bump` before merging — apply it as the final step, so the bump is transparent and the human can see which findings moved.
+
+## Closed Decisions
+
+- The controller does not author findings. Workers do.
+- The loaded profile is the source of truth for domains, overlays, and any
+  `severity_bump`.
+- Domain and overlay selection must follow actual diff triggers, not reviewer
+  curiosity.
+- The merged report format is fixed: profile, summary, selected domains,
+  findings, questions, and verdict.

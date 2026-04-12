@@ -49,9 +49,35 @@ Produce a concise, reusable context artifact with these sections:
 - AI Session Rules
 - When In Doubt
 
+## Examples
+
+- **New project onboarding:** Capture the project overview, stakeholders,
+  terminology, constraints, and AI session rules, and leave `[TO FILL: ...]`
+  placeholders where the user does not yet know the answer.
+- **Known political risk:** When the user mentions a hidden approver or org
+  tension, record it directly in the context artifact instead of softening it
+  into generic process language.
+
 ## Guardrails
 
 - Include only user-provided facts.
 - Use explicit placeholders like `[TO FILL: ...]` instead of inventing content.
 - Compress answers into token-efficient reference notes.
 - Surface political or organizational risks directly when the user mentions them.
+
+## Do Nots
+
+- Do not turn this context-building workflow into implementation planning.
+- Do not infer stakeholder motives, constraints, or standards the user never
+  stated.
+- Do not expand the artifact with verbose prose when concise reference notes are
+  sufficient.
+
+## Closed Decisions
+
+- This skill captures durable project context, not execution tasks or review
+  findings.
+- Only user-provided facts belong in the artifact; unknowns stay as explicit
+  placeholders.
+- The output section structure is fixed by this skill so later sessions can
+  reuse it consistently.

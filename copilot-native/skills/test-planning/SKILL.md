@@ -62,8 +62,27 @@ Classify each dependency to determine the testing approach:
 
 Do NOT mock in-process or local-substitutable dependencies — mocks hide real bugs.
 
-## Guardrails
+## Examples
+
+- **Plan mode:** Read an existing test file and the real source signatures, then
+  produce behavior-focused test cases covering happy path, validation, error
+  paths, and edge cases.
+- **Validate mode:** Review an existing suite, report pass/fail/todo counts and
+  the major coverage gaps, and call out framework-specific issues such as
+  missing async awaits.
+
+## Do Nots
 
 - Do not invent framework, file layout, or API signatures.
 - Do not require file writing if the user only wants a plan in chat.
 - Keep the plan behavior-focused, not implementation-coupled.
+
+## Closed Decisions
+
+- This skill is TDD-first and test-specific; built-in `/plan` still owns overall
+  implementation planning.
+- Real repo signatures, test framework conventions, and file layout are the
+  baseline.
+- In-process and local-substitutable dependencies should not be mocked by
+  default.
+- Test plans should stay behavior-focused rather than implementation-coupled.

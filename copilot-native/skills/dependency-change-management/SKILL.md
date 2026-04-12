@@ -50,8 +50,33 @@ For migration plans:
 - compatibility blockers
 - verification and rollback guidance
 
+## Examples
+
+- **Dependency audit:** Detect the package manager, separate security findings
+  from outdated and unused packages, and report direct versus transitive issues
+  without reclassifying tool output.
+- **Migration guide:** Verify the currently installed version, read the official
+  upgrade docs, map only the breaking changes that affect real repo usage, and
+  produce an ordered migration plan with rollback notes.
+
 ## Guardrails
 
 - Do not invent breaking changes.
 - Do not flag a dependency as unused before checking config and scripts.
 - Do not recommend auto-fixes that the repo tooling cannot actually perform.
+
+## Do Nots
+
+- Do not present vendor documentation from memory when official docs can be
+  checked.
+- Do not include documented breaking changes that do not touch this codebase.
+- Do not blur security, outdated, unused, and license findings into one
+  undifferentiated list.
+
+## Closed Decisions
+
+- Dependency analysis is evidence-based and repo-specific, not generic advice.
+- Official migration or release documentation is the source of truth for
+  version-change claims.
+- Built-in `/research` comes before vendor-doc discovery, and built-in `/plan`
+  comes after the migration analysis is accepted.

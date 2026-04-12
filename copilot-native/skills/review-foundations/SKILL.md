@@ -50,6 +50,15 @@ For new work, prefer:
 - `WARN` when issues exist but the code is still broadly aligned
 - `FAIL` when the code clearly violates required project or domain conventions
 
+## Examples
+
+- **Targeted API review:** Read the changed service files plus one local
+  reference implementation, then report only the concrete contract, validation,
+  or auth issues with exact file and line references.
+- **Targeted test review:** Use the repo's existing test style as the baseline,
+  then flag only the real isolation, determinism, or coverage defects rather
+  than general formatting preferences.
+
 ## Guardrails
 
 - Do not flag approximate locations.
@@ -57,3 +66,18 @@ For new work, prefer:
 - Do not review without first discovering the relevant local conventions.
 - Do not use this compatibility layer as a substitute for the shared
   `review-engine` domain selection model.
+
+## Do Nots
+
+- Do not emit a repo-wide audit when the invoking prompt asked for a narrower
+  specialist pass.
+- Do not turn this bridge skill into a second review controller with its own
+  domain-selection logic.
+
+## Closed Decisions
+
+- This skill is a compatibility bridge, not the primary review system.
+- Built-in `/review` remains the default quick path.
+- `review-engine` owns domain selection and orchestration for deeper review
+  lanes.
+- Findings must use exact locations and high-signal evidence.

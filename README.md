@@ -58,6 +58,16 @@ Every deployment target separates **shared** (overwritten on sync) from **local*
 4. **Pre-flight checks.** Config-dependent skills halt with actionable messages if config is missing.
 5. **Rubrics are reference-only.** Knowledge rubrics live in `claude/_rubrics/` and are referenced by user-invokable skills, not invoked directly.
 
+## Repository-level Copilot instructions
+
+This repo now has a real project instruction file at
+`.github/copilot-instructions.md`.
+
+That file is the top-level source of truth when using Copilot in this
+repository, including when authoring the assets under `copilot-native/`. The
+files inside `copilot-native/` are source templates for downstream repos, not
+the governing instruction layer for this repository itself.
+
 ## Adding Skills
 
 1. Add the skill in the appropriate platform directory

@@ -76,6 +76,26 @@ Document the concrete assumptions that should not be re-derived during execution
 - Dependency management expectations:
 - Integration test gating expectations:
 
+## Copilot Asset Guardrails
+
+In this repo, Copilot assets should bias toward explicit guardrails rather than
+leaving important behavior to model interpretation, especially when using
+high-reasoning models.
+
+- Add **Examples** when the desired interaction pattern, output shape, or
+  boundary between valid options is not obvious from the prompt alone.
+- Add explicit **Do Nots** for the failure modes you already know about, such as
+  guessing facts, reopening settled choices, or reporting success without the
+  required evidence.
+- Add **Closed Decisions** when the repo, asset author, or source artifact has
+  already made a decision that execution should inherit without debate.
+- Keep **Closed Decisions** and **Open Decisions** separate. Ask only about open
+  decisions.
+- Do not revisit a closed decision unless the user explicitly changes it or the
+  source artifact is inconsistent.
+- Prefer repo-shaped examples such as file paths, command patterns, output
+  skeletons, and contract snippets over generic placeholder examples.
+
 ## Coding Conventions
 
 ### General
@@ -119,6 +139,10 @@ Treat the validator workflow as:
 
 - input: business problem statement, business PRD, BRD, story, or rough spec
 - output: AERS
+
+Treat **Closed Decisions** as binding inputs for planning and implementation.
+They are not brainstorming prompts and should not be reopened unless the user
+or source artifact changes them.
 
 ## Execution Strategy
 

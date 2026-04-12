@@ -109,3 +109,25 @@ Replace the entire content with:
 ```
 
 Adjust the report path to omit the subdirectory when none is used.
+
+# Examples
+
+- **Root report:** Write a new report under `docs/code-investigations/`,
+  prepend its link to `index.md`, and replace `latest.md` with the new pointer.
+- **Subdirectory report:** Write the report under
+  `docs/code-investigations/<outputSubdir>/`, update the root index, update the
+  subdirectory index, and point `latest.md` at the subdirectory report.
+
+# Do Nots
+
+- Do not edit files outside `docs/code-investigations/`.
+- Do not overwrite an existing investigation report instead of creating a new
+  versioned file.
+- Do not include code lines or summaries when the caller disabled them.
+
+# Closed Decisions
+
+- This writer may only create or edit files under `docs/code-investigations/`.
+- Report, index, and `latest.md` formats are fixed by this skill.
+- Every run creates a new versioned report file rather than mutating historical
+  reports in place.

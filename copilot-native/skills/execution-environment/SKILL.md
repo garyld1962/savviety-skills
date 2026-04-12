@@ -51,6 +51,18 @@ After detection, match the environment against the user's config:
 4. If mismatch detected → follow the routing rule (direct, switch-terminal, or warn)
 5. If no config exists → emit commands in the detected shell's native syntax
 
+## Examples
+
+- **Direct native-shell execution:** Detected Bash on Linux, repo commands are
+  already Unix-native, no routing override exists. Emit the Bash command
+  directly and proceed without a shell-translation explanation.
+- **Switch-terminal recommendation:** Detected PowerShell, but the user's
+  routing rules say this repo should run inside WSL. Recommend switching to the
+  WSL terminal instead of emitting a wrapped `wsl ... bash -lc` command.
+- **Config-aware warning:** Detected shell and repo expectations disagree, and
+  the user's env config says to warn rather than switch automatically. State the
+  mismatch and give the safe next step only.
+
 ## Output Pattern
 
 When environment choice matters, report:
@@ -71,6 +83,24 @@ When the environment is obvious and no guidance is needed, proceed silently.
 - Never prefix commands with shell wrappers unless the user's routing rules explicitly call for it
 - Never invent runner scripts that do not exist in the project
 - Never mix path syntaxes across shell families
+
+## Do Nots
+
+- Do not reopen the question of which shell to target after detection and
+  routing rules already resolved it.
+- Do not treat `wsl`, `bash -lc`, or similar wrapper patterns as the default
+  answer when a native-shell or switch-terminal path is available.
+- Do not emit a "detected environment" report when the environment is obvious
+  and no decision changes.
+
+## Closed Decisions
+
+- Detection comes before command emission. Environment routing is not optional.
+- User or project `env.config.md` rules are authoritative when present.
+- Prefer direct native-shell execution or explicit terminal switching over
+  wrapper-style bridging.
+- This skill owns detection and routing logic; prompts should reference it
+  rather than re-deriving shell policy inline.
 
 ## Relationship to Other Assets
 

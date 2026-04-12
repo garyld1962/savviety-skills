@@ -61,9 +61,39 @@ Use this skill for built-in-aware delivery workflows:
 - require at least the relevant regression coverage or targeted verification
 - skip unnecessary ceremony, but do not skip essential safety checks
 
+## Examples
+
+- **Execute-plan:** Read an accepted plan, detect the repo's real test and build
+  commands, implement in dependency order, and stop on the first true blocker
+  with enough evidence to continue later.
+- **Checkpoint:** Map changed files to the affected package, run the repo's
+  configured checks, and report `PASS`, `FAIL`, or `SKIP` per check without
+  inventing missing scripts.
+- **Hotfix:** Apply a narrow production fix for a known regression, add the
+  targeted verification or regression coverage, and avoid folding in cleanup
+  refactors.
+
 ## Guardrails
 
 - Do not assume package manager, branch name, or script names.
 - Do not auto-ship unrelated changes.
 - Do not turn a hotfix into a refactor.
 - Do not claim success without build/test or other configured verification.
+
+## Do Nots
+
+- Do not rewrite an accepted plan into a different solution unless the user
+  explicitly changes direction.
+- Do not skip checkpoint before `ship` unless the user intentionally bypasses
+  it.
+- Do not collapse execution evidence into a vague "done" summary with no check
+  results or blocker detail.
+
+## Closed Decisions
+
+- Built-in `/plan` is the default planning step; this skill starts after the
+  work is already planned.
+- The repo's configured commands and conventions are the authority for build,
+  test, lint, branch, and packaging behavior.
+- `ship` assumes checkpoint-first by default.
+- `hotfix` optimizes for minimum safe change, not opportunistic cleanup.

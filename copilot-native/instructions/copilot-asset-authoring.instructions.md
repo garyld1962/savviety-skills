@@ -38,6 +38,28 @@ These rules apply when writing or editing Copilot prompts, agents, and instructi
 - Do not hardcode "already in WSL" unless the environment has been detected.
 - Prefer native-shell commands or explicit terminal switching over wrapper patterns like `wsl.exe -e bash -lc`.
 
+## Guardrails for high-reasoning models
+
+- Copilot, especially with high-reasoning models, performs better when assets
+  constrain recurring failure modes instead of leaving them implicit.
+- For non-trivial prompts, skills, and agents, prefer to include all three of
+  these guardrail types:
+  - **Examples** when the interaction shape, output shape, or classification
+    boundary is easy to misread.
+  - **Do Nots** when there are known bad behaviors to suppress, such as
+    inventing facts, revisiting settled choices, or claiming success without
+    evidence.
+  - **Closed Decisions** when the asset author, repo, or source artifact has
+    already made a choice that should not be reopened during execution.
+- Keep **Closed Decisions** separate from **Open Decisions**. If a choice is
+  closed, execute against it. If it is open, ask.
+- Do not restate a closed decision as an option set unless the user explicitly
+  asks to revisit it or the source artifact contradicts it.
+- Prefer short, repo-shaped examples over abstract filler. One concrete example
+  that locks in the intended behavior is better than several generic ones.
+- If an asset has repeated model drift in practice, add guardrails before adding
+  more workflow complexity.
+
 ## Migration rule
 
 When porting from Claude:

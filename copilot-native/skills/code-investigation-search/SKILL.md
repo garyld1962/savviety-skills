@@ -98,6 +98,14 @@ Within a single repository response:
 - If the same behavior is surfaced multiple times from the same file and overlapping lines, emit only the best match
 - If one code location truly satisfies multiple sub-aspects of the same request, keep one entry and describe the strongest reason in `whyMatch`
 
+# Examples
+
+- **Direct framework match:** A file constructs `MailMessage` and calls
+  `SendMailAsync`; emit a high-confidence `framework` or `symbol` match with the
+  tight line range around that behavior.
+- **Weak overlap only:** A file contains the word "email" in comments but no
+  sending logic; do not emit it just because one keyword overlaps.
+
 # Output example
 
 ```json
@@ -115,3 +123,17 @@ Within a single repository response:
   }
 ]
 ```
+
+# Do Nots
+
+- Do not return markdown, prose summaries, or wrapper objects.
+- Do not emit fields outside the required schema.
+- Do not include matches below `0.50` confidence.
+- Do not use file-wide ranges when a tighter evidence range exists.
+
+# Closed Decisions
+
+- Output is a JSON array only.
+- The match schema and field names are fixed.
+- `project` selection follows the declared ownership hierarchy.
+- Confidence measures match strength, not code quality.

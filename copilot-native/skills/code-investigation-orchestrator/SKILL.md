@@ -129,6 +129,18 @@ Dispatch the report writer to create:
 
 If the caller provides an explicit subdirectory, use `docs/code-investigations/<subdir>/...` and keep root indexes pointing to it.
 
+## Examples
+
+- **Single-repo behavior search:** The user asks "where do we send email?" for
+  one repo. Resolve `repo` mode, ask whether to include code lines and
+  summaries, dispatch one worker, then write the versioned report.
+- **Folder-wide investigation:** The user points to a folder of repos and asks
+  for "reads or writes a file". Resolve `folder` mode, keep repo boundaries
+  explicit, dispatch one worker per repo where practical, and aggregate the
+  reduced results into a shared index.
+- **Ambiguous scope:** The user gives a natural-language behavior but not the
+  target repos. Ask for scope mode once and stop instead of guessing.
+
 ## State machine
 
 Follow these states in order.
@@ -190,3 +202,20 @@ Completion signal:
 
 Completion signal:
 `STATE 6 (RESPOND) COMPLETE. Investigation finished with [N] match(es).`
+
+## Do Nots
+
+- Do not operate in more than one scope mode for a single run.
+- Do not skip the `include code lines` and `include summaries` questions when
+  the request did not already answer them.
+- Do not expand the search brief until it becomes a noisy synonym dump.
+- Do not write a report when every worker failed.
+
+## Closed Decisions
+
+- Every run operates in exactly one scope mode: `repo`, `repos`, or `folder`.
+- Search workers return JSON arrays only; prose belongs in the final response or
+  report.
+- Report output lives under `docs/code-investigations/` using the versioned
+  writer workflow.
+- Repo boundaries stay explicit through planning, reduction, and reporting.

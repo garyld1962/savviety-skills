@@ -23,3 +23,29 @@ Use this skill for frontend and component review passes.
 - Do not recommend components from libraries the project does not use.
 - Default accessibility expectations to WCAG 2.1 AA only when the repo does not
   specify otherwise.
+
+## Examples
+
+- **Component review:** Compare a changed component to the repo's existing token
+  and theme usage, then flag hardcoded colors or spacing only when they really
+  bypass the local design system.
+- **State review:** If a control has loading and error states in adjacent local
+  components but the changed component omits them, flag the missing states as a
+  concrete UX issue.
+
+## Do Nots
+
+- Do not recommend swapping in a new component library just because it would be
+  cleaner in the abstract.
+- Do not treat personal visual taste as a design-system defect.
+- Do not skip keyboard, focus, and label checks just because the component looks
+  correct visually.
+
+## Closed Decisions
+
+- The repo's existing design system, tokens, and component patterns are the
+  standard.
+- Accessibility expectations follow repo rules first, then WCAG 2.1 AA when the
+  repo is silent.
+- Theme-safe implementation is required; hardcoded theming values are not the
+  default path.

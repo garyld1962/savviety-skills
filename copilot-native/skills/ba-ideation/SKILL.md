@@ -212,13 +212,30 @@ What to validate next
 - ...
 ```
 
-## Guardrails
+## Examples
+
+- **Folder-based ideation:** Read the lightest useful set of discovery docs,
+  synthesize the repeated business themes, call out contradictions, and produce
+  a workshop-ready brief without pretending the work is implementation-ready.
+- **Blank-start ideation:** Start from a rough business problem, separate facts
+  from assumptions and open questions, compare a few plausible directions, and
+  recommend the next artifact.
+
+## Do Nots
 
 - Do NOT turn ideation into implementation planning unless the user asks
 - Do NOT invent certainty where the source material is ambiguous
 - Do NOT reopen routine implementation defaults during early ideation
 - Do NOT overload the output with templates when a short synthesis is enough
 - Do NOT present speculative architecture as a settled decision
+
+## Closed Decisions
+
+- This skill runs before `/plan`; it explores and frames ideas rather than
+  planning implementation.
+- The default audience is mixed business and technical stakeholders.
+- Facts, assumptions, risks, and open questions stay separate.
+- The lightest useful output is preferred over a template-heavy deliverable.
 
 ## Handoff guidance
 

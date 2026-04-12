@@ -119,6 +119,18 @@ Use only:
 - `accepted-risk`
 - `resolved`
 
+## Examples
+
+- **Fixed finding:** A reviewer raises a high-signal issue in `review-code.md`,
+  the coder fixes it, and the disposition log records the item as `fixed` with
+  the updated evidence.
+- **Accepted risk:** A real issue remains, a human explicitly approves
+  proceeding anyway, and the disposition log records `accepted-risk` rather than
+  pretending the finding was resolved.
+- **Human arbitration:** Reviewer and coder still disagree after bounded review
+  rounds, so the workflow escalates, records the human decision, and updates the
+  final gate state accordingly.
+
 ## Disposition loop
 
 ### Step 1 — Reviewer raises findings
@@ -204,6 +216,25 @@ Required behavior:
 - use repo-relative paths where practical
 - write `None` in required sections with no content
 - do not restate `AERS.md`
+
+## Do Nots
+
+- Do not invent new status labels or silently alias them to the canonical
+  vocabulary.
+- Do not treat green validation alone as permission to skip review or
+  disposition artifacts.
+- Do not use `accepted-risk` to hide unresolved disagreement without explicit
+  human acceptance.
+
+## Closed Decisions
+
+- The workflow artifact set and document structure come from the canonical
+  process docs and templates.
+- The status vocabulary is fixed: `open`, `fixed`, `disagree-with-evidence`,
+  `defer`, `accepted-risk`, `resolved`.
+- Unresolved `High` findings block completion.
+- Accepted risk requires explicit human acceptance; it is not a model-only
+  decision.
 
 ## Auditor mindset
 

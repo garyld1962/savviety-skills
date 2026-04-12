@@ -35,7 +35,7 @@ Good custom assets usually have one of these properties:
 - they produce a repeatable artifact with a fixed shape
 - they orchestrate a specialist agent set with a clear contract
 
-Examples:
+## Examples
 
 - AERS/story refinement
 - structured asset audits
@@ -159,6 +159,23 @@ For most repos, prefer:
 - a few specialist agents
 - disciplined instructions
 - heavy use of built-ins
+
+## Do Nots
+
+- Do not recreate built-in `/plan`, `/review`, or `/research` flows as custom
+  prompts unless the custom layer adds real domain leverage.
+- Do not mix prompt orchestration, durable domain rules, and passive
+  instructions into one giant asset when they should be split.
+- Do not assume one shell or terminal model for every user when an asset emits
+  commands.
+
+## Closed Decisions
+
+- Built-in first is the default design posture for Copilot assets in this repo.
+- Prompts stay thin, skills hold durable guidance, agents stay bounded, and
+  instructions carry passive always-on constraints.
+- When an asset mostly duplicates a built-in, simplify or retire it instead of
+  preserving it for name parity.
 
 ## Output format for audits
 

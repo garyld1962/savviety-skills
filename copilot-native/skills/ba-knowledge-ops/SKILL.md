@@ -58,8 +58,33 @@ Each test case should include:
 - Scoring rubric
 - Result log template
 
+## Examples
+
+- **Decision capture:** Record a meeting outcome as a concise decision note with
+  the decision, rationale, impact, and any follow-up fields the user actually
+  knows.
+- **Eval harness:** Build a pass/partial/fail rubric for AI-generated user
+  stories that explicitly checks for vague requirements, hallucinated facts, and
+  untestable acceptance criteria.
+
 ## Guardrails
 
 - Quality criteria must be observable, not aspirational.
 - Do not invent sample tasks or org standards.
 - If one input spans multiple capture templates, suggest splitting it.
+
+## Do Nots
+
+- Do not blur multiple capture intents into one overloaded record when separate
+  templates would stay clearer.
+- Do not turn an eval harness into generic writing advice with no scoring
+  criteria.
+- Do not imply organizational standards that the user did not provide.
+
+## Closed Decisions
+
+- Captured BA knowledge must stay reusable, concise, and grounded in provided
+  facts.
+- Evaluation criteria must be observable and scorable.
+- Use the lightest matching capture template instead of forcing every input into
+  a single format.
