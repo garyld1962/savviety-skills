@@ -3,6 +3,26 @@
     "allow": []
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -f ${CLAUDE_PROJECT_DIR}/.claude/SESSION.md && cat ${CLAUDE_PROJECT_DIR}/.claude/SESSION.md || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Before ending, invoke the session-save skill to write .claude/SESSION.md capturing current work context (what's in-flight, decisions made, what's next). Skip if nothing meaningful happened this session."
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
@@ -10,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/repos/skills/claude/pr-guardrail/pr-guardrail.sh",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/pr-guardrail/pr-guardrail.sh",
             "timeout": 15,
             "statusMessage": "Checking for existing PRs..."
           }
