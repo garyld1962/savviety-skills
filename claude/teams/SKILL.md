@@ -97,6 +97,8 @@ pnpm install && pnpm -r build && pnpm -r test
 **Never:**
 - More than 4 teams per wave (merge conflicts dominate; split into waves instead)
 - Skip code review (always review before merge)
+- Assume an earlier subagent can be resumed later; dispatch a fresh fixer with
+  the findings and target files for each review/fix pass
 - Use relative paths in subagent prompts (subagents have zero project context)
 - Skip `pnpm install` in worktrees (builds will fail)
 - Dispatch build agents sequentially (dispatch all in one message for concurrency)

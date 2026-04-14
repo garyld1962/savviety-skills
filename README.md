@@ -9,7 +9,11 @@ Cross-platform AI coding skills maintained across two canonical systems.
 | [Claude Code](claude/README.md) | `claude/` | `.claude/skills/` | Claude Opus, Sonnet |
 | [Copilot Native](copilot-native/README.md) | `copilot-native/` | `.github/` (Copilot CLI + VS Code) | GPT 5.4, Gemini Pro |
 
-**Claude Code** skills are invoked as `/name` in the CLI. **Copilot Native** skills are invoked as `/<prompt-name>` in Copilot CLI or VS Code Copilot Chat, with agents available via `@<agent-name>`.
+**Claude Code** workflows are primarily modeled as `/name` skills. When Claude
+needs worker roles, they usually live **inside the skill package** as nested
+sub-files or subskills rather than as a first-class top-level agent asset type.
+**Copilot Native** uses `/<prompt-name>` prompts plus first-class `@agent-name`
+agents.
 
 ## Repository Structure
 
@@ -20,6 +24,7 @@ skills/
 │   ├── execute-workflow/  #   Some skills have templates and sub-files
 │   ├── configure/         #   Template-filling skill + registry
 │   ├── _rubrics/          #   Knowledge rubrics (not user-invokable)
+│   ├── teams/agents/      #   Nested worker-role prompts inside a skill
 │   └── ...
 ├── copilot-native/        # Copilot-first workspace
 │   ├── prompts/           #   Thinner prompts that lean on built-ins
@@ -40,6 +45,12 @@ skills/
 
 Deployment is handled by the [skill-factory](https://github.com/garyld1962/skill-factory) compile+publish pipeline. The legacy `deploy.sh` script has been archived.
 
+For Claude Code, the source layout in `claude/` is **not** a literal copy of a
+project's `.claude/` folder. Shared skill directories and `_rubrics/` map into
+`.claude/skills/`, while runtime project files such as `.claude/settings.json`
+live at `.claude/` root. `claude/README.md` and `claude/SESSION-CONTEXT.md`
+are source/reference docs, not files to drop into `.claude/skills/`.
+
 ## Shared vs Local Convention
 
 Every deployment target separates **shared** (overwritten on sync) from **local** (never overwritten):
@@ -57,6 +68,21 @@ Every deployment target separates **shared** (overwritten on sync) from **local*
 3. **Config via `/configure`.** Skills that need user-specific data ship blank templates. Users fill them in via `/configure <target>` or by hand.
 4. **Pre-flight checks.** Config-dependent skills halt with actionable messages if config is missing.
 5. **Rubrics are reference-only.** Knowledge rubrics live in `claude/_rubrics/` and are referenced by user-invokable skills, not invoked directly.
+
+## Platform modeling note
+
+The two platforms do **not** represent worker roles the same way:
+
+- **Claude Code** usually treats the top-level deployable unit as the
+  **skill**. Worker roles are often nested inside the skill package (for
+  example `teams/agents/*.md`) or represented as subskills/specialists inside
+  the same workflow tree.
+- **Copilot Native** has a first-class top-level **agent** asset layer under
+  `copilot-native/agents/`.
+
+So a one-for-one "every Copilot agent must become a top-level Claude agent"
+port is too literal. The parity question is whether the worker role exists in
+the Claude workflow, not whether it exists as a top-level peer directory.
 
 ## Repository-level Copilot instructions
 

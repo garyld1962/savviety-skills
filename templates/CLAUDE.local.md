@@ -3,7 +3,8 @@
 <!-- This file is YOUR personal Claude Code configuration for this project.
      It is loaded via @CLAUDE.local.md in the project's CLAUDE.md.
      It is excluded from git via .git/info/exclude.
-     The deploy-skills script creates this file but NEVER overwrites it. -->
+     A shared-skill bootstrap may create this file, but it should NEVER
+     overwrite it once it exists. -->
 
 <!-- Uncomment and edit the sections that apply. -->
 

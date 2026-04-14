@@ -61,7 +61,7 @@ Scan for SKILL.md files in all skill directories:
 # Project-level skills
 find .claude/skills -name 'SKILL.md' 2>/dev/null
 
-# Repos-level skills (if using shared deployment)
+# Repo-level shared skills (if using a shared sync/install flow)
 find ~/repos/.claude/skills -name 'SKILL.md' 2>/dev/null
 
 # Skills repo (source of truth)
@@ -162,14 +162,16 @@ claude plugin marketplace add <name> <url> 2>&1
 
 ### 2d: Skills Repo Comparison
 
-If a skills repo exists (`~/repos/skills/`), compare deployed skills to source:
+If a skills repo exists (`~/repos/skills/`), compare the project's shared skills
+to the source repo:
 
 ```bash
-# Check for skills in source not deployed to project
+# Check for skills in source not present in the project
 diff <(ls ~/repos/skills/claude/) <(ls .claude/skills/ | grep -v _project)
 ```
 
-Also check MAPPING.md for skills marked as `C>` (Claude-only) that aren't deployed.
+Also check `claude/README.md` to see whether the source catalog mentions shared
+skills that are missing from the project.
 
 ### 2e: Version Freshness
 
@@ -201,7 +203,8 @@ For each available-but-not-installed item, score relevance:
 2. **Upgrade opportunities** — installed plugins with newer versions available
 3. **Unused plugins** — enabled plugins irrelevant to the project (wasting context)
 4. **Duplicate coverage** — multiple skills/plugins doing the same thing
-5. **Skill staleness** — skills in source repo newer than deployed versions
+5. **Skill staleness** — skills in source repo newer than the project's shared
+   copies
 
 ### Gap Report
 
@@ -228,8 +231,8 @@ For each available-but-not-installed item, score relevance:
 |------------|------------|
 | ... | skill A + plugin B (recommend keeping ...) |
 
-### Stale Deployments
-| Skill | Deployed Version | Source Version |
+### Stale Shared Skills
+| Skill | Project Copy | Source Version |
 |-------|-----------------|----------------|
 | ... | ... | ... |
 ```
@@ -260,8 +263,8 @@ Present findings grouped by action type, ordered by impact:
 ### Update (stale skills/plugins)
 1. **<item>** — <current> → <available>
 
-### Deploy (skills in source not in project)
-1. **<skill>** — run deploy.sh
+### Sync (skills in source not in project)
+1. **<skill>** — sync shared skills into the project
 
 Implement all? [y/N]
 ```
@@ -290,8 +293,8 @@ claude plugin enable <name>@<marketplace> 2>&1
 For each new skill to create:
 1. Create directory in the skills repo: `~/repos/skills/claude/<name>/`
 2. Write `SKILL.md` with frontmatter and workflow
-3. Update `MAPPING.md` with the new entry
-4. Run `deploy.sh` to push to projects
+3. Update `claude/README.md` or other catalog docs if the new skill should be discoverable there
+4. Re-sync the shared Claude skills into any target projects that consume them
 
 ### Enabling/Disabling Plugins
 
@@ -306,11 +309,11 @@ claude plugin disable <name>@<marketplace> 2>&1
 claude plugin update <name>@<marketplace> 2>&1
 ```
 
-### Deploying Skills
+### Syncing Skills
 
-```bash
-cd ~/repos/skills && ./deploy.sh claude
-```
+Refresh the shared Claude skills using the current sync workflow for your
+environment. In this source repo, the old `deploy.sh` script is archived, so do
+not instruct the user to run it.
 
 ## Phase 6: Report
 
@@ -325,7 +328,7 @@ cd ~/repos/skills && ./deploy.sh claude
 | Enabled | <plugin> | OK |
 | Disabled | <plugin> | OK |
 | Updated | <plugin> | OK |
-| Deployed | N skills | OK |
+| Synced | N skills | OK |
 
 ### Before → After
 | Metric | Before | After |
@@ -347,6 +350,6 @@ cd ~/repos/skills && ./deploy.sh claude
 2. **Context matters.** A Rust security plugin is noise in a TypeScript project. Always score relevance against the actual project.
 3. **Don't be noisy.** Only recommend items with relevance score >= 3. Skip obvious mismatches silently.
 4. **Preserve project skills.** Never touch `_project/` directories. Those are managed by the project, not this skill.
-5. **Skills repo is source of truth.** If `~/repos/skills/` exists, create new skills there and deploy. Don't create skills directly in `.claude/skills/` (they'd be overwritten by deploy.sh).
+5. **Skills repo is source of truth.** If `~/repos/skills/` exists, create new skills there and sync them into projects. Don't create shared skills directly in `.claude/skills/` (they'd be overwritten on the next shared sync).
 6. **One command at a time.** Plugin CLI commands can fail silently when chained. Run each install/enable/disable separately and check the result.
 7. **Marketplace registration is durable.** Only `marketplace add` once per source. Check `known_marketplaces.json` before adding.
