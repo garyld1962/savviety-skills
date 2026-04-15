@@ -6,6 +6,15 @@ This folder is intentionally separate from `vscode/` so we can explore a better 
 
 For a file-by-file inventory of prompts, agents, skills, instructions, and related control files, see [asset-catalog.md](asset-catalog.md).
 
+Canonical asset sources live at:
+
+- `copilot-native/prompts/`
+- `copilot-native/agents/`
+- `copilot-native/skills/`
+- `copilot-native/instructions/`
+
+Do not treat nested prompt or agent paths under `copilot-native/skills/` as canonical deploy targets.
+
 ## Why this exists
 
 The existing `vscode/` tree is already strong, but much of it mirrors Claude-era workflow commands one-for-one. GitHub Copilot has a different platform shape:

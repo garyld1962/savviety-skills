@@ -14,6 +14,16 @@ Follow these sources of truth:
 - `.github/docs/templates/disposition-log.template.md`
 - `.github/skills/review-disposition-governance/SKILL.md`
 
+## Missing governed workflow assets
+
+If any required `.github/docs/process/*.md` or `.github/docs/templates/*.template.md`
+file is missing in the consuming repo:
+
+- stop and tell the user the disposition workflow support files are not installed
+- name the missing path or paths explicitly
+- do not invent substitute process docs, templates, or artifact schemas
+- wait for the user to install the shared workflow assets or provide the files
+
 ## Responsibilities
 
 - gather meaningful findings from review artifacts

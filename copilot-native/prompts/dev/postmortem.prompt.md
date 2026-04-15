@@ -25,6 +25,16 @@ Follow these assets:
 - `.github/docs/process/document-schema.md`
 - `.github/docs/templates/postmortem.template.md`
 
+## Missing governed workflow assets
+
+If any required `.github/docs/process/*.md` or `.github/docs/templates/*.template.md`
+file is missing in the consuming repo:
+
+- stop and tell the user the postmortem workflow support files are not installed
+- name the missing path or paths explicitly
+- do not invent replacement process docs, templates, or artifact schemas
+- wait for the user to install the shared workflow assets or provide the files
+
 ## Workflow contract
 
 1. Identify the completed run folder under `docs/runs/<yyyy-mm-dd-HHMMSS>/`, or use the folder the user supplied.

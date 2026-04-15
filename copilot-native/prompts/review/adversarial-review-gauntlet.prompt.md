@@ -1,5 +1,4 @@
 ---
-name: adversarial-review-gauntlet
 description: >-
   Cross-model adversarial review challenge. Switch to a DIFFERENT model in the
   Copilot model picker before running. Selects 1-3 lenses based on review size

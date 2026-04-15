@@ -43,6 +43,11 @@ Workflow and artifact structure are defined in:
 
 Do not invent a different report structure if a canonical template already exists.
 
+If those shared process or template files are missing in the consuming repo,
+stop and say the governed workflow support files are not installed. Name the
+missing paths explicitly and do not invent substitute docs, templates, or
+artifact schemas.
+
 ## Required review set
 
 The canonical review set contains:

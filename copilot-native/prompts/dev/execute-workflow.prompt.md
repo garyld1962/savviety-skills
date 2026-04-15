@@ -30,6 +30,16 @@ Follow these assets:
 
 If the user does not supply an artifact and `AERS.md` exists, treat `@AERS.md` as the source requirements artifact.
 
+## Missing governed workflow assets
+
+If any required `.github/docs/process/*.md` or `.github/docs/templates/*.template.md`
+file is missing in the consuming repo:
+
+- stop and tell the user the governed workflow support files are not installed
+- name the missing path or paths explicitly
+- do not invent replacement process docs, templates, or artifact schemas
+- wait for the user to install the shared workflow assets or choose a lighter flow
+
 ## Workflow contract
 
 Use this prompt for governed, multi-step, or risk-bearing execution. If the ask is a routine, low-risk, convention-bound edit, use the small change fast path instead of forcing the full governed workflow.

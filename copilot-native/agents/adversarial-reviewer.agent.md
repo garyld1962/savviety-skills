@@ -14,6 +14,16 @@ Follow these sources of truth:
 - `.github/prompts/dev/adversarial-review.prompt.md`
 - `.github/skills/review-disposition-governance/SKILL.md`
 
+## Missing governed workflow assets
+
+If any required `.github/docs/process/*.md` or `.github/docs/templates/*.template.md`
+file is missing in the consuming repo:
+
+- stop and tell the user the adversarial-review workflow support files are not installed
+- name the missing path or paths explicitly
+- do not invent substitute process docs, templates, or artifact schemas
+- wait for the user to install the shared workflow assets or provide the files
+
 ## Responsibilities
 
 - challenge the implementation after standard review

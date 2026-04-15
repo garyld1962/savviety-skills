@@ -23,6 +23,16 @@ Follow these sources of truth:
 - `.github/skills/prd-readiness/SKILL.md`
 - `.github/skills/review-disposition-governance/SKILL.md`
 
+## Missing governed workflow assets
+
+If any required `.github/docs/process/*.md` or `.github/docs/templates/*.template.md`
+file is missing in the consuming repo:
+
+- stop and tell the user the governed workflow support files are not installed
+- name the missing path or paths explicitly
+- do not invent substitute process docs, templates, or artifact schemas
+- wait for the user to install the shared workflow assets or provide the files
+
 Your role is bounded orchestration, not generic implementation advice.
 
 Use this agent only for governed, multi-step, or risk-bearing execution. For routine, low-risk, convention-bound edits, do not force full orchestration, formal artifact production, or phase-by-phase narration.
