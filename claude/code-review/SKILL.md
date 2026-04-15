@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "Domain-based code review with profile selection. Dispatches parallel specialist workers per domain, merges findings. Use with profile: competence (default), comprehensive, pre-merge, pre-production, or security-focused."
+description: "Use for any non-trivial PR review. Dispatches parallel specialist workers per domain with a profile: competence, comprehensive, pre-merge, pre-production, or security-focused."
 ---
 
 # Review Controller

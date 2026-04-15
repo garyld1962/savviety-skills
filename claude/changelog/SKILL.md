@@ -1,6 +1,6 @@
 ---
 name: changelog
-description: "Generate a changelog and release from Conventional Commits. Collects commits since the last tag, groups by type, auto-calculates the next version, updates CHANGELOG.md, and creates a git tag and GitHub Release."
+description: "Use to generate a release from Conventional Commits. Groups commits since the last tag, auto-bumps the version, updates CHANGELOG.md, tags, and releases."
 ---
 
 # /changelog -- Generate Changelog and Release

@@ -8,7 +8,11 @@ A PreToolUse hook that intercepts `gh pr create` commands and checks for existin
 
 ## Install
 
-Add this to your **global** `~/.claude/settings.json` (so it applies across all repos):
+Two install models — pick one:
+
+### Option A · Per-project (matches `settings.template.json`)
+
+Copy `pr-guardrail.sh` into the project at `.claude/pr-guardrail/pr-guardrail.sh`, then add this to the project's `.claude/settings.json`:
 
 ```json
 {
@@ -20,7 +24,7 @@ Add this to your **global** `~/.claude/settings.json` (so it applies across all 
         "hooks": [
           {
             "type": "command",
-            "command": "bash ~/repos/skills/claude/pr-guardrail/pr-guardrail.sh",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/pr-guardrail/pr-guardrail.sh",
             "timeout": 15,
             "statusMessage": "Checking for existing PRs..."
           }
@@ -31,7 +35,32 @@ Add this to your **global** `~/.claude/settings.json` (so it applies across all 
 }
 ```
 
-**Important:** Merge this into your existing `hooks` section — don't replace the whole file. See the `update-config` skill for safe merging.
+### Option B · Global (one install, applies everywhere)
+
+Reference the script by absolute path from wherever this repo lives on disk, then add to `~/.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "if": "Bash(gh pr create:*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /absolute/path/to/savviety-skills/claude/pr-guardrail/pr-guardrail.sh",
+            "timeout": 15,
+            "statusMessage": "Checking for existing PRs..."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Important:** Merge this into your existing `hooks` section — don't replace the whole file. Use the built-in `update-config` skill (Claude Code harness) for safe merging.
 
 ## How it works
 

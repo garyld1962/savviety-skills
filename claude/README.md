@@ -104,6 +104,14 @@ Several review skills overlap with Claude Code built-ins. Use this matrix to pic
 | skill-audit | `/skill-audit` | Audit skill and plugin ecosystem coverage |
 | find-skills | `/find-skills` | Discover installable ecosystem skills for a given need |
 
+### Utilities (not slash commands)
+
+Non-skill assets that ship alongside the skills — typically hooks or shared scripts. These do NOT have `SKILL.md` files and are not invokable via `/name`.
+
+| Asset | Purpose |
+|-------|---------|
+| pr-guardrail | PreToolUse hook that intercepts `gh pr create` and warns about existing open PRs. See `claude/pr-guardrail/INSTALL.md` |
+
 ## Starting execution from a PRD or AERS
 
 Once you have a `PRD.md`, `AERS.md`, or similar requirements artifact, execution
@@ -197,7 +205,7 @@ testing manually from the source repo.
 
 ## BA Skills
 
-Most BA skills (problem-thesis, stakeholder, requirements, etc.) live in the [superpowers plugin](https://github.com/anthropics/superpowers) rather than this repo. The `ba-adversarial-review` skill here is the exception — it's a standalone Claude Code skill for adversarial review of BA deliverables.
+Most BA skills (problem-thesis, stakeholder, requirements, etc.) live in the [superpowers plugin](https://github.com/anthropics/superpowers) rather than this repo. The `ba-review-adversarial` skill here is the exception — it's a standalone Claude Code skill for adversarial review of BA deliverables.
 
 ## Platform Notes
 

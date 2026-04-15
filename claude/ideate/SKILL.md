@@ -1,6 +1,6 @@
 ---
 name: ideate
-description: "Explore and shape an idea from a rough ask, document, or folder before implementation. Three modes: idea (general), ba (business-analysis), tech (technical options). Sits upstream of brainstorming and /plan."
+description: "Use before /plan or brainstorming to shape a rough ask, doc, or folder into a direction. Three modes: idea (general), ba (business-analysis), tech (technical options)."
 ---
 
 # /ideate — Explore and Shape Ideas

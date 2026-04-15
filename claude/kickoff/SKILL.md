@@ -1,6 +1,6 @@
 ---
 name: kickoff
-description: "Start autonomous development from a PRD, story, or AERS. Checks readiness, plans, implements, and reviews using built-in tools. Lighter than /execute-workflow — no governed artifacts. Use for standard feature work."
+description: "Use for standard feature work to autonomously ship a PRD/story/AERS: readiness → plan → implement → review. Lighter than /execute-workflow — no governed artifacts."
 ---
 
 # /kickoff — Autonomous Development Start

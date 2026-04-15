@@ -1,6 +1,6 @@
 ---
 name: review-gauntlet
-description: "Meta-review of code review output. Reviews THE REVIEW, not the code. Applies 3 lenses (Skeptic, Architect, Pragmatist) to validate accuracy, structural fitness, and actionability. Produces SOLID/MIXED/UNRELIABLE verdict."
+description: "Use when a code review's conclusions need scrutiny. Reviews THE REVIEW via 3 lenses (Skeptic, Architect, Pragmatist). Returns SOLID / MIXED / UNRELIABLE."
 ---
 
 # /review-gauntlet -- Meta-Review of Code Reviews

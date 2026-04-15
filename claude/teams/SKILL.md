@@ -1,6 +1,6 @@
 ---
 name: teams
-description: Use when a feature requires 2-4 parallel implementation streams across distinct packages or services, before starting multi-team development waves
+description: "Use before multi-team development waves, when a feature needs 2-4 parallel implementation streams across distinct packages or services."
 ---
 
 # Parallel Teams

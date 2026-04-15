@@ -1,6 +1,6 @@
 ---
 name: configure
-description: "Fill in blank config templates for other skills. Interviews the user, writes config files. Use when a skill's pre-flight check says config is missing, or run with no argument to see what needs configuring."
+description: "Use when a skill's pre-flight says config is missing, or with no arg to see what needs configuring. Interviews the user and writes the config file."
 ---
 
 # /configure — Skill Config Setup
