@@ -1,6 +1,6 @@
 ---
 name: grill-me
-description: "Stress-test a plan, design, or decision by relentlessly interviewing the user. Walks every branch of the decision tree one question at a time, exploring the codebase when it can answer questions directly. Use when user wants to stress-test a plan, validate assumptions, or says 'grill me'."
+description: "Use when user says 'grill me', wants to stress-test a plan, or validate assumptions. Walks the decision tree one question at a time, exploring the codebase when it can."
 ---
 
 # /grill-me -- Decision Stress Test

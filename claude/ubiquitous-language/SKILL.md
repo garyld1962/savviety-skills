@@ -1,6 +1,6 @@
 ---
 name: ubiquitous-language
-description: "Extract a DDD-style ubiquitous language glossary from conversation and codebase — a semantic concern focused on ensuring the team shares precise, unambiguous domain vocabulary. Flags ambiguities, proposes canonical terms, saves to UBIQUITOUS_LANGUAGE.md. Use when defining domain terms, hardening terminology, onboarding to a domain, or after BA interviews."
+description: "Use when defining domain terms, after BA interviews, or onboarding to a new domain. Extracts a DDD glossary, flags ambiguities, saves UBIQUITOUS_LANGUAGE.md."
 ---
 
 # /ubiquitous-language -- Domain Terminology Glossary

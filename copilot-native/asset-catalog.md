@@ -18,10 +18,11 @@ This document is a file-by-file guide to the `copilot-native/` workspace. It cov
 
 | Group | Count | Notes |
 |---|---:|---|
-| Prompts | 28 | 7 BA, 1 common, 15 dev, 5 review |
+| Prompts | 33 | 8 BA, 2 common, 16 dev, 7 review |
 | Agents | 12 | Mostly bounded review, ideation, execution, and investigation roles |
-| Skills | 22 | Reusable knowledge used by prompts and agents |
+| Skills | 23 | Reusable knowledge used by prompts and agents |
 | Instructions | 3 | Passive authoring, environment, and personal rule layers |
+| Templates | 1 | Blank config template currently shipped for Copilot-side environment routing |
 
 Ignore the `:Zone.Identifier` sidecar files in this folder. They are Windows metadata, not Copilot assets.
 
@@ -32,6 +33,7 @@ Ignore the `:Zone.Identifier` sidecar files in this folder. They are Windows met
 | [README.md](README.md) | Main overview for the workspace: why it exists, design principles, current asset set, and the intended shared/project/local layout. |
 | [platform-review.md](platform-review.md) | Strategy note describing the move toward a more Copilot-native, built-in-first architecture. |
 | [copilot-instructions.md](copilot-instructions.md) | Project instruction template and intended single source of truth for conventions, build/test commands, environment model, and AERS expectations. |
+| [templates/env.config.template.md](templates/env.config.template.md) | Blank environment-routing template intended to be copied into a user or project Copilot config location. |
 
 ## Major workflow clusters
 
@@ -42,6 +44,8 @@ The BA prompt set centers on refinement and context capture:
 - prompts in `prompts/ba/`
 - skills `prd-readiness`, `project-context`, `ba-knowledge-ops`, `ba-ideation`, and `tech-ideation`
 - agents `ba-ideation.agent.md` and `prd-quality-gate.agent.md`
+
+The BA set also includes `ubiquitous-language`, a glossary-building prompt for locking in domain terms before planning or implementation.
 
 ### Governed execution and delivery
 
@@ -62,6 +66,13 @@ The investigation workflow is a distinct cluster:
 - skills `code-investigation-orchestrator`, `code-investigation-search`, and `investigation-report-writer`
 
 This cluster is designed to write reports under `docs/code-investigations/`.
+
+### Prompt discovery and configuration
+
+Two lighter support prompts improve day-to-day ergonomics around the rest of the asset set:
+
+- `prompts/common/configure.prompt.md` for filling shipped config templates such as the Copilot environment template
+- `prompts/dev/skill-help.prompt.md` for browsing the prompt surface and getting per-prompt help
 
 ### Specialist review
 
@@ -85,11 +96,13 @@ The specialist review path is intentionally thinner than a general `/review`:
 | `ba-spec-engineer` | [prompts/ba/ba-spec-engineer.prompt.md](prompts/ba/ba-spec-engineer.prompt.md) | Build an execution-ready BA specification or AERS through structured interview. | `prd-readiness` |
 | `ideate` | [prompts/ba/ideate.prompt.md](prompts/ba/ideate.prompt.md) | Explore and shape an idea for mixed business and technical audiences. | `ba-ideation`, `tech-ideation`, `ba-ideation.agent.md`, `tech-ideation.agent.md` |
 | `prd-validator` | [prompts/ba/prd-validator.prompt.md](prompts/ba/prd-validator.prompt.md) | Turn a rough story, BRD, or draft AERS into an implementation-ready artifact. | `prd-readiness`, `prd-quality-gate.agent.md` |
+| `ubiquitous-language` | [prompts/ba/ubiquitous-language.prompt.md](prompts/ba/ubiquitous-language.prompt.md) | Build or refresh a domain glossary with canonical terms, aliases to avoid, and unresolved terminology risks. | BA/discovery workflows |
 
 ### Common prompts
 
 | Prompt | File | Purpose | Main related assets |
 |---|---|---|---|
+| `configure` | [prompts/common/configure.prompt.md](prompts/common/configure.prompt.md) | Fill in shipped config templates and write the result to the correct user or project location. | `templates/env.config.template.md`, `execution-environment` |
 | `environment-check` | [prompts/common/environment-check.prompt.md](prompts/common/environment-check.prompt.md) | Detect whether commands should run in PowerShell, WSL/Linux, or after a terminal switch. | `execution-environment`, `execution-environment.instructions.md` |
 
 ### Dev prompts
@@ -110,6 +123,7 @@ The specialist review path is intentionally thinner than a general `/review`:
 | `migration-guide` | [prompts/dev/migration-guide.prompt.md](prompts/dev/migration-guide.prompt.md) | Produce a repo-specific major-version migration guide. | `dependency-change-management` |
 | `postmortem` | [prompts/dev/postmortem.prompt.md](prompts/dev/postmortem.prompt.md) | Run a governed postmortem over a completed execution run. | `copilot-platform-playbook`, `review-disposition-governance`, `postmortem-analyst.agent.md`, workflow docs/templates |
 | `ship` | [prompts/dev/ship.prompt.md](prompts/dev/ship.prompt.md) | Move completed work through the repo's actual delivery flow. | `repo-delivery`, `execution-environment` |
+| `skill-help` | [prompts/dev/skill-help.prompt.md](prompts/dev/skill-help.prompt.md) | Discover available prompts and show concise help for one prompt by name. | prompt discovery ergonomics |
 | `test-plan` | [prompts/dev/test-plan.prompt.md](prompts/dev/test-plan.prompt.md) | Create or refresh a repo-specific TDD-first test plan. | `test-planning` |
 
 ### Review prompts
@@ -189,3 +203,9 @@ The governed execution assets repeatedly reference these deployed paths:
 - `.github/docs/templates/*.template.md`
 
 Those references matter because they define the expected run artifacts and output formats for review, execution, disposition, and postmortem flows, even though source files for them are not currently stored under `copilot-native/`.
+
+The workspace also ships one local source template under `templates/`:
+
+- `templates/env.config.template.md`
+
+That file is intended to be copied into `$HOME/.copilot/env.config.md` or `<project>/.github/instructions/env.config.md`. In consuming repos, treat `.github/templates/` as the natural home for shared config templates when the publish pipeline deploys them.

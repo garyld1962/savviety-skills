@@ -10,11 +10,11 @@ For a file-by-file inventory of prompts, agents, skills, instructions, and relat
 
 The existing `vscode/` tree is already strong, but much of it mirrors Claude-era workflow commands one-for-one. GitHub Copilot has a different platform shape:
 
-- built-in slash commands like `/plan`, `/review`, `/research`, `/tasks`, `/delegate`, `/agent`, `/skills`, `/instructions`
+- built-in slash commands like `/plan`, `/review`, `/research`, `/tasks`, `/fleet`, `/diff`, `/pr`, `/delegate`, `/agent`, `/skills`, `/instructions`, `/env`
 - project agents and reusable skills
 - auto-applied instructions
 - background task management
-- file mentions and repo context controls
+- file mentions, session export, and repo context controls such as `/share`, `/context`, and `/compact`
 
 The goal here is to build a thinner, more native layer that:
 
@@ -51,11 +51,18 @@ The goal here is to build a thinner, more native layer that:
 | `/plan` | default planning path |
 | `/review` | default quick code review |
 | `/research` | broad repo/web investigation |
+| `/fleet` | parallel specialist passes when orchestration needs multiple workers |
 | `/tasks` | monitor background work |
+| `/diff` | inspect the changed scope before review, checkpoint, or ship |
+| `/pr` | inspect PR state, comments, checks, and merge readiness during delivery |
 | `/delegate` | only when the user explicitly wants cloud execution / PR creation |
 | `/agent` | discover/select specialist agents |
 | `/skills` | manage installed skills |
 | `/instructions` | inspect active instruction layers |
+| `/env` | inspect loaded environment details before deeper shell-routing work |
+| `/context` | inspect context pressure during long-running workflows |
+| `/compact` | reduce context pressure during long-running workflows |
+| `/share` | export a run, report, or session summary when repo persistence is not needed |
 | `/model` | switch models for adversarial or second-opinion passes |
 | `@file` mentions | targeted context instead of long pasted prompts |
 
@@ -70,6 +77,8 @@ The goal here is to build a thinner, more native layer that:
 - `prompts/ba/ba-context-builder.prompt.md`
 - `prompts/ba/ba-eval-harness.prompt.md`
 - `prompts/ba/ba-knowledge-capture.prompt.md`
+- `prompts/ba/ubiquitous-language.prompt.md`
+- `prompts/common/configure.prompt.md`
 - `prompts/common/environment-check.prompt.md`
 - `prompts/dev/adversarial-review.prompt.md`
 - `prompts/dev/autonomous-development-kickoff.prompt.md`
@@ -86,6 +95,7 @@ The goal here is to build a thinner, more native layer that:
 - `prompts/dev/migration-guide.prompt.md`
 - `prompts/dev/dependency-audit.prompt.md`
 - `prompts/dev/ado-item.prompt.md`
+- `prompts/dev/skill-help.prompt.md`
 - `prompts/review/adversarial-review-gauntlet.prompt.md`
 - `prompts/review/code-review.prompt.md`
 - `prompts/review/professional-review.prompt.md`
@@ -136,6 +146,7 @@ The goal here is to build a thinner, more native layer that:
 - `agents/writer-investigation-report.agent.md`
 - `.github/docs/process/*.md`
 - `.github/docs/templates/*.template.md`
+- `templates/env.config.template.md`
 - `instructions/copilot-asset-authoring.instructions.md`
 - `instructions/execution-environment.instructions.md`
 - `instructions/personal.instructions.md`
@@ -145,21 +156,27 @@ The goal here is to build a thinner, more native layer that:
 - Use built-in `/plan` instead of creating another custom planning prompt unless the repo needs special orchestration.
 - Use `prd-validator` before planning when the source artifact is still business-oriented, incomplete, or not yet an AERS.
 - Use BA prompts like `ba-problem-refiner`, `ba-spec-engineer`, `ba-context-builder`, `ba-eval-harness`, and `ba-knowledge-capture` when the missing piece is business precision or durable context, not implementation orchestration.
+- Use `ubiquitous-language` when discovery or BA work needs a canonical glossary before planning or implementation.
+- Use `configure` to fill blank config templates interactively when a workflow depends on user-specific or project-specific config.
 - Use `ideate` when the work is still exploratory and you need shared, BA, or technical option-shaping before `/plan`.
-- Use `environment-check` when a repo must support both PowerShell and WSL execution patterns.
+- Use built-in `/env` for a quick environment snapshot, and use `environment-check` only when command routing still needs repo-specific guidance.
+- Use built-in `/diff` as the default changed-scope view before `checkpoint`, `ship`, or deeper review flows.
 - Use built-in `/review` for the quick/default code review path.
 - Use `code-review` when you want a deeper defect-focused review with explicit domain selection and merged findings.
 - Use `professional-review` when the code may work but you need a senior-bar judgment about scalability, failure behavior, operability, and engineering choice quality.
+- Use built-in `/fleet` plus `/tasks` when structured review or investigation benefits from multiple specialist workers in parallel.
 - Use built-in `/model` and then `adversarial-review` when you want a deliberate second-opinion challenge after `/review`, `code-review`, or `professional-review`.
 - Use `adversarial-review-gauntlet` when the thing you need to challenge is the review output itself, not the code.
 - Use `autonomous-development-kickoff` when you want a thin built-in-first path from requirements readiness into `/plan`, implementation, and `/review`.
 - Use `execute-workflow` when the work needs governed execution artifacts, required review gates, and explicit disposition handling.
-- Use `execute-plan`, `checkpoint`, `ship`, and `hotfix` for repo-specific delivery flows that built-in Copilot does not model directly.
+- Use `execute-plan`, `checkpoint`, `ship`, and `hotfix` for repo-specific delivery flows that built-in Copilot does not model directly, while leaning on `/pr` for PR state and checks.
 - Use `dependency-audit`, `migration-guide`, and `ado-item` when the workflow depends on repo-local dependency state or external Azure DevOps context.
 - Use `investigate-code` when you need an evidence-backed index of where a behavior or API appears across one repo, several repos, or a repo folder.
 - Use `postmortem` after a governed run when you want a structured process retrospective tied to the run artifacts.
 - Use `review-api`, `review-db`, `review-design`, and `review-tests` as targeted launchers into the shared review engine when you want a narrower domain emphasis than the default review paths.
 - Use `copilot-asset-audit` when reviewing or porting prompt/agent/skill/instruction sets.
+- Use `skill-help` when you want a concise catalog of the prompt surface or details for one specific prompt.
+- Use built-in `/compact` or `/share` during long governed runs when you need to manage context pressure or export a durable summary without writing a repo artifact.
 - Use the platform playbook skill when authoring new Copilot assets.
 
 ## Shared vs local asset convention
@@ -177,6 +194,7 @@ upstream:
 - `.github/prompts/review/`
 - `.github/docs/process/`
 - `.github/docs/templates/`
+- `.github/templates/*.template.md`
 - `.github/skills/<shared-skill>/`
 - `.github/agents/`
 - `.github/instructions/*.instructions.md`

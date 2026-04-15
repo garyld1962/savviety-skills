@@ -7,6 +7,18 @@ description: "Run a structured retrospective over a completed governed execution
 
 **Purpose:** Analyze a completed governed execution run and produce a structured postmortem. Focuses on process effectiveness — what the workflow caught, what it missed, and what should change — not on re-reviewing the code.
 
+## When to Use
+
+- A `/execute-workflow` run has completed (PR merged or rejected)
+- You want to evaluate the workflow itself — gates, reviews, tool usage
+- Recurring issues suggest the process needs tuning
+
+## When NOT to Use
+
+- Re-reviewing code quality — use `/code-review` or `/review-adversarial`
+- No governed run artifacts exist — postmortem needs the run folder
+- Incident retrospective for production issues — this skill is for workflow runs, not outages
+
 ## Pre-flight Required Config
 
 This skill shares config with `/execute-workflow`.

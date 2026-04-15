@@ -1,6 +1,6 @@
 ---
 name: skill-audit
-description: "Audit Claude Code skills, plugins, and agents: inventory current state, research available options from marketplaces and Anthropic repos, gap analysis, and implement recommendations. Use periodically or when setting up a new project."
+description: "Use periodically or when setting up a new project to audit Claude Code skills/plugins/agents, research marketplaces, gap-analyze, and implement recommendations."
 ---
 
 # /skill-audit — Skills & Plugin Ecosystem Audit

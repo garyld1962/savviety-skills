@@ -7,6 +7,17 @@ description: "List available agents or show detailed help for a specific agent. 
 
 **Purpose:** Show available agents and their usage. With no argument, list all user-invokable agents with descriptions. With a name, show detailed help for that agent.
 
+## When to Use
+
+- User asks "what skills/agents are available" or "what can you do"
+- User asks for help on a specific skill by name
+- User is new to the repo and needs an orientation
+
+## When NOT to Use
+
+- User already named a skill and wants it executed — invoke it directly
+- You need Claude Code built-in help — use `/help`
+
 ## Arguments
 
 - _(none)_ — list all available agents

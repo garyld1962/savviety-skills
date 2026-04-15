@@ -1,11 +1,23 @@
 ---
 name: test-plan
-description: "TDD-first test planning system. Analyzes task requirements and generates test specifications as executable specs before implementation. Produces it.todo() test stubs, structured plan files, and markdown reports. Supports plan, validate, and refresh modes for team agent integration."
+description: "Use before implementing a feature to generate it.todo() stubs from requirements (TDD-first). Supports plan, validate, and refresh modes. TypeScript monorepos."
 ---
 
 # /test-plan — TDD-First Test Planning
 
 **Purpose:** Generate test specifications from task requirements BEFORE implementation. Tests serve as executable specifications that define what the code must do. Designed for iterative use by team agents in a TDD workflow. Project-agnostic — adapts to any TypeScript monorepo.
+
+## When to Use
+
+- Starting TDD on a new task — generate `it.todo()` stubs before implementation
+- Validating whether an existing test suite covers the task requirements
+- Refreshing a plan after requirements change
+
+## When NOT to Use
+
+- Implementation already exists and passes — use `/review-tests` to audit coverage
+- Non-TypeScript repo without an equivalent test runner convention
+- Exploratory spike code that will be discarded
 
 ## Usage
 

@@ -7,6 +7,17 @@ description: "Fill in blank config templates for other skills. Interviews the us
 
 **Purpose:** Read a blank config template shipped with a skill, interview the user to fill in the required fields, and write the completed config file to its destination. This is the interactive alternative to hand-editing template files.
 
+## When to Use
+
+- A skill's pre-flight check reports missing or incomplete config
+- First-time setup of a skill in a new repo
+- You want to audit which skills are configured in the current workspace
+
+## When NOT to Use
+
+- You know the config fields and prefer to hand-edit the template directly
+- Configuring Claude Code itself (hooks, permissions, settings.json) — use the `update-config` skill
+
 ## Arguments
 
 - (no argument) — list all registered targets, show which have config vs which are unconfigured

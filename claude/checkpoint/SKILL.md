@@ -7,7 +7,17 @@ description: "Quality gate: discovers project tooling, runs linter, typecheck/bu
 
 **Purpose:** Fast quality gate that runs lint, build, and tests for changed packages. Does NOT run code review — use `/code-review` separately for that.
 
-## Workflow
+## When to Use
+
+- Before pushing a branch or creating a PR
+- After a batch of edits to verify lint/typecheck/tests still pass
+- As a sanity gate inside larger flows (invoked by `/pr`, `/ship`)
+
+## When NOT to Use
+
+- You want review feedback, not just green tests — use `/code-review`
+- No changes staged or tooling not yet configured — run `/configure` first
+- Full delivery flow needed — use `/pr` or `/ship`, which call checkpoint internally
 
 Execute these steps in order. Report results at the end.
 

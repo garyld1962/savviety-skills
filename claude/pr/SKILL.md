@@ -7,6 +7,18 @@ description: "Full PR lifecycle: branch, commit, checkpoint, push, create PR, an
 
 **Purpose:** Automate the full PR lifecycle from branch creation through optional merge.
 
+## When to Use
+
+- Implementation is complete and ready for review/merge
+- You want branch + commit + checkpoint + push + PR creation in one flow
+- Squash-merge is the repo's standard and you want optional auto-merge
+
+## When NOT to Use
+
+- Repo has project-specific release steps beyond a PR — use `/ship`
+- You only need the quality gate — use `/checkpoint`
+- Work isn't ready — finish implementation and tests first
+
 ## Arguments
 
 - `--skip-checkpoint` — skip the /checkpoint quality gate

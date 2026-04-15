@@ -7,6 +7,18 @@ description: "Validate implementation against PRD acceptance criteria. Reads a P
 
 **Purpose:** Compare finished implementation against the PRD's acceptance criteria. For each criterion, determine HOW to verify it, execute the check, and report pass/fail with evidence.
 
+## When to Use
+
+- Implementation is complete and you need to verify PRD criteria are met
+- Before marking a story/PRD done, or before PR merge on acceptance-driven work
+- Re-verifying after a fix via `--recheck`
+
+## When NOT to Use
+
+- PRD is still a draft — use `/prd-validate` first
+- You need a general code review — use `/code-review`
+- No PRD/acceptance criteria exist — there's nothing to verify against
+
 **Arguments:**
 - `<path>` — path to the PRD file (required on first run, remembered after)
 - `--recheck` — re-run only previously failed criteria

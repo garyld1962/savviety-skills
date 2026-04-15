@@ -7,6 +7,18 @@ description: "Start autonomous development from a PRD, story, or AERS. Checks re
 
 **Purpose:** Begin implementation work from a requirements artifact, following a built-in-first flow: readiness check → plan → implement → review. Does NOT produce governed artifacts (use `/execute-workflow` for that).
 
+## When to Use
+
+- Starting standard feature work from an AERS, PRD, story, or spec
+- Work is routine enough that governed artifacts aren't required
+- You want an autonomous readiness → plan → implement → review flow
+
+## When NOT to Use
+
+- Work needs audit-grade traceable review artifacts — use `/execute-workflow`
+- You already have a written plan — use `/execute-plan`
+- You only need planning, not implementation — use `/plan`
+
 ## Arguments
 
 - `<path>` — path to the requirements artifact (AERS, PRD, spec, story). Defaults to `AERS.md` if it exists.

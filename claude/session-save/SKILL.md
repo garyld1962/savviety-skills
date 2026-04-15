@@ -9,6 +9,18 @@ description: "Session-end state capture: writes SESSION.md with current work con
 
 This is the counterpart to `/whereami`. Where `/whereami` reads, `/session-save` writes.
 
+## When to Use
+
+- Ending a session with in-flight work that will resume later
+- Switching machines or handing off to another agent/human
+- Before context-compaction if the session has been long and complex
+
+## When NOT to Use
+
+- Work is fully complete and merged — nothing to resume
+- Starting a session — use `/whereami` instead
+- A short session with no durable state beyond git — git log suffices
+
 ## Arguments
 
 - _(none)_ — generate and write SESSION.md from current conversation context

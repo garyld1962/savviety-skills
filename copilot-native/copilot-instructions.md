@@ -6,7 +6,7 @@
 ## Scope Boundaries
 
 - This file is the authoritative project instruction file for GitHub Copilot in this repository.
-- Do **not** read `CLAUDE.md`, `.claude/`, or Claude-specific configuration when working in Copilot.
+- Do **not** read unrelated assistant-specific instruction files or non-Copilot runtime configuration when working in Copilot.
 - Prompts live in `.github/prompts/`
 - Agents live in `.github/agents/`
 - Skills live in `.github/skills/`

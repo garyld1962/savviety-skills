@@ -9,6 +9,18 @@ description: "Turn a rough story, BRD, AERS draft, or idea into an implementatio
 
 **Use BEFORE `/plan`, `/kickoff`, or `/execute-workflow`** when the requirements are still ambiguous.
 
+## When to Use
+
+- Requirements have ambiguity, missing sections, or unclear acceptance criteria
+- A BRD, story, or partial AERS needs to be made implementation-ready
+- Before `/plan`, `/kickoff`, or `/execute-workflow` on a new feature
+
+## When NOT to Use
+
+- Requirements are already implementation-ready — skip to `/plan` or `/kickoff`
+- Verifying completed work — use `/prd-acceptance`
+- You need the scoring rubric itself — see `/prd-readiness`
+
 ## Arguments
 
 - `<path>` — path to the requirements artifact. If not provided, scan common locations: `AERS.md`, `PRD.md`, `docs/plans/*.md` (most recent).

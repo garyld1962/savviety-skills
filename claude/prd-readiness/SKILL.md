@@ -1,6 +1,6 @@
 ---
 name: prd-readiness
-description: "AERS readiness checklist and rubric. Defines what makes a requirements artifact implementation-ready: sections, ambiguity priorities, interaction rules, and engineering hardening. Referenced by /prd-validate, /kickoff, /execute-workflow."
+description: "Use to score a requirements artifact against the AERS readiness rubric. Defines 'implementation-ready'. Referenced by /prd-validate, /kickoff, /execute-workflow."
 ---
 
 # AERS Readiness Rubric
@@ -8,6 +8,18 @@ description: "AERS readiness checklist and rubric. Defines what makes a requirem
 Use this skill to evaluate or improve a requirements artifact before implementation planning.
 
 **Preferred term:** **AERS** — Agent-Executable Requirements Spec.
+
+## When to Use
+
+- Scoring or shaping a requirements artifact against the readiness rubric
+- Referenced internally by `/prd-validate`, `/kickoff`, `/execute-workflow` for their gates
+- You need the authoritative definition of "implementation-ready"
+
+## When NOT to Use
+
+- You want an interactive interview to fix gaps — use `/prd-validate`
+- Verifying a finished implementation — use `/prd-acceptance`
+- Drafting a PRD from scratch — use `/ideate` first
 
 ## Input → Output Model
 

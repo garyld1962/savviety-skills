@@ -1,4 +1,5 @@
 ---
+name: investigation-report-writer
 description: "Write structured investigation matches to a versioned Markdown report under docs/code-investigations/ and update report pointers."
 argument-hint: "Structured investigation results JSON"
 ---

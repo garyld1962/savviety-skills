@@ -19,13 +19,17 @@ depends on user-specific or project-specific data ships a blank template with
 `<FILL IN>` placeholders. This prompt reads the template, asks you for each
 required value, and writes the completed config to the right location.
 
-Follow the skill: `.github/skills/configure/SKILL.md` (if present) for the
-registry and detailed behavior. If no skill file exists, use the inline
-registry below.
+Use built-in `/env` when you only need a quick snapshot of the loaded
+environment. Use this prompt when you need to create or refresh a config file.
+
+Follow `.github/skills/configure/SKILL.md` when the consuming repo ships one for
+the registry and detailed behavior. If no configure skill exists, use the
+inline registry below.
 
 ## No-argument mode
 
-If no target is provided, list all known targets and their status:
+If no target is provided, list all known targets from the project registry or
+the inline registry below and show their status:
 
 1. For each target, check whether the destination file exists and is free of
    `<FILL IN>` placeholders.
@@ -48,15 +52,15 @@ If no target is provided, list all known targets and their status:
 
 ## Inline registry
 
-Use this registry when `.github/skills/configure/SKILL.md` is not available:
+Use this registry when `.github/skills/configure/SKILL.md` is not available.
+This source repo currently ships only the Copilot environment template here.
+Additional targets such as workflow, ship, or investigate-code should come from
+the consuming repo's own configure skill or registry when those templates exist.
 
 | Target | Template | Destination | Scope |
 |---|---|---|---|
-| `env` | `.github/skills/env-check/env.config.template.md` | `$HOME/.copilot/env.config.md` | per-user |
-| `workflow` | `.github/skills/execute-workflow/config.template.md` | `.claude/workflow.config.md` (project) | per-project |
-| `ship` | `.github/skills/ship/config.template.md` | `.claude/ship.config.md` (project) | per-project |
-| `code-investigate` | `.github/skills/code-investigate/config.template.md` | `$HOME/.copilot/code-investigate.config.md` | per-user |
-| `copilot-env` | `.github/skills/env-check/env.config.template.md` | `$HOME/.copilot/env.config.md` | per-user |
+| `env` | `.github/templates/env.config.template.md` | `$HOME/.copilot/env.config.md` or `<project>/.github/instructions/env.config.md` | per-user or per-project |
+| `copilot-env` | `.github/templates/env.config.template.md` | `$HOME/.copilot/env.config.md` or `<project>/.github/instructions/env.config.md` | per-user or per-project |
 
 ## Placeholder conventions
 
@@ -74,3 +78,4 @@ Use this registry when `.github/skills/configure/SKILL.md` is not available:
 - Do NOT overwrite an existing config without confirming.
 - Do NOT hardcode shell names, hostnames, or project names. All environment
   data comes from the user's answers or auto-detection.
+- Do NOT point Copilot-native users at Claude-specific config paths.

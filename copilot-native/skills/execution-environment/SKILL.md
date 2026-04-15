@@ -7,6 +7,11 @@ description: Detect the current shell and OS, then choose safe command routing u
 
 Use this skill whenever prompts, agents, or instructions need to produce shell commands or environment-specific guidance.
 
+## Relationship to Copilot built-ins
+
+- Use built-in `/env` when you only need a quick snapshot of the loaded environment, instructions, tools, or shell context.
+- Use this skill when shell routing and command-syntax decisions materially affect the next command or workflow.
+
 ## Core Principle
 
 > Detect the execution environment first. Do not assume any specific shell or OS.
@@ -18,7 +23,7 @@ Before routing commands, check whether the user has an env config:
 1. Check `$HOME/.copilot/env.config.md` (user-level) or `<project>/.github/instructions/env.config.md` (project-level).
 2. If found, load the registered shells, routing rules, and host mappings.
 3. If NOT found, fall back to auto-detection only (detect shell, emit commands in its native syntax). Optionally suggest:
-   > "For cross-platform routing rules, run `/configure copilot-env` or copy the template from `.github/skills/execution-environment/env.config.template.md`."
+   > "For cross-platform routing rules, run `/configure copilot-env` or copy the template from `.github/templates/env.config.template.md`."
 
 ## Detection Protocol
 

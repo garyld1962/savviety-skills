@@ -1,6 +1,9 @@
 ---
 name: investigation-report-writer
 description: Turn structured investigation matches into a versioned Markdown report under docs/code-investigations/ and update index pointers.
+tools:
+  - read
+  - edit
 ---
 
 # Role

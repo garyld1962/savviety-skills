@@ -7,6 +7,18 @@ description: "Search one or more repos for a code pattern or behavior and produc
 
 **Purpose:** Search code for a requested pattern or behavior across one or more repositories and produce a structured, versioned Markdown report. Unlike the Explore subagent (single-scope, no report), this skill produces a durable investigation artifact with structured matches and confidence scores.
 
+## When to Use
+
+- You need a durable, versioned investigation report — not an ephemeral search
+- Scope spans multiple repositories
+- Findings will be cited in a ticket, PR, or postmortem
+
+## When NOT to Use
+
+- Single-repo, throwaway search — use the Explore subagent or Grep directly
+- You already know the file and just need to read it — use Read
+- You are debugging an active bug — use `/triage`
+
 ## Soft Pre-flight Config Check
 
 This skill has a config file for defaults, but can run without it if arguments are provided.

@@ -1,11 +1,23 @@
 ---
 name: execute-plan
-description: "Execute an implementation plan end-to-end: reads a plan file, implements each task with build/test cycles, runs acceptance validation, and reports readiness. Use when you have a written plan and want to execute it with quality gates."
+description: "Use when you have a written plan file and want to execute it with per-task build/test cycles and an acceptance gate. Lightweight — no governance artifacts."
 ---
 
 # /execute-plan — Plan Executor
 
 **Purpose:** Execute a written implementation plan end-to-end with per-task build/test cycles and a final acceptance gate.
+
+## When to Use
+
+- You have a written plan file (typically from `/plan`) ready to execute
+- Work benefits from per-task build/test cycles and an acceptance gate
+- Lightweight execution is sufficient — no governed review artifacts required
+
+## When NOT to Use
+
+- No plan exists yet — run `/plan` first, or use `/kickoff` for autonomous flow
+- Work requires traceable review artifacts — use `/execute-workflow`
+- Trivial single-file change — just make the edit directly
 
 ## Arguments
 

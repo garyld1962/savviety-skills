@@ -1,4 +1,5 @@
 ---
+name: code-investigation-orchestrator
 description: "Run a cross-repository code investigation from a natural-language request or explicit pattern list and produce a versioned Markdown index."
 argument-hint: "Describe what to find and where to search"
 ---

@@ -1,6 +1,10 @@
 ---
 name: code-investigation-orchestrator
 description: Orchestrate cross-repository code investigations and write a versioned Markdown index under docs/code-investigations/.
+tools:
+  - read
+  - search
+  - codebase
 ---
 
 # Mission

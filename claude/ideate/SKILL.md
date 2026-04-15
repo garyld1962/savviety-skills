@@ -7,6 +7,18 @@ description: "Explore and shape an idea from a rough ask, document, or folder be
 
 **Purpose:** Take a rough idea, a single document, or a folder of related documents and turn them into a clear direction with identified options, risks, and next steps. Does NOT produce implementation plans — use `superpowers:brainstorming` or `/plan` after the direction is chosen.
 
+## When to Use
+
+- Rough idea or scattered docs need shaping into a coherent direction
+- Deciding between multiple technical or business approaches
+- Upstream of `/plan` or `superpowers:brainstorming`, when the problem itself isn't framed yet
+
+## When NOT to Use
+
+- Direction is already clear — jump to `superpowers:brainstorming` or `/plan`
+- You need an implementation plan — use `/plan`
+- Requirements exist but are ambiguous — use `/prd-validate`
+
 ## Arguments
 
 - `<mode>` — optional first arg: `idea` (default), `ba`, `tech`

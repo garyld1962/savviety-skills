@@ -7,6 +7,18 @@ description: "Create an implementation plan: explores the codebase, estimates sc
 
 **Purpose:** Explore the codebase, understand the problem, write a validated implementation plan. Enriches the superpowers planning pipeline with codebase discovery and scope estimation.
 
+## When to Use
+
+- You have requirements (PRD, AERS, story, bug report) and need a plan before coding
+- Scope is unclear and needs codebase discovery + estimation
+- Multi-step work that benefits from a TDD-style task breakdown
+
+## When NOT to Use
+
+- Trivial single-file edits — plan overhead exceeds the work
+- You already have a plan and want to execute it — use `/execute-plan`
+- End-to-end autonomous flow desired — use `/kickoff` or `/execute-workflow`
+
 ## Arguments
 
 - `<description>` — what to plan (feature, bug fix, refactor, etc.)

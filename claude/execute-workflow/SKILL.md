@@ -9,6 +9,18 @@ description: "Governed autonomous execution with required review artifacts, disp
 
 **For lightweight execution without governance artifacts, use `/execute-plan` instead.**
 
+## When to Use
+
+- Work is risk-bearing (auth, payments, data migrations, compliance-relevant)
+- Audit-grade traceability is required — review-plan, disposition-log, etc.
+- Stakeholders need evidence of review, not just green tests
+
+## When NOT to Use
+
+- Standard feature work without governance needs — use `/kickoff` or `/execute-plan`
+- No requirements artifact exists yet — produce one first
+- Quick bug fix or routine change — overhead is not justified
+
 ## Pre-flight Required Config
 
 Before proceeding, verify:

@@ -29,7 +29,7 @@ severity_owner: false
 
 Extends `concept/data-integrity` with PostgreSQL-specific and ORM-specific smells that a conceptual data-integrity review cannot see.
 
-Read CLAUDE.md and existing schema files before applying. Detect the ORM first (Prisma, Drizzle, TypeORM, Knex, Sequelize, raw pg) and adapt all examples to the ORM in use. Read 2-3 existing tables to learn the project's conventions before flagging deviations.
+Read the project instruction file and existing schema files before applying. Detect the ORM first (Prisma, Drizzle, TypeORM, Knex, Sequelize, raw pg) and adapt all examples to the ORM in use. Read 2-3 existing tables to learn the project's conventions before flagging deviations.
 
 ## Additional smells to hunt for
 

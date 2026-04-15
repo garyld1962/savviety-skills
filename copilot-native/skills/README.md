@@ -8,11 +8,11 @@ This folder is intentionally separate from `vscode/` so we can explore a better 
 
 The existing `vscode/` tree is already strong, but much of it mirrors Claude-era workflow commands one-for-one. GitHub Copilot has a different platform shape:
 
-- built-in slash commands like `/plan`, `/review`, `/research`, `/tasks`, `/delegate`, `/agent`, `/skills`, `/instructions`
+- built-in slash commands like `/plan`, `/review`, `/research`, `/tasks`, `/fleet`, `/diff`, `/pr`, `/delegate`, `/agent`, `/skills`, `/instructions`, `/env`
 - project agents and reusable skills
 - auto-applied instructions
 - background task management
-- file mentions and repo context controls
+- file mentions, session export, and repo context controls such as `/share`, `/context`, and `/compact`
 
 The goal here is to build a thinner, more native layer that:
 
@@ -49,11 +49,18 @@ The goal here is to build a thinner, more native layer that:
 | `/plan` | default planning path |
 | `/review` | default quick code review |
 | `/research` | broad repo/web investigation |
+| `/fleet` | parallel specialist passes when orchestration needs multiple workers |
 | `/tasks` | monitor background work |
+| `/diff` | inspect the changed scope before review, checkpoint, or ship |
+| `/pr` | inspect PR state, comments, checks, and merge readiness during delivery |
 | `/delegate` | only when the user explicitly wants cloud execution / PR creation |
 | `/agent` | discover/select specialist agents |
 | `/skills` | manage installed skills |
 | `/instructions` | inspect active instruction layers |
+| `/env` | inspect loaded environment details before deeper shell-routing work |
+| `/context` | inspect context pressure during long-running workflows |
+| `/compact` | reduce context pressure during long-running workflows |
+| `/share` | export a run, report, or session summary when repo persistence is not needed |
 | `/model` | switch models for adversarial or second-opinion passes |
 | `@file` mentions | targeted context instead of long pasted prompts |
 
@@ -115,12 +122,14 @@ The goal here is to build a thinner, more native layer that:
 - Use built-in `/plan` instead of creating another custom planning prompt unless the repo needs special orchestration.
 - Use `prd-validator` before planning when the source artifact is still business-oriented, incomplete, or not yet an AERS.
 - Use BA prompts like `ba-problem-refiner`, `ba-spec-engineer`, `ba-context-builder`, `ba-eval-harness`, and `ba-knowledge-capture` when the missing piece is business precision or durable context, not implementation orchestration.
-- Use `environment-check` when a repo must support both PowerShell and WSL execution patterns.
+- Use built-in `/env` for a quick environment snapshot, and use `environment-check` only when command routing still needs repo-specific guidance.
 - Use built-in `/model` and then `adversarial-review` when you want a deliberate second-opinion code challenge instead of the default `/review` path.
-- Use `execute-plan`, `checkpoint`, `ship`, and `hotfix` for repo-specific delivery flows that built-in Copilot does not model directly.
+- Use built-in `/diff` as the default changed-scope view before `checkpoint`, `ship`, or deeper review flows.
+- Use `execute-plan`, `checkpoint`, `ship`, and `hotfix` for repo-specific delivery flows that built-in Copilot does not model directly, while leaning on `/pr` for PR state and checks.
 - Use `dependency-audit`, `migration-guide`, and `ado-item` when the workflow depends on repo-local dependency state or external Azure DevOps context.
 - Use `review-api`, `review-db`, `review-design`, and `review-tests` when you want narrow compliance checks rather than the broader default `/review`.
 - Use `copilot-asset-audit` when reviewing or porting prompt/agent/skill/instruction sets.
+- Use built-in `/compact` or `/share` during long governed runs when you need to manage context pressure or export a durable summary without writing a repo artifact.
 - Use the platform playbook skill when authoring new Copilot assets.
 
 ## Shared vs local asset convention
@@ -136,6 +145,7 @@ upstream:
 - `.github/prompts/common/`
 - `.github/prompts/dev/`
 - `.github/prompts/review/`
+- `.github/templates/*.template.md`
 - `.github/skills/<shared-skill>/`
 - `.github/agents/`
 - `.github/instructions/*.instructions.md`

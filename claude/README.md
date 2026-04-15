@@ -66,6 +66,23 @@ project-local `.claude/skills/_project/` content.
 | postmortem | `/postmortem` | Retrospective analysis after delivery or incident work |
 | test-plan | `/test-plan` | Build or refresh a TDD-first test plan |
 
+### Review Skills Decision Matrix
+
+Several review skills overlap with Claude Code built-ins. Use this matrix to pick the right one:
+
+| Situation | Skill | Why |
+|---|---|---|
+| Standard PR review on a small/medium diff | `/review` (built-in) | Fastest path; no project-specific setup needed |
+| Security-focused pass on pending changes | `/security-review` (built-in) | Purpose-built for vulnerability classes |
+| Domain-aware review (frontend, DB, API, design tokens) | `/code-review` | Orchestrates specialist lenses per changed file |
+| High-stakes diff (200+ lines, auth/payments/migrations) | `/review-adversarial` | Runs on a **different model** to challenge assumptions |
+| Challenging an existing review's conclusions | `/review-gauntlet` | Meta-review — attacks the review itself, not the code |
+| BA deliverables (requirements, stories, AC) — not code | `/ba-review-adversarial` | Targets ambiguity in specs before they become defects |
+| Test suite coverage & quality audit | `review-tests` (superpowers) | Behavior-focused test review |
+| Workflow retrospective after a governed run | `/postmortem` | Reviews the process, not the code |
+
+**Compose, don't duplicate:** `/pr` and `/ship` already call `/checkpoint` internally; don't run both. `/review-adversarial` is an *optional* follow-up after `/code-review` passes, not a replacement.
+
 ### Operations, Environment & Configuration
 
 | Skill | Invocation | Purpose |

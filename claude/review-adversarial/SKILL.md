@@ -1,11 +1,19 @@
 ---
 name: review-adversarial
-description: >-
-  Optional adversarial code review using an opposing AI model. Spawns 1–3 reviewers
-  on a different model (Codex or Gemini) to challenge work from distinct critical lenses.
-  Triggers: "adversarial review", "/review-adversarial".
-schedule: "Optional step after /code-review passes, before creating a PR. Use for large changes (200+ lines) or high-risk code (auth, payments, data migrations)."
+description: "Adversarial code review via opposing AI model (Codex/Gemini). Use after /code-review passes, before PR, on 200+ line diffs or high-risk code (auth, payments, migrations)."
 ---
+
+## When to Use
+
+- /code-review has passed and diff is 200+ lines
+- Changes touch auth, payments, data migrations, or architectural boundaries
+- User explicitly requests "adversarial review" or invokes `/review-adversarial`
+
+## When NOT to Use
+
+- Small, low-risk diffs — `/code-review` is sufficient
+- BA deliverables — use `/ba-review-adversarial`
+- Reviewing an existing code review — use `/review-gauntlet`
 
 # /review-adversarial — Cross-Model Adversarial Review
 

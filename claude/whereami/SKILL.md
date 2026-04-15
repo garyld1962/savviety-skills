@@ -9,6 +9,17 @@ description: "Session-start briefing: reads SESSION.md, git state, and open PRs 
 
 **This is the single command to learn.** Everything else — reading SESSION.md, checking git, checking PRs — happens behind it.
 
+## When to Use
+
+- Start of every new session — before any other work
+- After returning from a long break to a project
+- When the agent feels disoriented about branch, PR, or in-flight state
+
+## When NOT to Use
+
+- Ending a session — use `/session-save` instead
+- You already have full context from the current conversation
+
 ## Arguments
 
 - _(none)_ — brief the current repo

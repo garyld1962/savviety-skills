@@ -7,6 +7,18 @@ description: "Retrieve a work item from Azure DevOps or Linear. Extracts title, 
 
 **Purpose:** Fetch a work item from Azure DevOps (ADO) or Linear and present it in a clean, structured format. Used standalone or called by other skills (/triage, /hotfix, /plan) when they need to pull in requirements or bug details from a tracker.
 
+## When to Use
+
+- Pull a ticket's details into the conversation by ID (ADO or Linear)
+- Upstream of `/plan`, `/triage`, `/hotfix` when requirements live in a tracker
+- You want a clean markdown summary rather than raw API JSON
+
+## When NOT to Use
+
+- The ticket content is already pasted in the conversation
+- Tracker not configured — set up ADO/Linear integration first
+- You need to modify the ticket — use the tracker's native CLI/UI
+
 ## Usage
 
 ```

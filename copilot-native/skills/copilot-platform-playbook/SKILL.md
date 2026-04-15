@@ -20,7 +20,12 @@ GitHub Copilot already provides built-in workflow capabilities. Custom assets sh
 | Implementation planning | Built-in `/plan` | Native workflow already exists |
 | Default code review | Built-in `/review` | Native review path already exists |
 | Broad repo/web investigation | Built-in `/research` | Native research mode already exists |
+| Parallel specialist execution | Built-in `/fleet` + `/tasks` | Native worker orchestration and visibility already exist |
+| Inspect changed scope | Built-in `/diff` | Native changed-scope inspection already exists |
+| PR state and checks | Built-in `/pr` | Native PR workflow surface already exists |
 | Background execution visibility | Built-in `/tasks` | Native task tracking already exists |
+| Environment inspection | Built-in `/env` | Native environment snapshot already exists |
+| Exporting a report or session | Built-in `/share` | Native export path already exists |
 | Specialist bounded analysis | Agent | Best for focused role-based work |
 | Durable rules / rubrics / heuristics | Skill | Keeps prompts thin |
 | Passive always-on constraints | Instruction | Avoids prompt duplication |
@@ -101,10 +106,15 @@ Instructions should:
 - `/plan` for planning
 - `/review` for default review
 - `/research` for broader discovery
+- `/fleet` for parallel specialist passes
+- `/diff` for changed-scope inspection
+- `/pr` for PR state and checks
 - `/tasks` for background work visibility
 - `/agent` for specialist agent usage
 - `/skills` for skill management
 - `/instructions` to inspect active instruction layers
+- `/env` for environment inspection
+- `/share` for exporting a report or session
 - `/model` for deliberate model switching
 - `@file` mentions for precise context
 - `/context` and `/compact` for context management

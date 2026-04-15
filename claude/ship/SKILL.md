@@ -7,6 +7,18 @@ description: "Ship completed work through the repo's actual delivery flow: check
 
 **Purpose:** Move completed work through the repo's actual delivery flow. Runs checkpoint, creates a clean commit, pushes, creates a PR, and optionally runs release steps — all using the project's configured commands.
 
+## When to Use
+
+- Repo has a configured delivery flow (`ship.config.md` or `CLAUDE.md` Ship section)
+- Work needs project-specific release steps beyond a standard PR
+- You want a single command from completion through release
+
+## When NOT to Use
+
+- No ship config exists — use `/pr` for the standard PR flow
+- You only need the quality gate — use `/checkpoint`
+- Work is mid-implementation — finish first
+
 ## Pre-flight Required Config
 
 Before proceeding, verify:

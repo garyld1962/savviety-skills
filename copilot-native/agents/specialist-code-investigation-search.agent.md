@@ -1,6 +1,10 @@
 ---
 name: code-investigation-search
 description: Search specialist for locating user-requested code patterns or behaviors across a repository and returning structured matches only.
+tools:
+  - read
+  - search
+  - codebase
 ---
 
 # Role

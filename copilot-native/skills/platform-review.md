@@ -29,9 +29,14 @@ Prefer built-ins when they already provide strong platform support:
 - `/plan` for implementation planning
 - `/review` for default code review
 - `/research` for broad investigation
+- `/fleet` for parallel specialist execution
 - `/tasks` for background work visibility
+- `/diff` for changed-scope inspection
+- `/pr` for PR state, checks, and merge readiness
 - `/agent` and project agents for specialist roles
 - `/instructions` to understand active rule layers
+- `/env` for loaded environment inspection
+- `/share` and `/compact` for long-running session export and context control
 - `/model` for adversarial second-pass review
 
 ### 2. Reserve custom prompts for high-value gaps
@@ -85,8 +90,13 @@ They should not become another layer of generic orchestration unless there is a 
 | Plan code changes | `/plan` | project needs special wave/team/test architecture |
 | Review code | `/review` | you need structured multi-specialist review with custom rubrics |
 | Research | `/research` | you need a repeatable domain-specific audit workflow |
+| Parallel specialist work | `/fleet` + `/tasks` | you need custom worker selection, merge logic, or report contracts |
+| Inspect changed scope | `/diff` | the repo needs a richer custom artifact than the built-in diff view |
+| PR workflow | `/pr` | the repo needs additional governed delivery artifacts or disposition rules |
 | Long-running work | `/tasks` | you need a project-specific coordination prompt |
+| Environment inspection | `/env` | the repo needs shell-routing logic or config-aware command guidance |
 | Context control | `@file`, `/instructions`, `/context`, `/compact` | the repo needs special handoff templates |
+| Export/share | `/share` | you need a repo-persisted artifact with a fixed schema |
 | Model disagreement | `/model` | you want a scripted adversarial review pattern |
 
 ## Recommended next-generation asset mix
