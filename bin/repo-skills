@@ -1,0 +1,490 @@
+#!/usr/bin/env bash
+# repo-skills — install savviety-skills into a target repo.
+#
+# Source of truth: docs/repo-skills-design.md and manifest.json in the
+# REPO_SKILLS_HOME directory (defaults to ~/repos/savviety-skills).
+#
+# Usage:
+#   repo-skills --claude  --init   [<target>] [--force] [--dry-run]
+#   repo-skills --claude  --update [<target>] [--prune [--yes]] [--dry-run]
+#   repo-skills --copilot --init   [<target>] [--force] [--dry-run]
+#   repo-skills --copilot --update [<target>] [--prune [--yes]] [--dry-run]
+#   repo-skills --version | --help
+
+set -euo pipefail
+
+VERSION="0.1.0"
+REPO_SKILLS_HOME="${REPO_SKILLS_HOME:-$HOME/repos/savviety-skills}"
+
+# ---- output helpers ----------------------------------------------------------
+c_dim()  { printf '\033[2m%s\033[0m'  "$*"; }
+c_red()  { printf '\033[31m%s\033[0m' "$*"; }
+c_grn()  { printf '\033[32m%s\033[0m' "$*"; }
+c_yel()  { printf '\033[33m%s\033[0m' "$*"; }
+c_bld()  { printf '\033[1m%s\033[0m'  "$*"; }
+
+die()    { echo "$(c_red error:) $*" >&2; exit "${2:-1}"; }
+warn()   { echo "$(c_yel warn:)  $*" >&2; }
+info()   { echo "$(c_dim '·')    $*"; }
+done_()  { echo "$(c_grn '✓')    $*"; }
+
+# ---- usage -------------------------------------------------------------------
+usage() {
+  cat <<'EOF'
+repo-skills — install savviety-skills into a target repo
+
+USAGE
+  repo-skills --claude  --init   [<target>] [--force] [--dry-run]
+  repo-skills --claude  --update [<target>] [--prune [--yes]] [--dry-run]
+  repo-skills --copilot --init   [<target>] [--force] [--dry-run]
+  repo-skills --copilot --update [<target>] [--prune [--yes]] [--dry-run]
+
+PLATFORM (one required)
+  --claude    install Claude Code assets into <target>/.claude
+  --copilot   install Copilot assets into <target>/.github
+
+ACTION (one required)
+  --init      first-time install. Refuses if target assets already exist.
+  --update    refresh shared assets. Safe to re-run. Never touches user-owned files.
+
+OPTIONS
+  --force     allow --init over an existing install (overwrites shared content)
+  --prune     with --update, prompt to delete shared skills no longer in source
+  --yes       with --prune, skip prompts and delete all orphans
+  --dry-run   show what would change, write nothing
+  --version   print version and exit
+  --help      print this help and exit
+
+ENVIRONMENT
+  REPO_SKILLS_HOME  source repo path (default: ~/repos/savviety-skills)
+
+EXIT CODES
+  0  success
+  1  user error (bad flags, missing target)
+  2  refused (would clobber, target not a git repo)
+  3  source repo missing or invalid
+EOF
+}
+
+# ---- argument parsing --------------------------------------------------------
+PLATFORM=""
+ACTION=""
+TARGET=""
+FORCE=0
+PRUNE=0
+YES=0
+DRY_RUN=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --claude)   PLATFORM="claude" ;;
+    --copilot)  PLATFORM="copilot" ;;
+    --init)     ACTION="init" ;;
+    --update)   ACTION="update" ;;
+    --force)    FORCE=1 ;;
+    --prune)    PRUNE=1 ;;
+    --yes|-y)   YES=1 ;;
+    --dry-run)  DRY_RUN=1 ;;
+    --version)  echo "repo-skills $VERSION"; exit 0 ;;
+    --help|-h)  usage; exit 0 ;;
+    -*)         die "unknown flag: $1" 1 ;;
+    *)
+      [[ -n "$TARGET" ]] && die "unexpected argument: $1 (target already set to $TARGET)" 1
+      TARGET="$1"
+      ;;
+  esac
+  shift
+done
+
+[[ -z "$PLATFORM" ]] && { usage; die "missing platform flag (--claude or --copilot)" 1; }
+[[ -z "$ACTION"   ]] && { usage; die "missing action flag (--init or --update)" 1; }
+[[ "$ACTION" == "init" && "$PRUNE" == 1 ]] && die "--prune is only valid with --update" 1
+[[ "$YES" == 1 && "$PRUNE" == 0 ]] && die "--yes is only valid with --prune" 1
+
+TARGET="${TARGET:-.}"
+TARGET="$(cd "$TARGET" 2>/dev/null && pwd)" || die "target does not exist: $TARGET" 1
+
+# ---- source repo validation --------------------------------------------------
+[[ -d "$REPO_SKILLS_HOME" ]] || die "source repo missing: $REPO_SKILLS_HOME (set REPO_SKILLS_HOME)" 3
+[[ -f "$REPO_SKILLS_HOME/manifest.json" ]] || die "manifest.json not found in $REPO_SKILLS_HOME" 3
+[[ -f "$REPO_SKILLS_HOME/claude/README.md" ]] || die "$REPO_SKILLS_HOME does not look like savviety-skills (missing claude/README.md)" 3
+command -v jq >/dev/null || die "jq is required" 3
+command -v rsync >/dev/null || die "rsync is required" 3
+
+MANIFEST="$REPO_SKILLS_HOME/manifest.json"
+
+# ---- target validation -------------------------------------------------------
+[[ -d "$TARGET/.git" ]] || git -C "$TARGET" rev-parse --git-dir >/dev/null 2>&1 \
+  || die "target is not a git repo: $TARGET" 2
+
+# ---- summary tracking --------------------------------------------------------
+declare -a SUMMARY=()
+record() { SUMMARY+=("$1"); }
+
+# ---- dry-run aware actions ---------------------------------------------------
+do_mkdir() {
+  local d="$1"
+  if (( DRY_RUN )); then
+    info "[dry-run] mkdir -p $d"
+  else
+    mkdir -p "$d"
+  fi
+}
+
+do_rsync() {
+  # do_rsync <src> <dst> [<extra rsync args>...]
+  # Caller decides whether to pass --delete; we never default to deletion.
+  local src="$1" dst="$2"; shift 2
+  local args=(-a "$@")
+  if (( DRY_RUN )); then
+    args+=(-n -i)
+    info "[dry-run] rsync ${args[*]} $src $dst"
+    rsync "${args[@]}" "$src" "$dst" || true
+  else
+    rsync "${args[@]}" "$src" "$dst"
+  fi
+}
+
+do_copy_file() {
+  local src="$1" dst="$2"
+  if (( DRY_RUN )); then
+    info "[dry-run] cp $src $dst"
+  else
+    mkdir -p "$(dirname "$dst")"
+    cp "$src" "$dst"
+  fi
+}
+
+do_write_file() {
+  local content="$1" dst="$2"
+  if (( DRY_RUN )); then
+    info "[dry-run] write $dst (${#content} bytes)"
+  else
+    mkdir -p "$(dirname "$dst")"
+    printf '%s' "$content" > "$dst"
+  fi
+}
+
+# ---- user_owned membership ---------------------------------------------------
+is_user_owned() {
+  local rel="$1"
+  jq -e --arg p "$rel" '.user_owned | index($p)' "$MANIFEST" >/dev/null 2>&1
+}
+
+# ---- starter handling --------------------------------------------------------
+apply_starters() {
+  # Starters: copy templates/X to <target>/Y only if Y is absent.
+  local platform="$1"
+  local count
+  count=$(jq -r --arg p "$platform" '.[$p].starters | length' "$MANIFEST")
+  for ((i = 0; i < count; i++)); do
+    local from to abs_from abs_to
+    from=$(jq -r --arg p "$platform" --argjson i "$i" '.[$p].starters[$i].from' "$MANIFEST")
+    to=$(jq -r   --arg p "$platform" --argjson i "$i" '.[$p].starters[$i].to'   "$MANIFEST")
+    abs_from="$REPO_SKILLS_HOME/$from"
+    abs_to="$TARGET/$to"
+    if [[ -e "$abs_to" ]]; then
+      record "starter:skip-exists  $to"
+      info "$(c_dim "skip starter (exists):") $to"
+    else
+      do_copy_file "$abs_from" "$abs_to"
+      record "starter:created     $to"
+      done_ "starter created: $to"
+    fi
+  done
+}
+
+# ---- ensure-files (Claude only today) ----------------------------------------
+apply_ensure() {
+  local platform="$1"
+  local count
+  count=$(jq -r --arg p "$platform" '.[$p].ensure // [] | length' "$MANIFEST")
+  for ((i = 0; i < count; i++)); do
+    local to content abs_to
+    to=$(jq -r      --arg p "$platform" --argjson i "$i" '.[$p].ensure[$i].to'      "$MANIFEST")
+    content=$(jq -r --arg p "$platform" --argjson i "$i" '.[$p].ensure[$i].content' "$MANIFEST")
+    abs_to="$TARGET/$to"
+    if [[ -e "$abs_to" ]]; then
+      record "ensure:skip-exists  $to"
+      info "$(c_dim "skip ensure (exists):") $to"
+    else
+      do_write_file "$content" "$abs_to"
+      record "ensure:created     $to"
+      done_ "ensured: $to"
+    fi
+  done
+}
+
+# ---- extras (single-source → single-dest pairs) ------------------------------
+apply_extras() {
+  local platform="$1"
+  local count
+  count=$(jq -r --arg p "$platform" '.[$p].extras // [] | length' "$MANIFEST")
+  for ((i = 0; i < count; i++)); do
+    local from to abs_from abs_to
+    from=$(jq -r --arg p "$platform" --argjson i "$i" '.[$p].extras[$i].from' "$MANIFEST")
+    to=$(jq -r   --arg p "$platform" --argjson i "$i" '.[$p].extras[$i].to'   "$MANIFEST")
+    abs_from="$REPO_SKILLS_HOME/$from"
+    abs_to="$TARGET/$to"
+
+    if is_user_owned "$to"; then
+      if [[ -e "$abs_to" ]]; then
+        record "extra:skip-userowned $to"
+        info "$(c_dim "skip user-owned:") $to"
+        continue
+      fi
+    fi
+
+    if [[ -d "$abs_from" ]]; then
+      do_mkdir "$abs_to"
+      do_rsync "$abs_from/" "$abs_to/"
+      record "extra:synced       $to/"
+      done_ "synced extra: $to/"
+    elif [[ -f "$abs_from" ]]; then
+      do_copy_file "$abs_from" "$abs_to"
+      record "extra:copied       $to"
+      done_ "copied extra: $to"
+    else
+      warn "extra source not found, skipping: $from"
+    fi
+  done
+}
+
+# ---- skills tree (Claude) ----------------------------------------------------
+apply_claude_skills() {
+  local from to
+  from=$(jq -r '.claude.skills.from' "$MANIFEST")
+  to=$(jq -r   '.claude.skills.to'   "$MANIFEST")
+  local abs_from="$REPO_SKILLS_HOME/$from"
+  local abs_to="$TARGET/$to"
+
+  do_mkdir "$abs_to"
+
+  local -a rsync_args=()
+
+  # Skip top-level source entries we never want copied.
+  while IFS= read -r entry; do
+    rsync_args+=(--exclude="/$entry")
+  done < <(jq -r '.claude.skills.skip[]' "$MANIFEST")
+
+  # Preserve user subdirs (_project, _local) inside target.
+  while IFS= read -r entry; do
+    rsync_args+=(--filter="protect /$entry/" --filter="protect /$entry/**")
+  done < <(jq -r '.claude.skills.preserve_subdirs[]' "$MANIFEST")
+
+  # Protect orphan skill dirs (target-only) from --delete.
+  # Orphans are handled explicitly by prune_claude_orphans, never silently.
+  if [[ -d "$abs_to" ]]; then
+    while IFS= read -r dir; do
+      local name; name="$(basename "$dir")"
+      [[ ! -e "$abs_from/$name" ]] && \
+        rsync_args+=(--filter="protect /$name/" --filter="protect /$name/**")
+    done < <(find "$abs_to" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
+  fi
+
+  # --delete is needed so files removed inside an existing source skill drop
+  # from target on update. The protect filters above stop --delete from
+  # touching orphan directories or user-owned subdirs.
+  rsync_args+=(--delete)
+
+  do_rsync "$abs_from/" "$abs_to/" "${rsync_args[@]}"
+  record "skills:synced       $to/"
+  done_ "skills synced into $to/"
+}
+
+# ---- trees (Copilot multi-tree sync) -----------------------------------------
+apply_copilot_trees() {
+  local count
+  count=$(jq -r '.copilot.trees | length' "$MANIFEST")
+  for ((i = 0; i < count; i++)); do
+    local from to abs_from abs_to
+    from=$(jq -r --argjson i "$i" '.copilot.trees[$i].from' "$MANIFEST")
+    to=$(jq -r   --argjson i "$i" '.copilot.trees[$i].to'   "$MANIFEST")
+    abs_from="$REPO_SKILLS_HOME/$from"
+    abs_to="$TARGET/$to"
+
+    [[ -d "$abs_from" ]] || { warn "tree source missing, skipping: $from"; continue; }
+
+    do_mkdir "$abs_to"
+
+    # Per-file user_owned protection: build --filter rules for any user_owned
+    # file whose path lives under this tree's destination.
+    local -a rsync_args=(--delete)
+    while IFS= read -r owned; do
+      if [[ "$owned" == "$to/"* ]]; then
+        local rel="${owned#$to/}"
+        rsync_args+=(--filter="protect /$rel")
+      fi
+    done < <(jq -r '.user_owned[]' "$MANIFEST")
+
+    # If user_owned file exists in source but not in target, treat as starter (copy if absent).
+    while IFS= read -r owned; do
+      if [[ "$owned" == "$to/"* ]]; then
+        local rel="${owned#$to/}"
+        local src_file="$abs_from/$rel"
+        local dst_file="$abs_to/$rel"
+        if [[ -f "$src_file" && ! -e "$dst_file" ]]; then
+          do_copy_file "$src_file" "$dst_file"
+          record "tree:starter-copy   $owned"
+          done_ "seeded user-owned: $owned"
+        fi
+        # Always exclude from main rsync to avoid overwriting.
+        rsync_args+=(--exclude="/$rel")
+      fi
+    done < <(jq -r '.user_owned[]' "$MANIFEST")
+
+    do_rsync "$abs_from/" "$abs_to/" "${rsync_args[@]}"
+    record "tree:synced         $to/"
+    done_ "tree synced: $to/"
+  done
+}
+
+# ---- orphan detection + interactive prune (Claude skills) --------------------
+prune_claude_orphans() {
+  local from to
+  from=$(jq -r '.claude.skills.from' "$MANIFEST")
+  to=$(jq -r   '.claude.skills.to'   "$MANIFEST")
+  local abs_from="$REPO_SKILLS_HOME/$from"
+  local abs_to="$TARGET/$to"
+
+  [[ -d "$abs_to" ]] || return 0
+
+  # Build skip + preserve set
+  local -A skip_set=()
+  while IFS= read -r e; do skip_set["$e"]=1; done < <(jq -r '.claude.skills.skip[]' "$MANIFEST")
+  while IFS= read -r e; do skip_set["$e"]=1; done < <(jq -r '.claude.skills.preserve_subdirs[]' "$MANIFEST")
+
+  local -a orphans=()
+  while IFS= read -r dir; do
+    local name; name="$(basename "$dir")"
+    [[ -n "${skip_set[$name]:-}" ]] && continue
+    [[ ! -e "$abs_from/$name" ]] && orphans+=("$name")
+  done < <(find "$abs_to" -mindepth 1 -maxdepth 1 -type d | sort)
+
+  if (( ${#orphans[@]} == 0 )); then
+    return 0
+  fi
+
+  if (( PRUNE == 0 )); then
+    warn "orphans (in target but not in source): ${orphans[*]}"
+    info "re-run with --prune to delete (or --prune --yes to skip prompts)"
+    for o in "${orphans[@]}"; do record "orphan:left-alone   $to/$o/"; done
+    return 0
+  fi
+
+  local yes_to_all=$YES
+  for o in "${orphans[@]}"; do
+    local choice="N"
+    if (( yes_to_all )); then
+      choice="y"
+    else
+      printf "Skill '%s' exists in target but not in source. Delete? [y/N/a/q] " "$o" >&2
+      read -r choice </dev/tty || choice="q"
+    fi
+    case "$choice" in
+      y|Y) ;;
+      a|A) yes_to_all=1 ;;
+      q|Q) info "prune cancelled by user"; break ;;
+      *)   info "kept: $o"; record "orphan:kept         $to/$o/"; continue ;;
+    esac
+    if (( DRY_RUN )); then
+      info "[dry-run] rm -rf $abs_to/$o"
+    else
+      rm -rf "${abs_to:?}/$o"
+    fi
+    record "orphan:deleted      $to/$o/"
+    done_ "deleted orphan: $to/$o/"
+  done
+}
+
+# ---- pre-flight refusal checks -----------------------------------------------
+check_init_refusal() {
+  local platform="$1"
+  case "$platform" in
+    claude)
+      if [[ -d "$TARGET/.claude/skills" && "$FORCE" != 1 ]]; then
+        die "$TARGET/.claude/skills already exists. Use --force to overwrite, or --update to refresh." 2
+      fi
+      ;;
+    copilot)
+      if { [[ -d "$TARGET/.github/skills" ]] || [[ -d "$TARGET/.github/prompts" ]]; } && [[ "$FORCE" != 1 ]]; then
+        die "$TARGET/.github already has Copilot assets. Use --force to overwrite, or --update to refresh." 2
+      fi
+      ;;
+  esac
+}
+
+check_update_prereq() {
+  local platform="$1"
+  case "$platform" in
+    claude)
+      [[ -d "$TARGET/.claude/skills" ]] || die "$TARGET/.claude/skills does not exist. Run --init first." 1
+      ;;
+    copilot)
+      [[ -d "$TARGET/.github/prompts" || -d "$TARGET/.github/skills" ]] \
+        || die "$TARGET has no Copilot assets. Run --init first." 1
+      ;;
+  esac
+}
+
+# ---- main dispatch -----------------------------------------------------------
+echo
+echo "$(c_bld 'repo-skills') $VERSION"
+echo "  source:   $REPO_SKILLS_HOME"
+echo "  target:   $TARGET"
+echo "  platform: $PLATFORM"
+echo "  action:   $ACTION$([[ $PRUNE == 1 ]] && echo ' --prune')$([[ $YES == 1 ]] && echo ' --yes')$([[ $DRY_RUN == 1 ]] && echo ' --dry-run')"
+echo
+
+case "$ACTION" in
+  init)
+    check_init_refusal "$PLATFORM"
+    case "$PLATFORM" in
+      claude)
+        apply_claude_skills
+        apply_extras    "claude"
+        apply_ensure    "claude"
+        apply_starters  "claude"
+        ;;
+      copilot)
+        apply_copilot_trees
+        apply_starters  "copilot"
+        ;;
+    esac
+    ;;
+  update)
+    check_update_prereq "$PLATFORM"
+    case "$PLATFORM" in
+      claude)
+        apply_claude_skills
+        apply_extras    "claude"
+        # ensure: only acts if absent — safe on update
+        apply_ensure    "claude"
+        # starters: only act if absent — safe on update
+        apply_starters  "claude"
+        prune_claude_orphans
+        ;;
+      copilot)
+        apply_copilot_trees
+        apply_starters  "copilot"
+        # TODO(v2): copilot-tree orphan prune
+        ;;
+    esac
+    ;;
+esac
+
+# ---- summary -----------------------------------------------------------------
+echo
+echo "$(c_bld 'Summary')"
+if (( ${#SUMMARY[@]} == 0 )); then
+  echo "  (no actions recorded)"
+else
+  for line in "${SUMMARY[@]}"; do
+    echo "  $line"
+  done
+fi
+echo
+
+if (( DRY_RUN )); then
+  echo "$(c_yel 'dry-run complete — no files written.')"
+fi
