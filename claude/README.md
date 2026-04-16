@@ -50,6 +50,7 @@ project-local `.claude/skills/_project/` content.
 | prd-validate | `/prd-validate` | Turn a PRD, story, or rough spec into an implementation-ready AERS |
 | prd-acceptance | `/prd-acceptance` | Validate whether delivered work satisfies the PRD/acceptance bar |
 | ideate | `/ideate` | Explore solution directions before detailed planning |
+| thesis | `/thesis` | Interrogate for a single-sentence product or architectural thesis, then audit scope against it |
 | grill-me | `/grill-me` | Stress-test a plan or design by walking decision branches |
 | ubiquitous-language | `/ubiquitous-language` | Build a shared business/domain vocabulary |
 | ba-review-adversarial | `/ba-review-adversarial` | Adversarial review of BA deliverables |
