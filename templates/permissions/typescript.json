@@ -1,0 +1,13 @@
+{
+  "$comment": "TypeScript compiler, runners, linters, formatters.",
+  "permissions": {
+    "allow": [
+      "Bash(tsc:*)",
+      "Bash(tsx:*)",
+      "Bash(ts-node:*)",
+      "Bash(eslint:*)",
+      "Bash(prettier:*)",
+      "Bash(biome:*)"
+    ]
+  }
+}

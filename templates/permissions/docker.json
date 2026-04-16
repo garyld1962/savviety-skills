@@ -1,0 +1,10 @@
+{
+  "$comment": "Container runtimes and Compose.",
+  "permissions": {
+    "allow": [
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+      "Bash(podman:*)"
+    ]
+  }
+}

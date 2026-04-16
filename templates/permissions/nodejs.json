@@ -1,0 +1,15 @@
+{
+  "$comment": "Node.js / JS package managers and runtimes.",
+  "permissions": {
+    "allow": [
+      "Bash(npm:*)",
+      "Bash(pnpm:*)",
+      "Bash(yarn:*)",
+      "Bash(node:*)",
+      "Bash(npx:*)",
+      "Bash(corepack:*)",
+      "Bash(bun:*)",
+      "Bash(deno:*)"
+    ]
+  }
+}

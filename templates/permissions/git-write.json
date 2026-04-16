@@ -1,0 +1,22 @@
+{
+  "$comment": "Git write operations. Includes push (network-visible) and reset (destructive) — opt in deliberately.",
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git restore:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(git stash:*)",
+      "Bash(git tag:*)",
+      "Bash(git remote:*)",
+      "Bash(git reset:*)",
+      "Bash(gh:*)"
+    ]
+  }
+}

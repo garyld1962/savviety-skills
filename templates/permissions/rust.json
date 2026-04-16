@@ -1,0 +1,11 @@
+{
+  "$comment": "Rust toolchain. cargo covers fmt/clippy/test/build subcommands.",
+  "permissions": {
+    "allow": [
+      "Bash(cargo:*)",
+      "Bash(rustc:*)",
+      "Bash(rustfmt:*)",
+      "Bash(rustup:*)"
+    ]
+  }
+}

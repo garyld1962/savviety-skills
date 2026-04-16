@@ -21,11 +21,9 @@
       { "from": "claude/settings.template.json", "to": ".claude/settings.json" }
     ],
     "starters": [
-      { "from": "templates/CLAUDE.starter.md", "to": "CLAUDE.md" },
-      { "from": "templates/CLAUDE.local.md",   "to": "CLAUDE.local.md" }
-    ],
-    "ensure": [
-      { "to": ".claude/settings.local.json", "content": "{}\n" }
+      { "from": "templates/CLAUDE.starter.md",            "to": "CLAUDE.md" },
+      { "from": "templates/CLAUDE.local.md",              "to": "CLAUDE.local.md" },
+      { "from": "templates/settings.local.starter.json",  "to": ".claude/settings.local.json" }
     ],
     "gitignore": [
       "CLAUDE.local.md"
