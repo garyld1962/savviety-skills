@@ -195,6 +195,48 @@ apply_starters() {
   done
 }
 
+# ---- gitignore maintenance ---------------------------------------------------
+apply_gitignore() {
+  local platform="$1"
+  local count
+  count=$(jq -r --arg p "$platform" '.[$p].gitignore // [] | length' "$MANIFEST")
+  (( count == 0 )) && return 0
+
+  local gitignore="$TARGET/.gitignore"
+
+  for ((i = 0; i < count; i++)); do
+    local pattern
+    pattern=$(jq -r --arg p "$platform" --argjson i "$i" '.[$p].gitignore[$i]' "$MANIFEST")
+
+    # Already ignored (exact match or via broader rule)?
+    if git -C "$TARGET" check-ignore --no-index "$pattern" >/dev/null 2>&1; then
+      record "gitignore:already   $pattern"
+      info "$(c_dim "already gitignored:") $pattern"
+      continue
+    fi
+
+    if [[ ! -f "$gitignore" ]]; then
+      if (( DRY_RUN )); then
+        info "[dry-run] create $gitignore with '$pattern'"
+      else
+        printf '%s\n' "$pattern" > "$gitignore"
+      fi
+      record "gitignore:created   .gitignore (+ $pattern)"
+      done_ ".gitignore created with $pattern"
+    else
+      if (( DRY_RUN )); then
+        info "[dry-run] append '$pattern' to $gitignore"
+      else
+        # Ensure trailing newline on existing file before appending.
+        [[ -n "$(tail -c 1 "$gitignore" 2>/dev/null)" ]] && printf '\n' >> "$gitignore"
+        printf '%s\n' "$pattern" >> "$gitignore"
+      fi
+      record "gitignore:appended  $pattern"
+      done_ "appended $pattern to .gitignore"
+    fi
+  done
+}
+
 # ---- ensure-files (Claude only today) ----------------------------------------
 apply_ensure() {
   local platform="$1"
@@ -502,10 +544,12 @@ case "$ACTION" in
         apply_extras    "claude"
         apply_ensure    "claude"
         apply_starters  "claude"
+        apply_gitignore "claude"
         ;;
       copilot)
         apply_copilot_trees
         apply_starters  "copilot"
+        apply_gitignore "copilot"
         ;;
     esac
     ;;
@@ -519,11 +563,14 @@ case "$ACTION" in
         apply_ensure    "claude"
         # starters: only act if absent — safe on update
         apply_starters  "claude"
+        # gitignore: idempotent — safe on update
+        apply_gitignore "claude"
         prune_claude_orphans
         ;;
       copilot)
         apply_copilot_trees
         apply_starters  "copilot"
+        apply_gitignore "copilot"
         # TODO(v2): copilot-tree orphan prune
         ;;
     esac

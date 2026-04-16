@@ -26,6 +26,9 @@
     ],
     "ensure": [
       { "to": ".claude/settings.local.json", "content": "{}\n" }
+    ],
+    "gitignore": [
+      "CLAUDE.local.md"
     ]
   },
 
