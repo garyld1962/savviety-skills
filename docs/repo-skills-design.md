@@ -162,7 +162,15 @@ repo-skills --help
 
 - `<target-path>` defaults to `.` (current directory).
 - `--init` refuses if the platform's primary directory already exists, unless
-  `--force` is given. Refuses if target is not a git repo.
+  `--force` is given. With `--force`, existing savviety-owned assets are
+  **moved aside** to `<name>.bak-<UTC-timestamp>/` (or `.md.bak-<TS>` for
+  files) before fresh install. Nothing is overwritten or deleted.
+- For Claude, the whole `.claude/` is moved (it's all ours).
+- For Copilot, only the assets we own are moved
+  (`prompts/`, `agents/`, `skills/`, `instructions/`, `templates/`,
+  `copilot-instructions.md`); other `.github/` content
+  (`workflows/`, `CODEOWNERS`, `ISSUE_TEMPLATE/`, etc.) is left untouched.
+- Refuses if target is not a git repo.
 - `--update` is the safe, re-runnable verb. No-op when nothing has changed.
 - `--dry-run` prints what would change without writing.
 - Exit codes: `0` success, `1` user error (bad path, missing flag),
@@ -180,7 +188,9 @@ Pre-flight:
 - Verify `REPO_SKILLS_HOME` (or `~/repos/savviety-skills`) exists and looks
   like the right repo (presence of `claude/README.md`).
 - Verify `<target>` is a git repo.
-- Refuse if `<target>/.claude/skills/` exists, unless `--force`.
+- If `<target>/.claude/skills/` exists: refuse unless `--force`. With
+  `--force`, move `<target>/.claude/` to `<target>/.claude.bak-<UTC-timestamp>/`
+  and continue.
 
 Actions:
 1. Create `<target>/.claude/skills/`.
@@ -217,8 +227,11 @@ Actions:
 
 ### 5.3. `--copilot --init <target>`
 
-Pre-flight: same target checks. Refuse if `<target>/.github/skills/` or
-`<target>/.github/prompts/` exists, unless `--force`.
+Pre-flight: same target checks. If any savviety-owned asset already exists
+under `<target>/.github/`, refuse unless `--force`. With `--force`, move
+each owned asset (the five subdirs plus `copilot-instructions.md`) to
+`<original>.bak-<UTC-timestamp>/`. Other `.github/` content (CI workflows,
+`CODEOWNERS`, `ISSUE_TEMPLATE/`, etc.) is never touched.
 
 Actions:
 1. Copy `copilot-native/prompts/` → `<target>/.github/prompts/`.

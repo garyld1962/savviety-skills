@@ -48,7 +48,8 @@ ACTION (one required)
   --update    refresh shared assets. Safe to re-run. Never touches user-owned files.
 
 OPTIONS
-  --force     allow --init over an existing install (overwrites shared content)
+  --force     allow --init over an existing install. Existing assets are
+              moved aside to <name>.bak-<UTC-timestamp>/ before reinstall
   --prune     with --update, prompt to delete shared skills no longer in source
   --yes       with --prune, skip prompts and delete all orphans
   --dry-run   show what would change, write nothing
@@ -397,18 +398,74 @@ prune_claude_orphans() {
   done
 }
 
+# ---- backup helpers (used by --force) ----------------------------------------
+BACKUP_SUFFIX=""
+backup_suffix() {
+  # Lazy-init once per run so all backups in a single invocation share a stamp.
+  [[ -z "$BACKUP_SUFFIX" ]] && BACKUP_SUFFIX="bak-$(date -u +%Y%m%dT%H%M%SZ)"
+  printf '%s' "$BACKUP_SUFFIX"
+}
+
+backup_path_for() {
+  # Echo a unique backup destination for $1 (file or dir). Adds .N if needed.
+  local p="$1"
+  local base="${p}.$(backup_suffix)"
+  local cand="$base" n=1
+  while [[ -e "$cand" ]]; do
+    cand="${base}.${n}"
+    n=$((n + 1))
+  done
+  printf '%s' "$cand"
+}
+
+backup_one() {
+  local p="$1"
+  [[ ! -e "$p" ]] && return 0
+  local dst; dst="$(backup_path_for "$p")"
+  if (( DRY_RUN )); then
+    info "[dry-run] mv $p $dst"
+  else
+    mv "$p" "$dst"
+  fi
+  record "force:backup       $(basename "$p") → $(basename "$dst")"
+  warn "moved aside: $p → $dst"
+}
+
 # ---- pre-flight refusal checks -----------------------------------------------
 check_init_refusal() {
   local platform="$1"
   case "$platform" in
     claude)
-      if [[ -d "$TARGET/.claude/skills" && "$FORCE" != 1 ]]; then
-        die "$TARGET/.claude/skills already exists. Use --force to overwrite, or --update to refresh." 2
+      # Whole .claude/ is ours — back up wholesale.
+      if [[ -d "$TARGET/.claude" ]]; then
+        if (( FORCE )); then
+          backup_one "$TARGET/.claude"
+        elif [[ -d "$TARGET/.claude/skills" ]]; then
+          die "$TARGET/.claude/skills already exists. Use --force to back up and reinstall, or --update to refresh." 2
+        fi
       fi
       ;;
     copilot)
-      if { [[ -d "$TARGET/.github/skills" ]] || [[ -d "$TARGET/.github/prompts" ]]; } && [[ "$FORCE" != 1 ]]; then
-        die "$TARGET/.github already has Copilot assets. Use --force to overwrite, or --update to refresh." 2
+      # .github/ is shared with non-savviety content (workflows, CODEOWNERS,
+      # ISSUE_TEMPLATE, etc.). Only back up the assets we own.
+      local -a owned=(
+        "$TARGET/.github/prompts"
+        "$TARGET/.github/agents"
+        "$TARGET/.github/skills"
+        "$TARGET/.github/instructions"
+        "$TARGET/.github/templates"
+        "$TARGET/.github/copilot-instructions.md"
+      )
+      local -a existing=()
+      for p in "${owned[@]}"; do
+        [[ -e "$p" ]] && existing+=("$p")
+      done
+      if (( ${#existing[@]} > 0 )); then
+        if (( FORCE )); then
+          for p in "${existing[@]}"; do backup_one "$p"; done
+        elif [[ -d "$TARGET/.github/skills" || -d "$TARGET/.github/prompts" ]]; then
+          die "$TARGET/.github already has Copilot assets. Use --force to back up and reinstall, or --update to refresh." 2
+        fi
       fi
       ;;
   esac
