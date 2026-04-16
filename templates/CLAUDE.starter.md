@@ -1,9 +1,12 @@
 # CLAUDE.md
 
+@CLAUDE.local.md
+
 Project-specific instructions for Claude Code in this repository.
 
 This file is the top-level source of truth for *shared* conventions.
-Personal overrides live in `CLAUDE.local.md` (gitignored).
+Personal overrides live in `CLAUDE.local.md` (gitignored) and are loaded
+via the `@CLAUDE.local.md` reference above.
 Per-skill project config lives under `.claude/skills/_project/`.
 
 <!-- Replace the comments below with real content. Delete sections that don't apply. -->
