@@ -1,6 +1,7 @@
 ---
 name: prd-readiness
 description: "Use to score a requirements artifact against the AERS readiness rubric. Defines 'implementation-ready'. Referenced by /prd-validate, /kickoff, /execute-workflow."
+model: opus
 ---
 
 # AERS Readiness Rubric

@@ -1,6 +1,7 @@
 ---
 name: triage
 description: "Investigate a bug from reproduction through root cause analysis. Produces a structured triage report with classification, risk assessment, and recommended next step. Does NOT write fixes."
+model: opus
 ---
 
 # /triage -- Bug Investigation and Root Cause Analysis

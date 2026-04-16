@@ -1,6 +1,7 @@
 ---
 name: configure
 description: "Use when a skill's pre-flight says config is missing, or with no arg to see what needs configuring. Interviews the user and writes the config file."
+model: haiku
 ---
 
 # /configure — Skill Config Setup

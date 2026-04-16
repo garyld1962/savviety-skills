@@ -1,6 +1,7 @@
 ---
 name: grill-me
 description: "Use when user says 'grill me', wants to stress-test a plan, or validate assumptions. Walks the decision tree one question at a time, exploring the codebase when it can."
+model: opus
 ---
 
 # /grill-me -- Decision Stress Test

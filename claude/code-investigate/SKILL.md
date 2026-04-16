@@ -1,6 +1,7 @@
 ---
 name: code-investigate
 description: "Search one or more repos for a code pattern or behavior and produce a versioned Markdown investigation report. Supports literal, regex, and semantic (behavioral) search across multi-repo scope."
+model: opus
 ---
 
 # /code-investigate — Cross-Repo Code Investigation

@@ -1,6 +1,7 @@
 ---
 name: skill-help
 description: "List available skills or show detailed help for a specific skill. Use when the user asks 'what skills are available', 'help with a skill', 'what can you do', 'list skills', or '/skill-help'."
+model: haiku
 ---
 
 # /skill-help — Agent Reference

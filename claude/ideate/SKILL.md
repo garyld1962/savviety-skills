@@ -1,6 +1,7 @@
 ---
 name: ideate
 description: "Use before /plan or brainstorming to shape a rough ask, doc, or folder into a direction. Three modes: idea (general), ba (business-analysis), tech (technical options)."
+model: opus
 ---
 
 # /ideate — Explore and Shape Ideas

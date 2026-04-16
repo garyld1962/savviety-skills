@@ -1,6 +1,7 @@
 ---
 name: plan
 description: "Create an implementation plan: explores the codebase, estimates scope, writes a TDD-style task plan, and validates it. Use when you have requirements and need a plan before writing code."
+model: opus
 ---
 
 # /plan — Implementation Planning

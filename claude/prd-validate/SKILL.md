@@ -1,6 +1,7 @@
 ---
 name: prd-validate
 description: "Turn a rough story, BRD, AERS draft, or idea into an implementation-ready AERS. Interviews the author, closes ambiguity, generates missing sections. Use BEFORE /plan or /kickoff."
+model: opus
 ---
 
 # /prd-validate — AERS Readiness Gate

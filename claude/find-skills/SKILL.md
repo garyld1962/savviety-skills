@@ -1,6 +1,7 @@
 ---
 name: find-skills
 description: "Use when user asks 'how do I do X', 'is there a skill for X', or wants to extend capabilities. Discovers and installs agent skills from available marketplaces."
+model: haiku
 ---
 
 # Find Skills

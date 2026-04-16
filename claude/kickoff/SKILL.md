@@ -1,6 +1,7 @@
 ---
 name: kickoff
 description: "Use for standard feature work to autonomously ship a PRD/story/AERS: readiness → plan → implement → review. Lighter than /execute-workflow — no governed artifacts."
+model: opus
 ---
 
 # /kickoff — Autonomous Development Start

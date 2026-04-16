@@ -1,6 +1,7 @@
 ---
 name: whereami
 description: "Session-start briefing: reads SESSION.md, git state, and open PRs to restore context. Run this first in every new session."
+model: haiku
 ---
 
 # /whereami — Session Context Briefing

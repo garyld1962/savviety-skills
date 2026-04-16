@@ -1,6 +1,7 @@
 ---
 name: ba-review-adversarial
 description: "Use to adversarially review BA deliverables (requirements, stories, acceptance criteria) before sprint. Spawns 1-3 reviewer lenses. Returns PASS/CONTESTED/REJECT."
+model: opus
 ---
 
 # /ba-review-adversarial -- Adversarial Review of BA Deliverables

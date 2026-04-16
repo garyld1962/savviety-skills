@@ -1,6 +1,7 @@
 ---
 name: execute-workflow
 description: "Governed autonomous execution with required review artifacts, disposition loop, and gate verdicts. Use when the work needs traceable review evidence, not just green tests. Heavier than /execute-plan."
+model: opus
 ---
 
 # /execute-workflow — Governed Execution

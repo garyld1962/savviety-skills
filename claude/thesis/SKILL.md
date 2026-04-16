@@ -1,6 +1,7 @@
 ---
 name: thesis
 description: "Interrogate the user to discover the single-sentence thesis of an application or architectural design, then audit every planned feature or design decision against it. Two modes: `product` (who is this for and why does it exist) and `arch` (the one technical idea that shapes everything downstream). Use when starting a new project, when a design feels sprawling, when a feature list won't stop growing, or before writing a handoff doc. Triggers include 'new project', 'what is this for', 'product thesis', 'architectural thesis', 'design feels unfocused', or mentions of a project that has lost its center."
+model: opus
 ---
 
 # /thesis — Application & Architectural Thesis

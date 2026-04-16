@@ -1,6 +1,7 @@
 ---
 name: env-check
 description: "Detect the current shell environment and choose safe command routing. Use when working across different shells, OSes, or remote hosts. Reads user-specific shell config from ~/.claude/env.config.md."
+model: haiku
 ---
 
 # /env-check — Shell Environment Detection

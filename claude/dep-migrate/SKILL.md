@@ -1,6 +1,7 @@
 ---
 name: dep-migrate
 description: "Plan a dependency migration: analyze breaking changes, assess impact on your codebase, produce a step-by-step migration plan. Use when upgrading Node, TypeScript, frameworks, or major dependencies."
+model: opus
 ---
 
 # /dep-migrate — Dependency Migration Planner

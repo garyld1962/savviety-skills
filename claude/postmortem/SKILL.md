@@ -1,6 +1,7 @@
 ---
 name: postmortem
 description: "Run a structured retrospective over a completed governed execution run. Analyzes workflow, review quality, tool usage, and process gaps. Writes postmortem.md in the run folder."
+model: opus
 ---
 
 # /postmortem — Governed Run Retrospective
