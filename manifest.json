@@ -1,0 +1,53 @@
+{
+  "$comment": "Source-of-truth manifest for the repo-skills installer. See docs/repo-skills-design.md.",
+
+  "claude": {
+    "skills": {
+      "from": "claude",
+      "to": ".claude/skills",
+      "skip": [
+        "README.md",
+        "SESSION-CONTEXT.md",
+        "settings.template.json",
+        "pr-guardrail"
+      ],
+      "preserve_subdirs": [
+        "_project",
+        "_local"
+      ]
+    },
+    "extras": [
+      { "from": "claude/pr-guardrail",           "to": ".claude/pr-guardrail" },
+      { "from": "claude/settings.template.json", "to": ".claude/settings.json" }
+    ],
+    "starters": [
+      { "from": "templates/CLAUDE.starter.md", "to": "CLAUDE.md" },
+      { "from": "templates/CLAUDE.local.md",   "to": "CLAUDE.local.md" }
+    ],
+    "ensure": [
+      { "to": ".claude/settings.local.json", "content": "{}\n" }
+    ]
+  },
+
+  "copilot": {
+    "trees": [
+      { "from": "copilot-native/prompts",      "to": ".github/prompts" },
+      { "from": "copilot-native/agents",       "to": ".github/agents" },
+      { "from": "copilot-native/skills",       "to": ".github/skills" },
+      { "from": "copilot-native/instructions", "to": ".github/instructions" },
+      { "from": "copilot-native/templates",    "to": ".github/templates" }
+    ],
+    "starters": [
+      { "from": "templates/copilot-instructions.starter.md",
+        "to":   ".github/copilot-instructions.md" }
+    ]
+  },
+
+  "user_owned": [
+    ".claude/settings.local.json",
+    "CLAUDE.md",
+    "CLAUDE.local.md",
+    ".github/copilot-instructions.md",
+    ".github/instructions/personal.instructions.md"
+  ]
+}
