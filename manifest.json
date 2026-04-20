@@ -9,7 +9,8 @@
         "README.md",
         "SESSION-CONTEXT.md",
         "settings.template.json",
-        "pr-guardrail"
+        "pr-guardrail",
+        "journal"
       ],
       "preserve_subdirs": [
         "_project",
@@ -18,6 +19,7 @@
     },
     "extras": [
       { "from": "claude/pr-guardrail",           "to": ".claude/pr-guardrail" },
+      { "from": "claude/journal",               "to": ".claude/journal" },
       { "from": "claude/settings.template.json", "to": ".claude/settings.json" }
     ],
     "starters": [
@@ -26,7 +28,10 @@
       { "from": "templates/settings.local.starter.json",  "to": ".claude/settings.local.json" }
     ],
     "gitignore": [
-      "CLAUDE.local.md"
+      "CLAUDE.local.md",
+      ".claude/journal/*.md",
+      ".claude/journal/.lock.*",
+      ".claude/SESSION.md"
     ]
   },
 
