@@ -56,10 +56,6 @@
           {
             "type": "command",
             "command": "sha=$(git -C \"$CLAUDE_PROJECT_DIR\" rev-parse --short HEAD 2>/dev/null) || exit 0; grep -q \"commit $sha\" \"$CLAUDE_PROJECT_DIR/.claude/journal/$(date +%F).md\" 2>/dev/null && exit 0; msg=\"$(date -u +%H:%MZ) commit $sha — $(git -C \"$CLAUDE_PROJECT_DIR\" log -1 --format=%s)\"; printf -- '- %s\\n' \"$msg\" | bash ${CLAUDE_PROJECT_DIR}/.claude/journal/append.sh"
-          },
-          {
-            "type": "prompt",
-            "prompt": "A commit was just made. Review the committed changes. If they introduced new patterns, commands, architecture changes, or gotchas that should be documented in CLAUDE.md, update it now. Otherwise do nothing."
           }
         ]
       }
