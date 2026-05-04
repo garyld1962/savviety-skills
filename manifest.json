@@ -10,7 +10,8 @@
         "SESSION-CONTEXT.md",
         "settings.template.json",
         "pr-guardrail",
-        "journal"
+        "journal",
+        "install-scan"
       ],
       "preserve_subdirs": [
         "_project",
@@ -20,6 +21,7 @@
     "extras": [
       { "from": "claude/pr-guardrail",           "to": ".claude/pr-guardrail" },
       { "from": "claude/journal",               "to": ".claude/journal" },
+      { "from": "claude/install-scan",          "to": ".claude/install-scan" },
       { "from": "claude/settings.template.json", "to": ".claude/settings.json" }
     ],
     "starters": [
