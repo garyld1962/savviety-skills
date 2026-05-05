@@ -33,8 +33,8 @@ Currently pinned to `opus`:
 - `grill-me`
 - `ideate`
 - `prd-validate`
-- `prd-readiness`
-- `ba-review-adversarial`
+- `aers-readiness`
+- `spec-review-adversarial`
 - `postmortem`
 - `triage`
 - `dep-migrate`

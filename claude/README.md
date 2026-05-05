@@ -46,14 +46,13 @@ project-local `.claude/skills/_project/` content.
 
 | Skill | Invocation | Purpose |
 |-------|------------|---------|
-| prd-readiness | `/prd-readiness` | Evaluate whether a requirements artifact is execution-ready |
-| prd-validate | `/prd-validate` | Turn a PRD, story, or rough spec into an implementation-ready AERS |
+| prd-validate | `/prd-validate` | Turn a PRD, story, or rough spec into an implementation-ready AERS (rubric: `dev/_rubrics/aers-readiness/`) |
 | prd-acceptance | `/prd-acceptance` | Validate whether delivered work satisfies the PRD/acceptance bar |
+| spec-review-adversarial | `/spec-review-adversarial` | Adversarial review of specs, requirements, stories, and acceptance criteria |
 | ideate | `/ideate` | Explore solution directions before detailed planning |
 | thesis | `/thesis` | Interrogate for a single-sentence product or architectural thesis, then audit scope against it |
 | grill-me | `/grill-me` | Stress-test a plan or design by walking decision branches |
 | ubiquitous-language | `/ubiquitous-language` | Build a shared business/domain vocabulary |
-| ba-review-adversarial | `/ba-review-adversarial` | Adversarial review of BA deliverables |
 
 ### Review & Investigation
 
@@ -78,7 +77,7 @@ Several review skills overlap with Claude Code built-ins. Use this matrix to pic
 | Domain-aware review (frontend, DB, API, design tokens) | `/code-review` | Orchestrates specialist lenses per changed file |
 | High-stakes diff (200+ lines, auth/payments/migrations) | `/review-adversarial` | Runs on a **different model** to challenge assumptions |
 | Challenging an existing review's conclusions | `/review-gauntlet` | Meta-review — attacks the review itself, not the code |
-| BA deliverables (requirements, stories, AC) — not code | `/ba-review-adversarial` | Targets ambiguity in specs before they become defects |
+| Specs / requirements / acceptance criteria — not code | `/spec-review-adversarial` | Targets ambiguity in specs before they become defects |
 | Test suite coverage & quality audit | `review-tests` (superpowers) | Behavior-focused test review |
 | Workflow retrospective after a governed run | `/postmortem` | Reviews the process, not the code |
 
@@ -206,7 +205,7 @@ testing manually from the source repo.
 
 ## BA Skills
 
-Most BA skills (problem-thesis, stakeholder, requirements, etc.) live in the [superpowers plugin](https://github.com/anthropics/superpowers) rather than this repo. The `ba-review-adversarial` skill here is the exception — it's a standalone Claude Code skill for adversarial review of BA deliverables.
+Most BA discipline skills (problem-thesis, stakeholder, requirements, etc.) live in the [superpowers plugin](https://github.com/anthropics/superpowers) rather than this repo. The local `ba/` folder holds `ubiquitous-language` (DDD glossary). Adversarial review of specs, validation of PRDs against the AERS rubric, and acceptance verification of delivered work all live in `dev/` (`/spec-review-adversarial`, `/prd-validate`, `/prd-acceptance`) since they're spec-engineering / verification concerns rather than core BA elicitation.
 
 ## Platform Notes
 
