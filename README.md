@@ -1,6 +1,6 @@
 # AI Coding Skills
 
-Cross-platform AI coding skills maintained across two canonical systems.
+Cross-platform AI coding skills maintained across three canonical systems.
 
 ## Platforms
 
@@ -8,12 +8,16 @@ Cross-platform AI coding skills maintained across two canonical systems.
 |----------|-----------|--------------------|----------------|
 | [Claude Code](claude/README.md) | `claude/` | `.claude/skills/` | Claude Opus, Sonnet |
 | [Copilot Native](copilot-native/README.md) | `copilot-native/` | `.github/` (Copilot CLI + VS Code) | GPT 5.4, Gemini Pro |
+| [Codex](codex/README.md) | `codex/` | `.codex/`, `.claude-plugin/marketplace.json`, `AGENTS.md` | GPT-5 Codex family |
 
 **Claude Code** workflows are primarily modeled as `/name` skills. When Claude
 needs worker roles, they usually live **inside the skill package** as nested
 sub-files or subskills rather than as a first-class top-level agent asset type.
 **Copilot Native** uses `/<prompt-name>` prompts plus first-class `@agent-name`
 agents.
+**Codex** uses plugins as the installable distribution unit, `SKILL.md` skills
+as reusable workflow packages, `.codex/agents/*.toml` for custom subagents, and
+`AGENTS.md` as the project instruction layer.
 
 ## Repository Structure
 
@@ -32,6 +36,11 @@ agents.
 │   ├── skills/            #   Domain knowledge
 │   ├── instructions/      #   Auto-applied rules
 │   └── templates/         #   Blank config templates for user setup
+├── codex/                 # Codex-native plugin, skills, agents, hooks, rules
+│   ├── plugins/           #   Local Codex plugins
+│   ├── agents/            #   Project-scoped custom agent TOML files
+│   ├── templates/         #   AGENTS.md/config/hooks/rules starters
+│   └── prompts/           #   Documented prompt examples
 ├── templates/             # Project scaffold templates
 │   ├── CLAUDE.local.md    #   Personal Claude Code overrides
 │   ├── blazorstack/       #   .NET scaffold template
@@ -57,15 +66,15 @@ docs, not files to drop into `.claude/skills/`.
 
 Every deployment target separates **shared** (overwritten on sync) from **local** (never overwritten):
 
-| Layer | Claude Code | Copilot Native |
-|-------|-------------|----------------|
-| Shared | `.claude/skills/<name>/` | `.github/prompts/<category>/`, `.github/skills/<name>/` |
-| Project | `.claude/skills/_project/` | `.github/prompts/project/`, `.github/skills/project-<name>/` |
-| Personal | `CLAUDE.local.md` | `.github/instructions/personal.instructions.md`, `.github/prompts/local/` |
+| Layer | Claude Code | Copilot Native | Codex |
+|-------|-------------|----------------|-------|
+| Shared | `.claude/skills/<name>/` | `.github/prompts/<category>/`, `.github/skills/<name>/` | `.codex/plugins/`, `.codex/agents/`, `.codex/rules/` |
+| Project | `.claude/skills/_project/` | `.github/prompts/project/`, `.github/skills/project-<name>/` | nested `AGENTS.md`, project `.codex/config.toml` |
+| Personal | `CLAUDE.local.md` | `.github/instructions/personal.instructions.md`, `.github/prompts/local/` | user-level `~/.codex/config.toml`, `~/.codex/AGENTS.md` |
 
 ## Architecture Principles
 
-1. **Two canonical systems.** Claude Code (`claude/`) and Copilot Native (`copilot-native/`).
+1. **Three canonical systems.** Claude Code (`claude/`), Copilot Native (`copilot-native/`), and Codex (`codex/`).
 2. **Environment-neutral.** Skills never hardcode shells, hostnames, or project names. Variable data lives in user-editable config templates.
 3. **Config via `/configure`.** Skills that need user-specific data ship blank templates. Users fill them in via `/configure <target>` or by hand.
 4. **Pre-flight checks.** Config-dependent skills halt with actionable messages if config is missing.
@@ -73,7 +82,7 @@ Every deployment target separates **shared** (overwritten on sync) from **local*
 
 ## Platform modeling note
 
-The two platforms do **not** represent worker roles the same way:
+The platforms do **not** represent worker roles the same way:
 
 - **Claude Code** usually treats the top-level deployable unit as the
   **skill**. Worker roles are often nested inside the skill package (for
@@ -81,6 +90,8 @@ The two platforms do **not** represent worker roles the same way:
   the same workflow tree.
 - **Copilot Native** has a first-class top-level **agent** asset layer under
   `copilot-native/agents/`.
+- **Codex** has project-scoped custom agent TOML files under `.codex/agents/`
+  and only spawns subagents when explicitly asked.
 
 So a one-for-one "every Copilot agent must become a top-level Claude agent"
 port is too literal. The parity question is whether the worker role exists in

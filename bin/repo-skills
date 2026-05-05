@@ -9,6 +9,8 @@
 #   repo-skills --claude  --update [<target>] [--prune [--yes]] [--dry-run]
 #   repo-skills --copilot --init   [<target>] [--force] [--dry-run]
 #   repo-skills --copilot --update [<target>] [--prune [--yes]] [--dry-run]
+#   repo-skills --codex   --init   [<target>] [--force] [--dry-run]
+#   repo-skills --codex   --update [<target>] [--dry-run]
 #   repo-skills --version | --help
 
 set -euo pipefail
@@ -38,10 +40,13 @@ USAGE
   repo-skills --claude  --update [<target>] [--prune [--yes]] [--dry-run]
   repo-skills --copilot --init   [<target>] [--force] [--dry-run]
   repo-skills --copilot --update [<target>] [--prune [--yes]] [--dry-run]
+  repo-skills --codex   --init   [<target>] [--force] [--dry-run]
+  repo-skills --codex   --update [<target>] [--dry-run]
 
 PLATFORM (one required)
   --claude    install Claude Code assets into <target>/.claude
   --copilot   install Copilot assets into <target>/.github
+  --codex     install Codex assets into <target>/.codex and AGENTS.md
 
 ACTION (one required)
   --init      first-time install. Refuses if target assets already exist.
@@ -80,6 +85,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --claude)   PLATFORM="claude" ;;
     --copilot)  PLATFORM="copilot" ;;
+    --codex)    PLATFORM="codex" ;;
     --init)     ACTION="init" ;;
     --update)   ACTION="update" ;;
     --force)    FORCE=1 ;;
@@ -97,7 +103,7 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-[[ -z "$PLATFORM" ]] && { usage; die "missing platform flag (--claude or --copilot)" 1; }
+[[ -z "$PLATFORM" ]] && { usage; die "missing platform flag (--claude, --copilot, or --codex)" 1; }
 [[ -z "$ACTION"   ]] && { usage; die "missing action flag (--init or --update)" 1; }
 [[ "$ACTION" == "init" && "$PRUNE" == 1 ]] && die "--prune is only valid with --update" 1
 [[ "$YES" == 1 && "$PRUNE" == 0 ]] && die "--yes is only valid with --prune" 1
@@ -382,6 +388,26 @@ apply_copilot_trees() {
   done
 }
 
+# ---- trees (Codex multi-tree sync) ------------------------------------------
+apply_codex_trees() {
+  local count
+  count=$(jq -r '.codex.trees | length' "$MANIFEST")
+  for ((i = 0; i < count; i++)); do
+    local from to abs_from abs_to
+    from=$(jq -r --argjson i "$i" '.codex.trees[$i].from' "$MANIFEST")
+    to=$(jq -r   --argjson i "$i" '.codex.trees[$i].to'   "$MANIFEST")
+    abs_from="$REPO_SKILLS_HOME/$from"
+    abs_to="$TARGET/$to"
+
+    [[ -d "$abs_from" ]] || { warn "tree source missing, skipping: $from"; continue; }
+
+    do_mkdir "$abs_to"
+    do_rsync "$abs_from/" "$abs_to/" --delete
+    record "tree:synced         $to/"
+    done_ "tree synced: $to/"
+  done
+}
+
 # ---- orphan detection + interactive prune (Claude skills) --------------------
 prune_claude_orphans() {
   local from to
@@ -510,6 +536,29 @@ check_init_refusal() {
         fi
       fi
       ;;
+    codex)
+      local -a owned=(
+        "$TARGET/.codex/plugins"
+        "$TARGET/.codex/agents"
+        "$TARGET/.codex/prompts"
+        "$TARGET/.codex/rules"
+        "$TARGET/.codex/hooks"
+        "$TARGET/.codex/config.toml"
+        "$TARGET/.codex/hooks.json"
+        "$TARGET/.claude-plugin/marketplace.json"
+      )
+      local -a existing=()
+      for p in "${owned[@]}"; do
+        [[ -e "$p" ]] && existing+=("$p")
+      done
+      if (( ${#existing[@]} > 0 )); then
+        if (( FORCE )); then
+          for p in "${existing[@]}"; do backup_one "$p"; done
+        else
+          die "$TARGET already has Codex assets. Use --force to back up and reinstall, or --update to refresh." 2
+        fi
+      fi
+      ;;
   esac
 }
 
@@ -522,6 +571,10 @@ check_update_prereq() {
     copilot)
       [[ -d "$TARGET/.github/prompts" || -d "$TARGET/.github/skills" ]] \
         || die "$TARGET has no Copilot assets. Run --init first." 1
+      ;;
+    codex)
+      [[ -d "$TARGET/.codex/plugins" || -d "$TARGET/.codex/agents" ]] \
+        || die "$TARGET has no Codex assets. Run --init first." 1
       ;;
   esac
 }
@@ -551,6 +604,12 @@ case "$ACTION" in
         apply_starters  "copilot"
         apply_gitignore "copilot"
         ;;
+      codex)
+        apply_codex_trees
+        apply_extras    "codex"
+        apply_starters  "codex"
+        apply_gitignore "codex"
+        ;;
     esac
     ;;
   update)
@@ -572,6 +631,13 @@ case "$ACTION" in
         apply_starters  "copilot"
         apply_gitignore "copilot"
         # TODO(v2): copilot-tree orphan prune
+        ;;
+      codex)
+        apply_codex_trees
+        apply_extras    "codex"
+        apply_starters  "codex"
+        apply_gitignore "codex"
+        # TODO(v2): codex-tree orphan prune
         ;;
     esac
     ;;

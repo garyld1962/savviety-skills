@@ -1,0 +1,36 @@
+{
+  "name": "savviety-workflows",
+  "version": "0.1.0",
+  "description": "Savviety engineering workflows for Codex: planning, checkpointing, review, delivery, and repo operations.",
+  "author": {
+    "name": "Savviety",
+    "url": "https://savviety.com"
+  },
+  "license": "UNLICENSED",
+  "keywords": [
+    "engineering",
+    "workflow",
+    "review",
+    "planning",
+    "delivery"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Savviety Workflows",
+    "shortDescription": "Planning, review, checkpoint, and delivery workflows for Codex.",
+    "longDescription": "Reusable Codex-native workflows ported from the Savviety Claude skill set. Includes plan validation, repo status, checkpointing, changelog support, ideation, and other delivery primitives.",
+    "developerName": "Savviety",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use Savviety Workflows to validate this PRD and produce an execution-ready AERS.",
+      "Use Savviety Workflows to review this branch against main for correctness, security, and missing tests.",
+      "Use Savviety Workflows to run a checkpoint on the changed packages.",
+      "Use Savviety Workflows to execute this plan with milestone checks."
+    ],
+    "brandColor": "#0F766E"
+  }
+}

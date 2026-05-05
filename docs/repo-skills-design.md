@@ -154,6 +154,8 @@ repo-skills --claude   --init    [<target-path>] [--force] [--dry-run]
 repo-skills --claude   --update  [<target-path>] [--prune [--yes]] [--dry-run]
 repo-skills --copilot  --init    [<target-path>] [--force] [--dry-run]
 repo-skills --copilot  --update  [<target-path>] [--prune [--yes]] [--dry-run]
+repo-skills --codex    --init    [<target-path>] [--force] [--dry-run]
+repo-skills --codex    --update  [<target-path>] [--dry-run]
 repo-skills --version
 repo-skills --help
 ```
@@ -175,7 +177,7 @@ repo-skills --help
   `2` refused (would clobber, target not a git repo), `3` source repo missing
   or unreadable.
 
-Mutually exclusive: `--claude` xor `--copilot`. Mutually exclusive:
+Mutually exclusive: `--claude` xor `--copilot` xor `--codex`. Mutually exclusive:
 `--init` xor `--update`.
 
 ## 5. Behavior
@@ -247,6 +249,37 @@ Actions:
 Same as `--claude --update` semantics, applied to the Copilot tree:
 overwrite shared, never touch `personal.instructions.md` or
 `copilot-instructions.md`.
+
+### 5.5. `--codex --init <target>`
+
+Pre-flight: same target checks. If any Savviety-owned Codex asset already
+exists, refuse unless `--force`. With `--force`, move only owned assets aside:
+`.codex/plugins`, `.codex/agents`, `.codex/prompts`, `.codex/rules`,
+`.codex/hooks`, `.codex/config.toml`, `.codex/hooks.json`, and
+`.claude-plugin/marketplace.json`.
+
+Actions:
+
+1. Copy `codex/plugins/` -> `<target>/.codex/plugins/`.
+2. Copy `codex/agents/` -> `<target>/.codex/agents/`.
+3. Copy `codex/prompts/` -> `<target>/.codex/prompts/`.
+4. Copy `codex/templates/rules/` -> `<target>/.codex/rules/`.
+5. Copy `codex/templates/hooks/` -> `<target>/.codex/hooks/`.
+6. Copy `codex/templates/config.toml` -> `<target>/.codex/config.toml`.
+7. Copy `codex/templates/hooks.json` -> `<target>/.codex/hooks.json`.
+8. Copy `codex/templates/marketplace.json` ->
+   `<target>/.claude-plugin/marketplace.json`.
+9. Create `<target>/AGENTS.md` from `codex/templates/AGENTS.starter.md` if
+   absent.
+
+`.agents/plugins/marketplace.json` is the preferred Codex marketplace location,
+but this repo currently uses `.claude-plugin/marketplace.json` because the
+workspace `.agents/` directory is read-only. Codex supports both locations.
+
+### 5.6. `--codex --update <target>`
+
+Refresh the shared Codex trees and extras. Never overwrite `AGENTS.md`.
+Codex orphan pruning is deferred to v2, matching Copilot tree pruning.
 
 ## 6. New artifacts to add to savviety-skills
 
