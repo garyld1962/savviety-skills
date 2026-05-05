@@ -17,7 +17,7 @@ model: haiku
 ## When NOT to Use
 
 - You know the config fields and prefer to hand-edit the template directly
-- Configuring Claude Code itself (hooks, permissions, settings.json) — use the `update-config` skill
+- Configuring the runtime CLI itself (hooks, permissions, settings.json for Claude Code; config.toml/hooks.json for Kimi or Codex) — use the platform's own config skill (`update-config` for Claude Code)
 
 ## Arguments
 

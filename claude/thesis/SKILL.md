@@ -14,7 +14,7 @@ Adapted from screenwriter Corey Mandel's "What is it about?" discipline. Applica
 
 - Starting a new project and the scope feels wobbly
 - Mid-project when the feature list or architecture won't stop growing
-- Before writing a handoff doc for Claude Code CLI — thesis goes at the top
+- Before writing a handoff doc for an AI coding CLI — thesis goes at the top
 - When something "feels off" about a design but you can't name it
 - When a project might actually be two projects tangled together
 
@@ -144,7 +144,7 @@ Tight output. Paste-ready for the top of a handoff doc, PRD, or design doc.
 - **Phase discipline.** Don't audit before the thesis is locked. Don't lock the thesis before it passes the tests.
 - **Propose, don't just ask.** When the thesis is forming, draft a candidate and let the user react. Faster than pure Socratic.
 - **Kill darlings out loud.** Name the cuts. The user can overrule.
-- **Respect the composition.** This skill produces a thesis artifact, not a handoff doc. Offer at the end: *"Want to hand this to Claude Code now? The handoff doc goes on top of this."*
+- **Respect the composition.** This skill produces a thesis artifact, not a handoff doc. Offer at the end: *"Want to hand this to your coding CLI now? The handoff doc goes on top of this."*
 - **Stop when done.** Thesis produced, audit complete, user confirms. Don't keep grilling.
 
 ## Examples of Thesis Quality

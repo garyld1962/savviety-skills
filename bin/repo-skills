@@ -11,6 +11,8 @@
 #   repo-skills --copilot --update [<target>] [--prune [--yes]] [--dry-run]
 #   repo-skills --codex   --init   [<target>] [--force] [--dry-run]
 #   repo-skills --codex   --update [<target>] [--dry-run]
+#   repo-skills --kimi    --init   [<target>] [--force] [--dry-run]
+#   repo-skills --kimi    --update [<target>] [--prune [--yes]] [--dry-run]
 #   repo-skills --version | --help
 
 set -euo pipefail
@@ -42,11 +44,14 @@ USAGE
   repo-skills --copilot --update [<target>] [--prune [--yes]] [--dry-run]
   repo-skills --codex   --init   [<target>] [--force] [--dry-run]
   repo-skills --codex   --update [<target>] [--dry-run]
+  repo-skills --kimi    --init   [<target>] [--force] [--dry-run]
+  repo-skills --kimi    --update [<target>] [--prune [--yes]] [--dry-run]
 
 PLATFORM (one required)
   --claude    install Claude Code assets into <target>/.claude
   --copilot   install Copilot assets into <target>/.github
   --codex     install Codex assets into <target>/.codex and AGENTS.md
+  --kimi      install Kimi Code CLI assets into <target>/.kimi and AGENTS.md
 
 ACTION (one required)
   --init      first-time install. Refuses if target assets already exist.
@@ -86,6 +91,7 @@ while [[ $# -gt 0 ]]; do
     --claude)   PLATFORM="claude" ;;
     --copilot)  PLATFORM="copilot" ;;
     --codex)    PLATFORM="codex" ;;
+    --kimi)     PLATFORM="kimi" ;;
     --init)     ACTION="init" ;;
     --update)   ACTION="update" ;;
     --force)    FORCE=1 ;;
@@ -103,7 +109,7 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-[[ -z "$PLATFORM" ]] && { usage; die "missing platform flag (--claude, --copilot, or --codex)" 1; }
+[[ -z "$PLATFORM" ]] && { usage; die "missing platform flag (--claude, --copilot, --codex, or --kimi)" 1; }
 [[ -z "$ACTION"   ]] && { usage; die "missing action flag (--init or --update)" 1; }
 [[ "$ACTION" == "init" && "$PRUNE" == 1 ]] && die "--prune is only valid with --update" 1
 [[ "$YES" == 1 && "$PRUNE" == 0 ]] && die "--yes is only valid with --prune" 1
@@ -408,6 +414,121 @@ apply_codex_trees() {
   done
 }
 
+# ---- skills tree (Kimi) ------------------------------------------------------
+# Mirrors apply_claude_skills but sources from .kimi.skills (which today points
+# at claude/ — single source of truth — but could point elsewhere later).
+apply_kimi_skills() {
+  local from to
+  from=$(jq -r '.kimi.skills.from' "$MANIFEST")
+  to=$(jq -r   '.kimi.skills.to'   "$MANIFEST")
+  local abs_from="$REPO_SKILLS_HOME/$from"
+  local abs_to="$TARGET/$to"
+
+  do_mkdir "$abs_to"
+
+  local -a rsync_args=()
+
+  while IFS= read -r entry; do
+    rsync_args+=(--exclude="/$entry")
+  done < <(jq -r '.kimi.skills.skip[]' "$MANIFEST")
+
+  while IFS= read -r entry; do
+    rsync_args+=(--filter="protect /$entry/" --filter="protect /$entry/**")
+  done < <(jq -r '.kimi.skills.preserve_subdirs[]' "$MANIFEST")
+
+  if [[ -d "$abs_to" ]]; then
+    while IFS= read -r dir; do
+      local name; name="$(basename "$dir")"
+      [[ ! -e "$abs_from/$name" ]] && \
+        rsync_args+=(--filter="protect /$name/" --filter="protect /$name/**")
+    done < <(find "$abs_to" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
+  fi
+
+  rsync_args+=(--delete)
+
+  do_rsync "$abs_from/" "$abs_to/" "${rsync_args[@]}"
+  record "skills:synced       $to/"
+  done_ "skills synced into $to/"
+}
+
+# ---- trees (Kimi multi-tree sync) -------------------------------------------
+apply_kimi_trees() {
+  local count
+  count=$(jq -r '.kimi.trees | length' "$MANIFEST")
+  for ((i = 0; i < count; i++)); do
+    local from to abs_from abs_to
+    from=$(jq -r --argjson i "$i" '.kimi.trees[$i].from' "$MANIFEST")
+    to=$(jq -r   --argjson i "$i" '.kimi.trees[$i].to'   "$MANIFEST")
+    abs_from="$REPO_SKILLS_HOME/$from"
+    abs_to="$TARGET/$to"
+
+    [[ -d "$abs_from" ]] || { warn "tree source missing, skipping: $from"; continue; }
+
+    do_mkdir "$abs_to"
+    do_rsync "$abs_from/" "$abs_to/" --delete
+    record "tree:synced         $to/"
+    done_ "tree synced: $to/"
+  done
+}
+
+# ---- orphan detection + interactive prune (Kimi skills) ----------------------
+# Same shape as prune_claude_orphans but reads from .kimi.skills.
+prune_kimi_orphans() {
+  local from to
+  from=$(jq -r '.kimi.skills.from' "$MANIFEST")
+  to=$(jq -r   '.kimi.skills.to'   "$MANIFEST")
+  local abs_from="$REPO_SKILLS_HOME/$from"
+  local abs_to="$TARGET/$to"
+
+  [[ -d "$abs_to" ]] || return 0
+
+  local -A skip_set=()
+  while IFS= read -r e; do skip_set["$e"]=1; done < <(jq -r '.kimi.skills.skip[]' "$MANIFEST")
+  while IFS= read -r e; do skip_set["$e"]=1; done < <(jq -r '.kimi.skills.preserve_subdirs[]' "$MANIFEST")
+
+  local -a orphans=()
+  while IFS= read -r dir; do
+    local name; name="$(basename "$dir")"
+    [[ -n "${skip_set[$name]:-}" ]] && continue
+    [[ ! -e "$abs_from/$name" ]] && orphans+=("$name")
+  done < <(find "$abs_to" -mindepth 1 -maxdepth 1 -type d | sort)
+
+  if (( ${#orphans[@]} == 0 )); then
+    return 0
+  fi
+
+  if (( PRUNE == 0 )); then
+    warn "orphans (in target but not in source): ${orphans[*]}"
+    info "re-run with --prune to delete (or --prune --yes to skip prompts)"
+    for o in "${orphans[@]}"; do record "orphan:left-alone   $to/$o/"; done
+    return 0
+  fi
+
+  local yes_to_all=$YES
+  for o in "${orphans[@]}"; do
+    local choice="N"
+    if (( yes_to_all )); then
+      choice="y"
+    else
+      printf "Skill '%s' exists in target but not in source. Delete? [y/N/a/q] " "$o" >&2
+      read -r choice </dev/tty || choice="q"
+    fi
+    case "$choice" in
+      y|Y) ;;
+      a|A) yes_to_all=1 ;;
+      q|Q) info "prune cancelled by user"; break ;;
+      *)   info "kept: $o"; record "orphan:kept         $to/$o/"; continue ;;
+    esac
+    if (( DRY_RUN )); then
+      info "[dry-run] rm -rf $abs_to/$o"
+    else
+      rm -rf "${abs_to:?}/$o"
+    fi
+    record "orphan:deleted      $to/$o/"
+    done_ "deleted orphan: $to/$o/"
+  done
+}
+
 # ---- orphan detection + interactive prune (Claude skills) --------------------
 prune_claude_orphans() {
   local from to
@@ -559,6 +680,16 @@ check_init_refusal() {
         fi
       fi
       ;;
+    kimi)
+      # .kimi/ is fully ours — back up wholesale.
+      if [[ -d "$TARGET/.kimi" ]]; then
+        if (( FORCE )); then
+          backup_one "$TARGET/.kimi"
+        elif [[ -d "$TARGET/.kimi/skills" ]]; then
+          die "$TARGET/.kimi/skills already exists. Use --force to back up and reinstall, or --update to refresh." 2
+        fi
+      fi
+      ;;
   esac
 }
 
@@ -575,6 +706,10 @@ check_update_prereq() {
     codex)
       [[ -d "$TARGET/.codex/plugins" || -d "$TARGET/.codex/agents" ]] \
         || die "$TARGET has no Codex assets. Run --init first." 1
+      ;;
+    kimi)
+      [[ -d "$TARGET/.kimi/skills" ]] \
+        || die "$TARGET has no Kimi assets. Run --init first." 1
       ;;
   esac
 }
@@ -610,6 +745,13 @@ case "$ACTION" in
         apply_starters  "codex"
         apply_gitignore "codex"
         ;;
+      kimi)
+        apply_kimi_skills
+        apply_kimi_trees
+        apply_extras    "kimi"
+        apply_starters  "kimi"
+        apply_gitignore "kimi"
+        ;;
     esac
     ;;
   update)
@@ -638,6 +780,14 @@ case "$ACTION" in
         apply_starters  "codex"
         apply_gitignore "codex"
         # TODO(v2): codex-tree orphan prune
+        ;;
+      kimi)
+        apply_kimi_skills
+        apply_kimi_trees
+        apply_extras    "kimi"
+        apply_starters  "kimi"
+        apply_gitignore "kimi"
+        prune_kimi_orphans
         ;;
     esac
     ;;

@@ -71,12 +71,50 @@
     ]
   },
 
+  "kimi": {
+    "$comment": "Skills are sourced from claude/ to avoid duplication; Kimi v1.39+ auto-merges .claude/skills/ via merge_all_available_skills=true. Deploying to .kimi/skills/ as well covers older versions and users who disable the merge. Hook script bodies are also single-sourced from claude/infra/ — Kimi's hook event names live in .kimi/config.toml, not a separate hooks.json.",
+    "skills": {
+      "from": "claude",
+      "to": ".kimi/skills",
+      "skip": [
+        "README.md",
+        "MODEL-POLICY.md",
+        "SESSION-CONTEXT.md",
+        "settings.template.json",
+        "infra"
+      ],
+      "preserve_subdirs": [
+        "_project",
+        "_local"
+      ]
+    },
+    "trees": [
+      { "from": "kimi/agents",    "to": ".kimi/agents" },
+      { "from": "kimi/templates", "to": ".kimi/templates" }
+    ],
+    "extras": [
+      { "from": "claude/infra/install-scan", "to": ".kimi/install-scan" },
+      { "from": "claude/infra/journal",      "to": ".kimi/journal" },
+      { "from": "claude/infra/pr-guardrail", "to": ".kimi/pr-guardrail" }
+    ],
+    "starters": [
+      { "from": "kimi/templates/AGENTS.starter.md", "to": "AGENTS.md" },
+      { "from": "kimi/templates/config.toml",       "to": ".kimi/config.toml" }
+    ],
+    "gitignore": [
+      ".kimi/journal/*.md",
+      ".kimi/journal/.lock.*",
+      ".kimi/SESSION.md"
+    ]
+  },
+
   "user_owned": [
     ".claude/settings.local.json",
     "CLAUDE.md",
     "CLAUDE.local.md",
     ".github/copilot-instructions.md",
     ".github/instructions/personal.instructions.md",
-    "AGENTS.md"
+    "AGENTS.md",
+    ".kimi/config.toml"
   ]
 }

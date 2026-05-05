@@ -17,7 +17,7 @@ model: haiku
 ## When NOT to Use
 
 - User already named a skill and wants it executed — invoke it directly
-- You need Claude Code built-in help — use `/help`
+- You need the runtime's built-in help (Claude Code, Kimi, etc.) — use `/help`
 
 ## Arguments
 

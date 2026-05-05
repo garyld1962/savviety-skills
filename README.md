@@ -1,6 +1,6 @@
 # AI Coding Skills
 
-Cross-platform AI coding skills maintained across three canonical systems.
+Cross-platform AI coding skills maintained across four canonical systems.
 
 ## Platforms
 
@@ -9,6 +9,7 @@ Cross-platform AI coding skills maintained across three canonical systems.
 | [Claude Code](claude/README.md) | `claude/` | `.claude/skills/` | Claude Opus, Sonnet |
 | [Copilot Native](copilot-native/README.md) | `copilot-native/` | `.github/` (Copilot CLI + VS Code) | GPT 5.4, Gemini Pro |
 | [Codex](codex/README.md) | `codex/` | `.codex/`, `.claude-plugin/marketplace.json`, `AGENTS.md` | GPT-5 Codex family |
+| [Kimi](kimi/README.md) | `kimi/` | `.kimi/`, `AGENTS.md` (skills sourced from `claude/`) | Kimi K2.5/K2.6 |
 
 **Claude Code** workflows are primarily modeled as `/name` skills. When Claude
 needs worker roles, they usually live **inside the skill package** as nested
@@ -18,6 +19,11 @@ agents.
 **Codex** uses plugins as the installable distribution unit, `SKILL.md` skills
 as reusable workflow packages, `.codex/agents/*.toml` for custom subagents, and
 `AGENTS.md` as the project instruction layer.
+**Kimi Code CLI** auto-discovers `.claude/skills/` natively (since v1.39, with
+`merge_all_available_skills = true` by default), so the `kimi/` tree only ships
+Kimi-specific YAML agents, hooks, and an `AGENTS.md` starter — skill bodies
+stay single-sourced under `claude/`. Slash invocation differs from Claude:
+`/skill:<name>` and `/flow:<name>` instead of `/<name>`.
 
 ## Repository Structure
 
@@ -41,6 +47,9 @@ as reusable workflow packages, `.codex/agents/*.toml` for custom subagents, and
 │   ├── agents/            #   Project-scoped custom agent TOML files
 │   ├── templates/         #   AGENTS.md/config/hooks/rules starters
 │   └── prompts/           #   Documented prompt examples
+├── kimi/                  # Kimi Code CLI overlay (skills auto-sourced from claude/)
+│   ├── agents/            #   Kimi v1 agent YAML + system-prompt files
+│   └── templates/         #   AGENTS.md / config.toml starters (hooks embedded as TOML)
 ├── templates/             # Project scaffold templates
 │   ├── CLAUDE.local.md    #   Personal Claude Code overrides
 │   ├── blazorstack/       #   .NET scaffold template
@@ -66,15 +75,15 @@ docs, not files to drop into `.claude/skills/`.
 
 Every deployment target separates **shared** (overwritten on sync) from **local** (never overwritten):
 
-| Layer | Claude Code | Copilot Native | Codex |
-|-------|-------------|----------------|-------|
-| Shared | `.claude/skills/<name>/` | `.github/prompts/<category>/`, `.github/skills/<name>/` | `.codex/plugins/`, `.codex/agents/`, `.codex/rules/` |
-| Project | `.claude/skills/_project/` | `.github/prompts/project/`, `.github/skills/project-<name>/` | nested `AGENTS.md`, project `.codex/config.toml` |
-| Personal | `CLAUDE.local.md` | `.github/instructions/personal.instructions.md`, `.github/prompts/local/` | user-level `~/.codex/config.toml`, `~/.codex/AGENTS.md` |
+| Layer | Claude Code | Copilot Native | Codex | Kimi |
+|-------|-------------|----------------|-------|------|
+| Shared | `.claude/skills/<name>/` | `.github/prompts/<category>/`, `.github/skills/<name>/` | `.codex/plugins/`, `.codex/agents/`, `.codex/rules/` | `.kimi/skills/<name>/`, `.kimi/agents/` |
+| Project | `.claude/skills/_project/` | `.github/prompts/project/`, `.github/skills/project-<name>/` | nested `AGENTS.md`, project `.codex/config.toml` | nested `AGENTS.md`, `.kimi/config.toml` |
+| Personal | `CLAUDE.local.md` | `.github/instructions/personal.instructions.md`, `.github/prompts/local/` | user-level `~/.codex/config.toml`, `~/.codex/AGENTS.md` | user-level `~/.kimi/config.toml`, `~/.kimi/AGENTS.md` |
 
 ## Architecture Principles
 
-1. **Three canonical systems.** Claude Code (`claude/`), Copilot Native (`copilot-native/`), and Codex (`codex/`).
+1. **Four canonical systems.** Claude Code (`claude/`), Copilot Native (`copilot-native/`), Codex (`codex/`), and Kimi (`kimi/` overlay over `claude/`).
 2. **Environment-neutral.** Skills never hardcode shells, hostnames, or project names. Variable data lives in user-editable config templates.
 3. **Config via `/configure`.** Skills that need user-specific data ship blank templates. Users fill them in via `/configure <target>` or by hand.
 4. **Pre-flight checks.** Config-dependent skills halt with actionable messages if config is missing.
