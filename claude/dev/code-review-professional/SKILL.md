@@ -204,6 +204,44 @@ on the backend (`src/api/auth.ts:15`). The weakest is Judgment on the UI
 
 If applicable, append the Contract Compliance table after `## Overall read`.
 
+## Self-audit before delivery
+
+Before returning the report, run a three-lens pass on your own grades. Adapted from `dev/review-gauntlet/SKILL.md`. The goal is to catch the failure modes most common in seniority grading: citations that don't say what you claim, axes graded without sufficient evidence, and judgments that punish the author rather than the code.
+
+Run silently — do not include the audit in the output. Use it to revise the report. If a finding cannot be revised to pass the audit, drop it.
+
+### Skeptic — accuracy of citations
+
+For every cited line:
+- Re-read the cited file/line. Does it actually demonstrate the axis claim?
+- If you graded an axis below `senior`, is the evidence concrete (a specific failure mode), or just "I would have written it differently"?
+- Severity check: is `junior` justified by tutorial-level patterns or missed obvious cases, not by stylistic preference?
+
+If a citation fails: revise the grade or drop the citation. An axis with fewer than 2 surviving citations must be marked "insufficient evidence" and excluded from the component grade.
+
+### Architect — structural fit
+
+- Are component boundaries right? Did you bury two genuinely different components inside one cluster (and thus average a senior backend with a junior UI)?
+- Are any axes silently missing for a component? All 7 must be addressed or explicitly skipped.
+- Did you grade only the surface of the diff (file-by-file) when the structural story is across files (e.g., a leaky abstraction visible only when you read the caller and callee together)?
+
+If a structural issue surfaces: re-cluster, re-grade, or add a note in the Overall Read pointing at the cross-file pattern.
+
+### Pragmatist — usefulness of the grade
+
+- Is the grade actionable? "Junior on Forethought" with one weak edge case is not useful — it just labels the author. Either point to a concrete pattern they could learn, or drop the axis to "insufficient evidence."
+- Are you punishing defects? Defects belong in `code-review`. If a low grade rests on a bug, move the bug to "Notes for code-review" and re-grade the axis on craft alone.
+- Does the overall read point to something the team can act on (pair on the UI before merge, ask for a follow-up on edge cases), or does it just label?
+
+If the grade fails the pragmatist test: revise the reasoning to be actionable, or drop to "insufficient evidence."
+
+### Self-audit gates
+
+The report does not ship until:
+- Every retained citation passes Skeptic.
+- Component boundaries pass Architect.
+- Every component grade has at least one actionable takeaway in the Overall Read.
+
 ## Things you must not do
 
 - Do not report defects. That's `code-review`'s job. If you see a bug, list it under a final "Notes for code-review" section — do not inflate axis grades to punish defects.

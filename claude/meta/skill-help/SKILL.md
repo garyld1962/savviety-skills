@@ -39,7 +39,7 @@ model: haiku
    | **Planning & Design** | plan, grill-me, ideate, ubiquitous-language |
    | **Development** | execute-plan, execute-workflow, kickoff, test-plan, hotfix, triage |
    | **Quality** | code-review, review-gauntlet, review-adversarial, checkpoint |
-   | **BA & Requirements** | ba-review-adversarial, prd-acceptance, prd-readiness, prd-validate |
+   | **Specs & Requirements** | spec-review-adversarial, prd-acceptance, prd-validate (rubric: aers-readiness) |
    | **Investigation** | code-investigate, postmortem |
    | **Source Control** | pr, ship, sync-main, changelog |
    | **Operations** | k8s-verify, dep-audit, dep-migrate, env-check |

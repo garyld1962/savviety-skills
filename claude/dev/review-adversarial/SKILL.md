@@ -12,7 +12,7 @@ description: "Adversarial code review via opposing AI model (Codex/Gemini). Use 
 ## When NOT to Use
 
 - Small, low-risk diffs — `/code-review` is sufficient
-- BA deliverables — use `/ba-review-adversarial`
+- BA deliverables or specs — use `/spec-review-adversarial`
 - Reviewing an existing code review — use `/review-gauntlet`
 
 # /review-adversarial — Cross-Model Adversarial Review

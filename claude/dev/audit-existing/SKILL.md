@@ -32,7 +32,8 @@ surfaces duplicated contracts, missing tests, and broken wiring early.
 5. Flag duplicated public contracts/constants, mismatched API/runtime
    types, missing validation, missing failure-path tests, and
    generated/native artifacts that may need runtime probes.
-6. Return an audit only; do not edit files.
+6. **Classify external dependencies** using `dev/_rubrics/dependency-classification/SKILL.md`. Flag miscategorizations as test gaps — e.g., Postgres mocked instead of substituted with PGLite, internal services treated as true-external, filesystem mocked instead of using `memfs`. These miscategorizations are coverage smells: tests pass but exercise the mock, not the real semantics.
+7. Return an audit only; do not edit files.
 
 ## Output
 

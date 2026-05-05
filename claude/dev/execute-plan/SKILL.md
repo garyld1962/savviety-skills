@@ -34,6 +34,9 @@ adversarial review.
 | `--max-minutes=<N>` | Override the wall-clock budget for this run. Default: 60. |
 | `--accept-risk=<finding-id>` | Explicitly accept a critical or major finding (see `_rubrics/disposition`). Can be repeated for multiple findings. **For humans only** — never set by the harness. Each use is logged in the final report with the finding it accepted. |
 | `--adversarial=<auto\|always\|never\|ask>` | When to run the adversarial review stage (Phase 3e). Default: `auto`. `auto` = fires when the cumulative diff is ≥200 lines OR touches a path listed in `adversarial_triggers`; otherwise skipped silently. `always` = always runs regardless of diff size or paths. `never` = never runs; no prompt, no invocation. `ask` = interactive legacy behaviour; prompt the user per the legacy flow. Use `ask` only when a human is supervising. |
+| `--run-folder=<auto\|off\|path>` | Bundle run artefacts (`execution-report.md`/`.json`, `disposition-log.md`, optional `postmortem.md`) into a timestamped folder for audit retrieval. Default: `auto` (off unless the repo-delivery `## Commands` schema declares `runs_root:`, in which case the folder is `<runs_root>/<plan-slug>-<YYYYMMDD-HHMMSS>/`). `off` keeps the legacy single-file report at `--report-path`. `path` writes the folder at the given location. |
+| `--postmortem=<auto\|always\|never>` | When to run the Phase 5 postmortem. Default: `auto` (fires on `WARN`, `FAIL`, retry-budget exhaustion, or when escalation occurred; skipped on clean `PASS`). `always` runs regardless. `never` skips even on failure. |
+| `--postmortem-mode=<auto\|full\|lightweight>` | How deep the Phase 5 postmortem goes. Default: `auto` (`lightweight` for `PASS` triggers, `full` for WARN/FAIL/blocked). `lightweight` writes only `What happened`, `What broke down` (free-form), and `Recommendations`. |
 
 ### `adversarial_triggers`
 
@@ -53,6 +56,32 @@ adversarial_triggers:
 `adversarial_triggers` is defined in exactly one place (the repo's
 CLAUDE.md or the default above); do not duplicate it inside individual
 plans.
+
+### `team_agents` (parallel wave subagent overrides)
+
+Phase 2.7 (wave dispatch) substitutes prompts into three default
+templates shipped with this skill:
+
+- `<skill-root>/dev/execute-plan/agents/implementer.md`
+- `<skill-root>/dev/execute-plan/agents/reviewer.md`
+- `<skill-root>/dev/execute-plan/agents/fixer.md`
+
+A consumer repo may override any of them via its `## Commands` block:
+
+```
+team_agents:
+  implementer: docs/agents/our-implementer.md
+  reviewer:    docs/agents/our-reviewer.md
+  fixer:       docs/agents/our-fixer.md
+  implementer_model: sonnet     # optional; defaults in Phase 2.7d apply
+  reviewer_model:    sonnet
+  fixer_model:       sonnet
+```
+
+Override paths are resolved relative to the repo root. Override
+templates must accept the same placeholder set as the defaults — the
+executor does not detect missing placeholders and will substitute
+whatever is present.
 
 ## Workflow
 
@@ -495,6 +524,15 @@ run ships.
    governs task scheduling. Do not re-optimize the plan during
    execution; if the registry is wrong, halt as a plan ambiguity or
    deviation and require the plan to be corrected.
+7. **Load Waves.** If the plan has a `## Waves` section and/or
+   `## --- WAVE N START ---` markers in the body, parse the wave
+   table into a wave registry: for each wave, capture its task range,
+   focus, and execution mode (`sequential` or `parallel`). The wave
+   registry composes with the lane registry — lanes describe *which
+   tasks can fan out*, waves describe *when in the plan that fan-out
+   happens*. If wave markers and the wave table disagree on task
+   ranges, halt as a `plan-ambiguity`. If no `## Waves` section
+   exists, treat the entire plan as a single sequential wave.
 
 ### Phase 1.1: Parallel lane readiness
 
@@ -508,11 +546,26 @@ When a lane registry exists:
    that overlap is not owned by exactly one lane.
 5. Reject `parallel` mode if a lane depends on a task or barrier that
    is not defined in the plan.
-6. Report the chosen mode:
+6. **Refuse ≥5 parallel teams in a single wave.** If `Mode: parallel`
+   and the wave's lane count is greater than 4, halt with a
+   `plan-ambiguity` finding:
+   ```
+   Wave <N> declares <K> parallel lanes; max is 4.
+   Coordination overhead dominates beyond 4 concurrent teams.
+   Split into sequential parallel waves (e.g. Wave <N> with 3 lanes,
+   Wave <N+1> with the rest).
+   ```
+   In interactive mode, ask the operator to fix the plan; in
+   autonomous mode, abort via the Phase 0c failure path.
+7. **Refuse undersized lanes.** If any lane owns fewer than 3 tasks,
+   warn but do not halt — a single-task lane is usually a sign the
+   plan would be cleaner sequential, but is not unsafe.
+8. Report the chosen mode:
    ```
    Parallel Execution: <mode> — <rationale>
    Lanes: <lane-a>, <lane-b>, ...
    Barriers: <barrier-a>, ...
+   Waves: <wave-count> (<sequential | mixed | all-parallel>)
    ```
 
 Treat conservative uncertainty about file overlap as a reason to pause
@@ -738,6 +791,196 @@ produces three `review(...)` commits, each referencing the same
 If this task completes a milestone, proceed to Phase 2.5 before moving on.
 Otherwise, continue to the next task.
 
+#### 2f-bis. Wave barrier check
+If this task is the last task in a wave (per the wave registry from
+Phase 1, step 7), enforce a hard barrier before starting the next
+wave's first task:
+
+1. If the completed wave was `parallel`, wait for every lane in the
+   wave to report DONE. Integrate any cross-lane review findings
+   from the milestone breakpoint review (Phase 2.5) before crossing
+   the barrier.
+2. Re-run the repo's full `test` and `build` commands at the wave
+   boundary even if no milestone fell on this task. Wave barriers
+   are integration points; cross them silently and you'll discover
+   the merge issue four tasks later, far from the cause.
+3. If the next wave is `parallel`, re-validate Phase 1.1 against the
+   current repo state — a previous wave may have introduced files
+   that change the single-owner picture. Treat any new conflict the
+   same way as Phase 1.1's initial check.
+4. Report:
+   ```
+   Wave <K>/<W>: COMPLETE — <focus>
+   Wave barrier: build PASS, tests PASS
+   Next: Wave <K+1>/<W> (<mode>) — <focus>
+   ```
+
+Waves nest *inside* the task loop — they do not replace milestones.
+A wave may contain 0–many milestones; both fire when their conditions
+are met.
+
+### Phase 2.7: Wave dispatch mechanics (parallel waves)
+
+When a wave's mode is `parallel` and it has ≥2 lanes, the lanes do
+**not** run in the main checkout. They run in isolated git worktrees
+with a fresh subagent per lane, then merge sequentially under the
+rules in Phase 2.8. Sequential waves skip Phase 2.7 entirely and
+execute in-place via the normal Phase 2 task loop.
+
+The mechanics below are the only safe way to fan out: shared-checkout
+parallelism would force every lane to race the same index and produce
+non-deterministic merge artefacts.
+
+#### 2.7a. Worktree preparation
+
+For each lane in the wave:
+
+1. Create a worktree at `.worktrees/<plan-slug>-<lane-id>/` off
+   `default_branch` on a new branch named
+   `feat/<plan-slug>-<lane-id>`:
+   ```
+   git worktree add .worktrees/<plan-slug>-<lane-id> \
+     -b feat/<plan-slug>-<lane-id> <default_branch>
+   ```
+2. Run `{install_cmd}` from the repo-delivery `## Commands` schema
+   inside the worktree. **This is not optional.** Subagents do not
+   inherit the parent's `node_modules` / `target/` / virtualenv;
+   skipping install reliably produces "command not found" or stale
+   bindings inside the worker.
+3. Record `<base-sha>` per lane (the SHA the worktree was created
+   from) so the reviewer subagent's `{DIFF_RANGE}` resolves.
+
+If any worktree creation or install fails, halt the wave via the
+Phase 0c failure path. Do not attempt to dispatch lanes on a partial
+worktree set.
+
+#### 2.7b. Single-message dispatch
+
+Dispatch all lane implementers in **one** message. Sequential
+dispatch silently kills concurrency — the fan-out is an illusion;
+each lane waits on the previous to return.
+
+For each lane, build an implementer prompt from the template at
+`<skill-root>/dev/execute-plan/agents/implementer.md` (or the
+override path declared in the consumer repo's `CLAUDE.md ## Commands`
+under `team_agents.implementer`). Substitute every placeholder; use
+**absolute paths** throughout — subagents have zero project context
+and relative paths resolve unpredictably inside their shell.
+
+Then send a single message containing one Task / Agent invocation
+per lane.
+
+#### 2.7c. Per-lane review and fix
+
+When all implementers return, dispatch reviewers — also in a single
+message — using the template at
+`<skill-root>/dev/execute-plan/agents/reviewer.md` (override:
+`team_agents.reviewer`).
+
+For each lane whose reviewer returns `FAIL` or `WARN` with `critical`
+or `major` findings, dispatch a **fresh** fixer subagent using
+`<skill-root>/dev/execute-plan/agents/fixer.md` (override:
+`team_agents.fixer`). Pass the findings and target files in the
+prompt — never assume a prior subagent can be resumed; subagent state
+is not durable across dispatches.
+
+Each fixer pass increments the global retry counter. The 3-cycle
+auto-fix limit from Phase 2.5 applies per finding inside the lane:
+after 3 fixer cycles without resolution, the finding's status moves
+to `open` (and blocks the wave verdict unless `--accept-risk=<id>`
+was supplied).
+
+#### 2.7d. Model selection (default)
+
+Lane subagents run on the following defaults; override via
+`team_agents.<role>_model` in the repo-delivery schema if needed.
+
+| Role | Default model | Rationale |
+|---|---|---|
+| Implementer (well-specified plan) | sonnet | Plan provides complete code; speed matters |
+| Implementer (architectural lane) | opus | Novel design judgment required |
+| Reviewer | sonnet | Checklist-driven, well-defined criteria |
+| Fixer | sonnet | Targeted change against named finding |
+
+The "architectural lane" trigger: a lane whose plan section contains
+unresolved design choices the plan didn't pre-commit (no closed
+decision applies, no template-copy fast path, no prescriptive code
+block). In practice this is rare in plans that have passed
+`/validate-plan`; sonnet is the right default.
+
+### Phase 2.8: Sequential merge after a parallel wave
+
+After every lane in a parallel wave reaches reviewer `PASS` (or
+`WARN` with no `critical`/`major`), the wave's branches merge into
+`default_branch` **sequentially**. Concurrent merges produce
+non-deterministic conflict resolution and defeat the integration
+test.
+
+#### 2.8a. Merge order rules
+
+Apply in order; the first matching rule decides:
+
+1. **Dependency provider first.** A lane that produces shared types,
+   generated clients, schemas, or migrations consumed by another lane
+   merges before its consumers. The lane registry's `Barriers` and
+   `Single-Owner Files` describe this graph.
+2. **Infrastructure before dependents.** Config, build setup, CI, and
+   manifest changes merge before lanes that depend on them at
+   runtime.
+3. **Smallest diff as tiebreaker.** When no dependency relation
+   applies, the lane with the smallest diff merges first — fewer
+   subsequent rebase conflict surfaces.
+
+#### 2.8b. Merge sequence
+
+For each lane in merge order:
+
+1. Push the lane's branch:
+   ```
+   git -C .worktrees/<plan-slug>-<lane-id> push -u origin feat/<plan-slug>-<lane-id>
+   ```
+2. Open a PR (or merge locally if push is out of scope per the
+   repo's policy).
+3. Merge into `default_branch`. Use the repo's standard merge
+   strategy from `## Commands` (default: merge commit; if the schema
+   declares `merge_strategy: rebase|squash`, honour it).
+4. In the main checkout, pull the merged `default_branch`.
+5. **For every still-unmerged lane**, rebase its branch onto the
+   updated `default_branch`:
+   ```
+   cd .worktrees/<plan-slug>-<other-lane-id>
+   git fetch origin <default_branch>
+   git rebase origin/<default_branch>
+   git push --force-with-lease origin feat/<plan-slug>-<other-lane-id>
+   ```
+   Use `--force-with-lease`, never `--force`. The rebase may produce
+   conflicts; the lane that introduces them must resolve them in its
+   worktree before its own merge step.
+6. Run the repo's full `build` and `test` commands on the updated
+   `default_branch` after each merge. A regression caught immediately
+   localises the cause; caught after all merges, you've lost the
+   bisection bound.
+
+#### 2.8c. Worktree cleanup
+
+After all lanes merge and the wave-barrier integration test
+(Phase 2f-bis step 2) passes, remove the per-lane worktrees:
+
+```
+git worktree remove .worktrees/<plan-slug>-<lane-id>
+```
+
+Do not delete the lane branches — they remain as audit history. The
+operator garbage-collects them after the run ships.
+
+#### 2.8d. Failure during merge
+
+If any merge or rebase fails irrecoverably, follow the Phase 0c
+failure path: tag the last successful commit on `default_branch`,
+preserve every lane's worktree and branch intact, surface the abort
+message. **Do not** force-resolve conflicts, do not abandon a lane's
+work, do not `git reset --hard`.
+
 #### 2g. Report
 ```
 Task N/M: DONE — <brief summary>
@@ -928,6 +1171,41 @@ Grades go straight to the report.
    `code-review/references/controller-guide.md` for the severity definition. Plan-deviations
    are not auto-fixed; each requires a terminal disposition.
 
+##### Proof accounting
+
+Green tests are not the same as proved behaviour. After plan alignment,
+classify each task's acceptance criteria against the diff:
+
+| Classification | Meaning |
+|---|---|
+| `proved` | A test in the diff exercises the behaviour AND passed in Phase 3a. |
+| `partially-proved` | Some coverage exists (existing or new) but at least one acceptance bullet is unverified by a test that actually runs the new code. |
+| `unproved` | No test in the diff or pre-existing suite exercises the behaviour; the criterion was satisfied only by inspection or by a build/typecheck signal. |
+
+Procedure:
+
+1. For each completed task, list its acceptance bullets.
+2. For each bullet, locate the test or observable that proves it. A
+   bullet is `proved` only when:
+   - the test file appears in the effective diff or is named explicitly
+     in the bullet, AND
+   - that test executes the modified code path (not a stub, not a
+     mock-only assertion against unchanged code), AND
+   - it passed in Phase 3a's `test` run.
+3. Bullets satisfied only by `grep`/typecheck/build observables are
+   `partially-proved` unless the criterion is itself purely structural
+   (e.g. "file X exists", "export Y is present").
+4. Bullets with no corresponding artefact are `unproved`.
+
+Emit a proof-accounting table in the markdown report and a
+`proof_accounting` array in the JSON report (see schemas below). The
+classification does **not** alter the verdict by itself, but any
+`unproved` row in the final report is grounds for the postmortem to
+fire (Phase 5) and is reported in the WARN summary line. A run with
+≥1 `unproved` row may still PASS if the operator deems the gap
+acceptable; the table makes that decision auditable rather than
+implicit.
+
 Why `plan-deviation` and not `major`: unplanned changes are often
 legitimate (a dep-patch-bump to unblock the build, a formatter
 reformat). Treating them as `major` blocks every run; treating them
@@ -1031,15 +1309,74 @@ When skipping under `auto`, record the reason (`diff below threshold`,
 
 ### Phase 4: Final Report
 
-Write **two** artefacts at the end of the run:
+Write the run artefacts:
 
 - `execution-report.md` — human-facing markdown report (see format below).
 - `execution-report.json` — structured counterpart for CI and
   downstream tooling.
+- `disposition-log.md` — multi-round reviewer↔coder disposition
+  history (only when `--run-folder` is active; see below).
 
 Paths are configurable via `--report-path=<dir>`; default is the
-current working directory. Both files always land together — never
-one without the other.
+current working directory. The `.md` and `.json` always land together —
+never one without the other.
+
+#### Run-folder bundling (`--run-folder`)
+
+When `--run-folder` resolves to a path (either `auto` with `runs_root:`
+declared in the repo-delivery schema, or an explicit path), write all
+run artefacts into a single timestamped folder instead of into the
+current working directory:
+
+```
+<run-folder>/
+  execution-report.md
+  execution-report.json
+  disposition-log.md
+  postmortem.md          # only if Phase 5 fires
+```
+
+In run-folder mode, Phase 4 also emits `disposition-log.md` recording
+every review round per finding (Phase 2.5 and Phase 3b auto-fix
+cycles), using this structure:
+
+```
+## Finding F-001 — major — src/auth/session.ts:42
+
+### Round 1
+- **Reviewer note:** ...
+- **Auto-fix attempt:** commit <sha>
+- **Outcome:** still failing — assertion mismatch
+
+### Round 2
+- **Reviewer note:** ...
+- **Auto-fix attempt:** commit <sha>
+- **Outcome:** fixed; re-review passed
+
+**Final status:** fixed
+```
+
+The disposition log is a per-finding narrative; the `findings` table
+in the main report is the flat summary. Both are produced in run-folder
+mode; only the flat table is produced in legacy mode.
+
+When `--run-folder=off` (or `auto` with no `runs_root:`), behaviour is
+identical to prior versions: only the two report files are written, at
+`--report-path`.
+
+#### Gate state (four-state vocabulary)
+
+In addition to the markdown verdict (`PASS`/`WARN`/`FAIL`), the JSON
+report carries a `gate_state` field that distinguishes mechanical
+blocks from human-decision blocks. CI and automation should route on
+`gate_state`; humans read `verdict`.
+
+| `gate_state` | Meaning | Maps to |
+|---|---|---|
+| `completed` | All findings terminally dispositioned, no accepted risk | PASS |
+| `completed-with-accepted-risk` | One or more `accepted-risk` dispositions present | PASS or WARN |
+| `blocked` | Run halted on retry budget, persistent failure, or `open` critical/major after auto-fix exhaustion | FAIL |
+| `awaiting-human-decision` | Run completed but a finding requires explicit human arbitration (e.g. adversarial vs. code-review contradiction on the same line) | FAIL |
 
 #### JSON schema
 
@@ -1103,7 +1440,21 @@ one without the other.
   ],
   "decisions_written": [
     { "id": "20260419-0042", "path": "docs/decisions/<plan-slug>/0042-...md", "tags": ["..."], "files": ["..."] }
-  ]
+  ],
+  "gate_state": "completed | completed-with-accepted-risk | blocked | awaiting-human-decision",
+  "proof_accounting": [
+    {
+      "task": 1,
+      "criterion": "GET /users/:id returns 404 for unknown id",
+      "classification": "proved",
+      "evidence": "src/api/user.test.ts:88 (added in this run)"
+    }
+  ],
+  "postmortem": {
+    "status": "ran | skipped",
+    "reason": "...",
+    "path": "<run-folder>/postmortem.md"
+  }
 }
 ```
 
@@ -1177,6 +1528,13 @@ Overall read: <one paragraph>
 - All tasks implemented: YES/NO
 - Unplanned changes: NONE / [list]
 
+**Proof accounting:**
+
+| Task | Acceptance criterion | Classification | Evidence |
+|---|---|---|---|
+| 1 | GET /users/:id returns 404 | proved | src/api/user.test.ts:88 |
+| 2 | Rate limit kicks in at 100 req/min | unproved | no test exercises throttle path |
+
 ### Plan Deviations
 
 Dedicated section for `plan-deviation` findings from Phase 3d. Each
@@ -1233,6 +1591,261 @@ The professional grade does **not** affect the verdict. A `junior`-graded
 component still PASSes if it's bug-free. The grade is informational — the
 team decides what to do with it.
 
+### Phase 5: Postmortem
+
+Governed by two flags:
+
+- `--postmortem=<auto|always|never>` — *whether* Phase 5 fires (default `auto`)
+- `--postmortem-mode=<auto|full|lightweight>` — *which depth* the postmortem uses (default `auto`)
+
+#### Trigger rules
+
+`auto` fires Phase 5 when **any** of the following is true:
+
+- final `verdict` is `WARN` or `FAIL`,
+- `gate_state` is `blocked` or `awaiting-human-decision`,
+- retry budget exhaustion was hit (Phase 0c circuit breaker),
+- any `unproved` row exists in the proof-accounting table,
+- any auto-fix cycle required all 3 attempts (signals fragile fix),
+- any `plan-deviation` ended with status `accepted-risk` (signals plan
+  drift that should inform the next run).
+
+`always` fires unconditionally — useful when learning is the goal.
+`never` skips even on FAIL.
+
+When skipping, record the reason in `postmortem.status` / `reason`.
+
+#### Mode selection
+
+`--postmortem-mode=auto` resolves as:
+
+- **lightweight** when the trigger is a `PASS` with `unproved` rows or
+  fragile auto-fix only (no verdict failure, no blocked gate). Three
+  sections: `What happened`, `What broke down`, `Recommendations`.
+- **full** for every other trigger: WARN, FAIL, blocked,
+  awaiting-human-decision, retry-budget exhaustion, accepted-risk
+  plan-deviations.
+
+`full` and `lightweight` override the auto resolution.
+
+#### Inputs
+
+Postmortem reads (does not regenerate) the artefacts produced this run:
+
+- `execution-report.md` and `.json`
+- `disposition-log.md` (when present)
+- the original plan file
+- the source requirements artefact, if known to `execute-prd`
+
+#### Output
+
+Write `postmortem.md` and `postmortem.json` adjacent to the execution
+report (in the run folder when `--run-folder` is active, otherwise at
+`--report-path`). The `.json` is what the cross-run aggregator and
+`/process-tune` consume.
+
+#### Markdown structure (full mode)
+
+```
+# Postmortem
+
+## Run reference
+- **Plan:** <plan-file>
+- **Verdict:** <verdict>  Gate: <gate_state>
+- **Branch / base / head:** ...
+- **Trigger:** <which auto rule fired, or "--postmortem=always">
+- **Mode:** full | lightweight
+
+## What happened
+<2–4 sentence narrative — not a chat transcript, not a restatement
+of findings.>
+
+## What worked
+<Process strengths observed: which gates caught what, which auto-fix
+cycles converged cleanly, where the closed decisions saved time.>
+
+## What broke down
+
+### Tool and skill usage
+<Which gates fired or didn't fire, and whether that was correct.
+Threshold issues (e.g. adversarial review missed a 187-line auth diff
+because the threshold is 200). Skills invoked at the wrong time, or
+not invoked when they should have been. Repo-delivery flags or
+`adversarial_triggers` paths that need tuning.>
+
+### Requirements fit
+<Ambiguity in the source PRD/AERS that drove rework. Plan-deviations
+or plan-ambiguities whose root cause was an unsettled product
+decision. Closed decisions that should have existed but didn't.
+aers-readiness rubric items that the source missed.>
+
+## What the process missed
+<Gaps only visible in hindsight. Coverage holes (link to `unproved`
+rows). Reviewer blind spots. Plan structure that hid risk.>
+
+## Recommendations
+<Specific, actionable. Each recommendation MUST cite a target from
+the taxonomy below so the recommendation can aggregate across runs.
+Free-text recommendations that don't aggregate are a bug.>
+
+| # | Target | Type | Summary |
+|---|---|---|---|
+| 1 | `_rubrics/disposition` | tune-threshold | Disposition loop allowed 3 cycles where 2 would have caught the same fix |
+| 2 | `closed-decisions/auth/session-cookie-name` | new-decision | Session cookie name was re-debated this run; capture as closed decision |
+```
+
+In `lightweight` mode, omit `What worked` and the two named lenses.
+The remaining shape is `What happened` → `What broke down` (free
+form) → `Recommendations` (still structured).
+
+#### Recommendation taxonomy
+
+Every recommendation row in the markdown table corresponds to a
+structured object in `postmortem.json`. The `target` and `type` fields
+use a fixed vocabulary so cross-run aggregation works.
+
+**`target` vocabulary** (where the recommendation lands):
+
+| `target` value | What it points at |
+|---|---|
+| `_rubrics/disposition` | The disposition rubric |
+| `_rubrics/repo-delivery` | The repo-delivery contract / `## Commands` schema |
+| `_rubrics/<other>` | Any other rubric in the skill library |
+| `closed-decisions/<category>/<slug>` | A new or updated closed decision fragment |
+| `claude-md/commands` | The repo's `CLAUDE.md ## Commands` section |
+| `claude-md/conventions` | The repo's `CLAUDE.md` conventions section |
+| `adversarial-triggers` | The `adversarial_triggers` glob list |
+| `auto-accept-deviations` | The `auto_accept_deviations` category list |
+| `plan-template` | The plan author's template (drives `/plan` and `/execute-prd` step 5) |
+| `aers-readiness` | The AERS readiness rubric |
+| `execute-plan-skill` | This skill's own behaviour (gates, phases, defaults) |
+| `execute-prd-skill` | The `/execute-prd` skill's behaviour |
+| `code-review-profile` | A `code-review` profile (`breakpoint` or `full`) |
+| `process-doc/<name>` | Any project-level process doc not covered above |
+
+If a recommendation genuinely doesn't fit, use `target: other` and put
+the intent in `summary` — but treat that as a smell, not a release
+valve. Repeated `other` values are a sign the taxonomy needs an entry.
+
+**`type` vocabulary** (what kind of change):
+
+| `type` value | Meaning |
+|---|---|
+| `tune-threshold` | Numeric threshold needs adjustment (line counts, retry counts, timeouts) |
+| `tune-trigger` | A glob, signal, or condition that controls when something fires |
+| `new-decision` | Add a closed decision capturing a settled fact |
+| `update-decision` | Modify an existing closed decision |
+| `new-convention` | Add a project convention to CLAUDE.md |
+| `add-rubric-rule` | Extend an existing rubric with a new rule |
+| `tighten-gate` | Make an existing gate stricter |
+| `relax-gate` | Make an existing gate less strict (rare; needs evidence) |
+| `add-gate` | Introduce a new gate or phase |
+| `remove-gate` | Remove a gate that produces no signal |
+| `improve-prompt` | Reword an instruction passed to a worker or reviewer |
+| `documentation` | The skill or process is correct but the docs don't reflect reality |
+
+#### JSON schema (postmortem.json)
+
+```json
+{
+  "run": "2026-05-05-143000",
+  "plan_file": "docs/plans/<plan-slug>.md",
+  "verdict": "WARN",
+  "gate_state": "completed-with-accepted-risk",
+  "trigger": "unproved-rows",
+  "mode": "full",
+  "recommendations": [
+    {
+      "id": "R-001",
+      "target": "adversarial-triggers",
+      "type": "tune-threshold",
+      "summary": "Adversarial threshold of 200 lines missed a 187-line auth diff",
+      "evidence": "execution-report.json#findings.F-014",
+      "actionable": true,
+      "confidence": "high"
+    }
+  ],
+  "headline": "<one-line summary, copied from the highest-confidence actionable recommendation>"
+}
+```
+
+`actionable: true` means a future skill could mechanically apply the
+change. `confidence: high|medium|low` lets `/process-tune` weight
+recurring recommendations.
+
+#### Cross-run aggregation
+
+After writing `postmortem.md` and `postmortem.json`, append a row to
+the project-level postmortem index:
+
+- **Path:** `docs/postmortems/index.json` (relative to the repo root,
+  not the run folder).
+- **Append, never rewrite.** The index is an event log; old rows are
+  immutable evidence even if the recommendation later proved wrong.
+- **Schema:**
+  ```json
+  [
+    {
+      "run": "2026-05-05-143000",
+      "run_folder": "docs/runs/2026-05-05-143000/",
+      "plan_slug": "<plan-slug>",
+      "verdict": "WARN",
+      "gate_state": "completed-with-accepted-risk",
+      "trigger": "unproved-rows",
+      "recommendations": [
+        {
+          "id": "R-001",
+          "target": "adversarial-triggers",
+          "type": "tune-threshold",
+          "summary": "...",
+          "actionable": true,
+          "confidence": "high"
+        }
+      ]
+    }
+  ]
+  ```
+
+If `docs/postmortems/index.json` does not exist, create it as `[]`
+before appending. Do not gate on the directory existing — create it.
+
+`/process-tune` (the symmetric consumer skill) reads this index,
+groups by `target` + `type`, and proposes concrete artefact edits when
+the same recommendation appears across multiple runs.
+
+#### Hard rules
+
+- **Not a second requirements document.** Do not restate scope.
+- **Not a chat-transcript summary.** No turn-by-turn replay.
+- **Not a restatement of review findings.** Findings are in the
+  execution report; postmortem analyses *the process around them*.
+- **Not a blame document.** No "the model should have known" framing.
+- **Length cap:** target one page (full mode) or half a page
+  (lightweight). A long postmortem signals the run itself was
+  unrecoverable and the next action is human review, not a longer
+  document.
+- **Recommendations must use the taxonomy.** Free-text targets that
+  bypass the `target`/`type` vocabulary defeat aggregation. If the
+  taxonomy doesn't fit, the taxonomy needs extending — not bypassing.
+
+#### Terminal output
+
+After Phase 5 writes its artefacts, append to the executor's terminal
+output:
+
+```
+Postmortem: <run-folder>/postmortem.md  (mode: <mode>)
+Key recommendation: <postmortem.headline>
+```
+
+The headline is the single most actionable item from
+`postmortem.json.recommendations` (highest `confidence`, `actionable:
+true`, ties broken by recommendation order). The operator gets the
+takeaway without opening the doc; the index keeps the long tail.
+
+The postmortem is the only artefact in the flow whose audience is the
+*next run*, not this one.
+
 ## Key Rules
 
 - **Validate before executing.** Phase 0 is not optional.
@@ -1242,3 +1855,10 @@ team decides what to do with it.
 - **Adversarial review is flag-driven.** Governed by `--adversarial` (default `auto`). Autonomous runs never pause to ask; interactive supervisors can opt in with `--adversarial=ask`.
 - **Commits reference the plan.** Every commit ties back to a task number. Commit trailers carry `Plan-SHA` and `Base-SHA` so the run is fully reconstructable.
 - **Never destroy work on failure.** Abort preserves the branch and tags the last good commit as `execute-plan/abort/...`. Destructive git ops (`reset --hard`, `push --force`, `branch -D`, `clean -f`) are forbidden in all code paths.
+- **Green tests are not proof.** Phase 3d emits a proof-accounting table classifying every acceptance bullet as `proved` / `partially-proved` / `unproved`. The classification is auditable evidence, not a verdict modifier.
+- **Postmortems are for the next run, not this one.** Phase 5 fires automatically on `WARN`/`FAIL`/blocked/unproved coverage. It analyses *process*, not scope or findings, and is capped at one page.
+- **Waves are integration barriers.** When a plan declares `## Waves`, every wave boundary forces a full build + test re-run, even if no milestone fell there. Max 4 parallel lanes per wave; 5+ lanes refuse with a `plan-ambiguity`.
+- **Parallel waves run in worktrees, not the main checkout.** Phase 2.7 dispatches one implementer subagent per lane in a `.worktrees/<plan-slug>-<lane-id>/` checkout off `default_branch`. `{install_cmd}` runs inside every worktree before any subagent dispatches — subagents do not inherit the parent's `node_modules`/virtualenv.
+- **Single-message dispatch is mandatory for parallel waves.** All lane implementers (and later, all lane reviewers) dispatch in **one** message. Sequential dispatch produces sequential execution disguised as parallel; the fan-out is illusory.
+- **Never resume a prior subagent.** Each fixer pass is a fresh dispatch with the findings and target files in its prompt. Subagent state is not durable across calls; assuming it is silently drops fix attempts.
+- **Sequential merge after parallel waves.** Parallel-wave branches merge to `default_branch` one at a time per Phase 2.8: dependency-provider first, infrastructure before dependents, smallest-diff tiebreaker. Downstream lanes rebase with `--force-with-lease` (never `--force`) onto the updated `default_branch` after each merge. Build + test re-runs on `default_branch` after every merge.

@@ -1,0 +1,191 @@
+---
+name: code-review-professional
+description: "Craft grading (seniority-calibrated: junior/mid/senior/staff) of a code change. Graded per-component with 2-3 line-cited reasons per axis across 7 axes: Clarity, Judgment, Forethought, Idiom, Testability, Scope discipline, Abstraction. Use at the PR boundary after the code-review skill with profile full, when a reviewer wants an external judgment on craft level, or when onboarding feedback is useful. Do NOT use mid-flow at milestones (use code-review with profile breakpoint), when you want a defect list (use code-review), or when the change is under 10 lines."
+---
+
+# /code-review-professional — Seniority Grading
+
+**Purpose:** Judge the craft level of a code change on a seniority
+scale. Output a grade per identifiable component, each with
+evidence.
+
+This skill does **not** find defects. That's `code-review`'s job. If you
+find a bug, note it as a question for the code-review skill — do not
+record it as a grading finding.
+
+## When to Use
+
+- At the PR boundary in the CodeGen flow, after `code-review` with `profile: full`.
+- When a reviewer wants an external judgment on "what level of engineer wrote this."
+- When onboarding feedback on a team member's work is useful.
+
+## When NOT to Use
+
+- Mid-flow / at milestones — use `code-review` with `profile: breakpoint`.
+- When you want a defect list — use `code-review`.
+- When the change is <10 lines — grading is noise.
+
+## Inputs
+
+- **`diff`** — the set of changed files. Prefer `git diff $EXECUTE_PLAN_BASE_SHA..HEAD` at the PR boundary when invoked from `/execute-plan`.
+- **`pr_description`** — optional. If absent, note it and proceed.
+- **`diff_manifest`** — optional pre-computed triage object (provided by `/execute-plan` at the Phase 3 preamble). When present, use its `clusters` as the component boundaries for step 1 (Identify components); do **not** re-cluster the diff. This guarantees you and `/code-review` report on the same components. When absent (e.g., direct invocation), fall back to clustering from the diff yourself.
+
+## Grade scale
+
+See `_rubrics/professional-rubric/SKILL.md` for the full definitions. In
+summary:
+
+- **junior** — happy-path thinking; tutorial-level abstractions; edge cases missed; tests thin.
+- **mid** — solid on common cases; abstractions reasonable but sometimes premature or leaky; obvious edges handled; tests cover main paths.
+- **senior** — clean judgment, right abstraction level, anticipates failure, scope-disciplined, meaningful tests.
+- **staff** — all of senior **plus** the design makes future change cheap; chose the right problem to solve; made the codebase better, not just bigger.
+
+## Grading axes (7)
+
+Evaluate each component on all seven axes. Each axis requires **2–3 concrete
+diff-line citations** as evidence. No citation → don't claim the axis.
+
+1. **Clarity** — can a new teammate read this and understand intent without a walkthrough?
+2. **Judgment** — right tradeoffs; no over- or under-engineering for the problem size.
+3. **Forethought** — anticipated failure modes and edge cases that aren't the happy path.
+4. **Idiom** — uses the language/framework the way experienced practitioners do.
+5. **Testability** — structured so it can be tested in isolation; seams are in the right places.
+6. **Scope discipline** — did exactly what was asked; no drive-by refactors, unrelated cleanups, or feature creep.
+7. **Abstraction** — right level of abstraction: not leaky, not over-generalized, not premature.
+
+## Per-component grading
+
+A single PR is rarely one seniority level. Split by identifiable component
+and grade each independently. Component boundaries come from the diff
+itself — common patterns:
+
+- Directory clusters (`src/api/...` vs. `src/web/...` vs. `migrations/...`)
+- Language boundaries (TypeScript backend vs. TypeScript frontend vs. SQL)
+- Layer boundaries (domain logic vs. HTTP handlers vs. UI)
+
+If the diff is too small or too uniform to split meaningfully, grade it as
+one component and state so.
+
+**Split decisions are expected.** A PR where the backend is `senior` and
+the UI is `junior` is a valid, useful result. Do not force a single
+overall grade when the evidence points different ways.
+
+## Your job, in order
+
+### 1. Identify components
+
+**If `diff_manifest` was provided, use its `clusters` array as your
+components verbatim — do not re-cluster.** This keeps your reports
+aligned with `/code-review`'s. Absent the manifest, scan the diff
+and cluster files into components. State the clusters up front:
+
+```
+## Components
+- Backend — src/api/*, src/services/*
+- UI — src/web/*
+- DB migrations — migrations/*
+```
+
+If there's only one meaningful cluster, say: `Single component — entire diff graded together.`
+
+### 2. Grade each component on each axis
+
+For each component, evaluate all 7 axes. For each axis, cite **2–3 diff
+lines** as evidence. Format:
+
+```
+### Backend
+
+**Clarity: senior**
+- `src/api/auth.ts:42` — intent of `ensureScopesCover` is obvious from the name and signature.
+- `src/services/session.ts:88` — comment explains the non-obvious invariant without restating the code.
+
+**Judgment: senior**
+- `src/api/auth.ts:15` — validation deliberately lives in the controller, not repeated in the service; correct for this codebase's layering.
+- `src/services/session.ts:103` — did NOT introduce a cache here; the lookup is cheap and caching would add coordination cost for no measured gain.
+
+**Forethought: mid**
+- `src/api/auth.ts:67` — handles 401 and 403 distinctly — good.
+- `src/services/session.ts:120` — no handling for the `expired but about to rotate` race; this is a common edge case in auth flows and would show up under load.
+
+[...other axes...]
+
+**Component grade: senior** (split from forethought's mid, but 6 of 7 axes at senior → senior overall)
+```
+
+### 3. Determine component grade
+
+After grading all 7 axes for a component, pick the component-level grade:
+
+- **Unanimous** — all 7 axes agree → that's the grade.
+- **Majority** — 5 or 6 axes at one level, 1 or 2 others one level off → the majority level, noting the weak axes.
+- **Split** — 3/4 or 4/3 across levels → grade as the **lower** of the two dominant levels, with a clear note that the stronger axes carry the weaker ones.
+- **Staff requires evidence on all 7 axes** — if any axis is below senior, the component is at most senior, never staff.
+
+Record the reasoning in one sentence:
+```
+Component grade: senior — consistent senior on 6 axes; forethought slipped to mid on one edge case but didn't compromise the rest.
+```
+
+### 4. Write the overall read
+
+A short paragraph (3–5 sentences) summarizing the grades across components.
+Name the single strongest and single weakest observations. Do not repeat
+axis-level detail; point back to the tables.
+
+## Output format
+
+```
+# Professional Review
+
+## Components
+- Backend — src/api/*, src/services/*
+- UI — src/web/*
+
+## Per-component grades
+
+### Backend
+
+**Grade: senior**
+
+| Axis | Grade | Evidence |
+|---|---|---|
+| Clarity | senior | `src/api/auth.ts:42` ...; `src/services/session.ts:88` ... |
+| Judgment | senior | `src/api/auth.ts:15` ...; `src/services/session.ts:103` ... |
+| Forethought | mid | `src/api/auth.ts:67` ...; `src/services/session.ts:120` ... |
+| Idiom | senior | ... |
+| Testability | senior | ... |
+| Scope discipline | senior | ... |
+| Abstraction | senior | ... |
+
+Reasoning: consistent senior on 6 axes; forethought slipped on one edge case.
+
+### UI
+
+**Grade: junior**
+
+| Axis | Grade | Evidence |
+|---|---|---|
+| Clarity | mid | ... |
+| Judgment | junior | `src/web/LoginForm.tsx:22` — useState for server state where react-query is already available elsewhere; typical junior pattern. |
+| ... | ... | ... |
+
+Reasoning: abstractions are tutorial-level, state management doesn't match codebase conventions, tests only cover the happy path.
+
+## Overall read
+
+Backend and UI diverge sharply. The backend shows senior-level judgment and
+abstraction — the UI shows a first pass that would normally come back with
+review comments from a senior. The strongest axis in the diff is Judgment
+on the backend (`src/api/auth.ts:15`). The weakest is Judgment on the UI
+(`src/web/LoginForm.tsx:22`). The UI is the one to pair on before merge.
+```
+
+## Things you must not do
+
+- Do not report defects. That's `code-review`'s job. If you see a bug, list it under a final "Notes for code-review" section — do not inflate axis grades to punish defects.
+- Do not grade axes without diff-line citations. No citation = skip the axis and note it.
+- Do not force a single overall grade when components clearly differ. Split decisions are the expected output, not the exception.
+- Do not use the grade to judge the author as a person. Grade the code in this diff, not the human.
+- Do not grade a component staff unless all 7 axes are at senior or above and there's evidence the design improves the codebase beyond this change.
