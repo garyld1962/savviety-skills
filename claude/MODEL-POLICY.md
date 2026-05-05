@@ -27,15 +27,11 @@ and benefit from reasoning headroom more than from speed.
 Currently pinned to `opus`:
 
 - `thesis`
-- `plan`
 - `kickoff`
-- `execute-workflow`
 - `grill-me`
 - `ideate`
 - `prd-validate`
-- `aers-readiness`
 - `spec-review-adversarial`
-- `postmortem`
 - `triage`
 - `dep-migrate`
 - `code-investigate`
@@ -49,7 +45,7 @@ Currently pinned to `haiku`:
 
 - `find-skills`
 - `skill-help`
-- `whereami`
+- `repo-status`
 - `configure`
 - `env-check`
 
@@ -67,11 +63,14 @@ Leave the `model:` field off entirely when:
 
 Currently unpinned:
 
-- `execute-plan`, `pr`, `ship`, `hotfix`, `test-plan`, `teams`, `sync-main`,
-  `changelog`, `checkpoint`
+- `audit-existing`, `checkpoint`, `changelog`, `execute-plan`, `execute-prd`,
+  `hotfix`, `parallel-optimization`, `pr`, `process-tune`, `ship`, `sync-main`,
+  `test-plan`, `validate-plan`
 - `code-review`, `review-adversarial`, `review-gauntlet`
-- `ubiquitous-language`, `skill-audit`, `session-save`, `work-item`,
-  `k8s-verify`, `dep-audit`, `prd-acceptance`
+- `code-review-professional`, `postmortem`, `prd-acceptance`,
+  `ubiquitous-language`, `what-is-it-about`, `work-item`, `k8s-verify`,
+  `dep-audit`, `skill-audit`
+- `_internal/*` contracts and rubrics unless a specific model pin is added
 
 ## How to add a skill
 

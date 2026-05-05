@@ -49,7 +49,7 @@ Reference the script by absolute path from wherever this repo lives on disk, the
         "hooks": [
           {
             "type": "command",
-            "command": "bash /absolute/path/to/savviety-skills/claude/pr-guardrail/pr-guardrail.sh",
+            "command": "bash /absolute/path/to/savviety-skills/claude/infra/pr-guardrail/pr-guardrail.sh",
             "timeout": 15,
             "statusMessage": "Checking for existing PRs..."
           }

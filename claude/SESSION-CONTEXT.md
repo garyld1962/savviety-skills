@@ -7,9 +7,9 @@ A lightweight convention for preserving work context across Claude Code sessions
 
 ## Components
 
-### `/whereami` — Session Start
+### `/repo-status` — Session Start
 
-Run this first in every new session. It reads `.claude/SESSION.md`, git state, and open PRs, then prints a 10-line briefing:
+Run this first in every new session when you need live repo state. It reads git state and open PRs, then prints a concise briefing:
 
 ```
 📍 baker-street — feat/planner-v2
@@ -27,16 +27,16 @@ Open PRs (you): 1 — #42 "Planner worker refactor" (feat/planner-v2)
 
 Warns on branch mismatch, machine mismatch, stashed work, and stale PRs.
 
-### `/session-save` — Session End
+### Journal Hooks — Session End
 
-Run before ending a session (or wire to a Stop hook). Captures current work context into `.claude/SESSION.md`:
+The `claude/infra/journal/` hooks capture session and commit context into `.claude/journal/`:
 
 - **Where we left off** — what was done, what state it's in
 - **Next action** — one specific concrete thing for the next session
 - **Open questions** — unresolved decisions, unknowns
 - **Don't forget** — gotchas, reminders, non-obvious context
 
-SESSION.md is **gitignored** (per-machine working memory) and **overwritten** each save (not appended). History lives in git log and transcripts.
+`.claude/SESSION.md` and `.claude/journal/*.md` are **gitignored** per-machine working memory. History lives in git log and transcripts.
 
 ### PR Guardrail Hook
 
@@ -47,7 +47,7 @@ A `PreToolUse` hook on `gh pr create` that checks for existing open PRs before a
 3. Close the existing PR first
 4. Override and create anyway
 
-Installed globally in `~/.claude/settings.json`. See `claude/pr-guardrail/INSTALL.md`.
+Installed globally in `~/.claude/settings.json`. See `claude/infra/pr-guardrail/INSTALL.md`.
 
 ## Per-Repo Setup
 
@@ -65,8 +65,8 @@ Add this to each repo's `CLAUDE.md`:
 This repo uses the session-context system.
 
 - `.claude/SESSION.md` holds working memory from the previous session. Read it first.
-- Run `/whereami` at the start of every session.
-- Run `/session-save` before ending a session.
+- Run `/repo-status` at the start of every session when branch or PR state matters.
+- Let the journal hooks capture session-end state when enabled.
 - Never run `gh pr create` without first checking for existing open PRs — the
   PR guardrail hook will catch this, but prefer to check explicitly.
 ```
@@ -75,8 +75,7 @@ This repo uses the session-context system.
 
 - **SESSION.md is gitignored.** Per-machine isolation — Sherlock and Lestrade may be mid-different-things on the same repo. No merge conflicts on scratchpad content.
 - **PR guardrail is a Claude Code hook, not a GitHub branch rule.** Branch protection fires too late (after the agent has done work). The hook catches it at the intent layer so the agent can react intelligently.
-- **Session-save is manual by default.** Auto-save on Stop hook is possible but noisy for trivial sessions. Start manual, wire to Stop hook later if warranted.
-- **Session-end skill is named `session-save`, not `checkpoint`.** The existing `/checkpoint` skill is a quality gate (lint/build/test). Different concern.
+- **Journal capture is hook-based.** The existing `/checkpoint` skill remains a quality gate (lint/build/test), not a session-memory command.
 
 ## Task Management Integration
 
@@ -86,11 +85,9 @@ This system is designed to integrate with the **Baker Street task management sys
 
 ```
 claude/
-├── whereami/SKILL.md                    # Session-start briefing skill
-├── session-save/
-│   ├── SKILL.md                         # Session-end state capture skill
-│   └── SESSION.md.template              # Template for the session state file
-├── pr-guardrail/
+├── repo-status/SKILL.md                 # Live repo briefing skill
+├── infra/journal/                       # Session journal hook scripts
+├── infra/pr-guardrail/
 │   ├── pr-guardrail.sh                  # Hook script (install globally)
 │   └── INSTALL.md                       # Installation instructions
 └── SESSION-CONTEXT.md                   # This file

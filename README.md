@@ -18,14 +18,14 @@ agents.
 ## Repository Structure
 
 ```
-skills/
-├── claude/                # Claude Code skills
-│   ├── plan/              #   Each skill is a directory with SKILL.md
-│   ├── execute-workflow/  #   Some skills have templates and sub-files
-│   ├── configure/         #   Template-filling skill + registry
-│   ├── _rubrics/          #   Knowledge rubrics (not user-invokable)
-│   ├── teams/agents/      #   Nested worker-role prompts inside a skill
-│   └── ...
+	skills/
+	├── claude/                # Claude Code skills
+	│   ├── execute-plan/      #   User-invokable skill directories
+	│   ├── code-review/       #   Composite skill with private resources
+	│   ├── configure/         #   Template-filling skill + registry
+	│   ├── _internal/         #   Internal callable contracts and rubrics
+	│   ├── infra/             #   Hook and utility script sources
+	│   └── ...
 ├── copilot-native/        # Copilot-first workspace
 │   ├── prompts/           #   Thinner prompts that lean on built-ins
 │   ├── agents/            #   Narrow specialist agents
@@ -43,13 +43,15 @@ skills/
 
 ## Deployment
 
-Deployment is handled by the [skill-factory](https://github.com/garyld1962/skill-factory) compile+publish pipeline. The legacy `deploy.sh` script has been archived.
+Deployment into a target repository is handled by `bin/repo-skills` using
+`manifest.json`. The legacy `deploy.sh` script has been archived.
 
-For Claude Code, the source layout in `claude/` is **not** a literal copy of a
-project's `.claude/` folder. Shared skill directories and `_rubrics/` map into
+For Claude Code, user-facing skill directories and `_internal/` map into
 `.claude/skills/`, while runtime project files such as `.claude/settings.json`
-live at `.claude/` root. `claude/README.md` and `claude/SESSION-CONTEXT.md`
-are source/reference docs, not files to drop into `.claude/skills/`.
+and hook utilities live at `.claude/` root. `claude/infra/` is source for those
+hook utilities, not a skill namespace. `claude/README.md`,
+`claude/MODEL-POLICY.md`, and `claude/SESSION-CONTEXT.md` are source/reference
+docs, not files to drop into `.claude/skills/`.
 
 ## Shared vs Local Convention
 
@@ -67,7 +69,7 @@ Every deployment target separates **shared** (overwritten on sync) from **local*
 2. **Environment-neutral.** Skills never hardcode shells, hostnames, or project names. Variable data lives in user-editable config templates.
 3. **Config via `/configure`.** Skills that need user-specific data ship blank templates. Users fill them in via `/configure <target>` or by hand.
 4. **Pre-flight checks.** Config-dependent skills halt with actionable messages if config is missing.
-5. **Rubrics are reference-only.** Knowledge rubrics live in `claude/_rubrics/` and are referenced by user-invokable skills, not invoked directly.
+5. **Internal contracts are hidden from normal help.** Knowledge rubrics and reusable contracts live in `claude/_internal/` with `user-invocable: false`; user-facing skills call them by contract.
 
 ## Platform modeling note
 
@@ -75,7 +77,7 @@ The two platforms do **not** represent worker roles the same way:
 
 - **Claude Code** usually treats the top-level deployable unit as the
   **skill**. Worker roles are often nested inside the skill package (for
-  example `teams/agents/*.md`) or represented as subskills/specialists inside
+  example `execute-plan/agents/*.md`) or represented as subskills/specialists inside
   the same workflow tree.
 - **Copilot Native** has a first-class top-level **agent** asset layer under
   `copilot-native/agents/`.

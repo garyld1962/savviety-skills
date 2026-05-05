@@ -142,12 +142,10 @@ stays one config language.
 
 All previously-listed open questions resolved into §2.6–§2.9.
 
-One smaller call carried into the implementation as a default (revisit if
-wrong): **hook scripts referenced by `settings.template.json` are
-auto-copied** when the script sees a hook command pointing at a path under
-`${CLAUDE_PROJECT_DIR}/.claude/`. Today that means `claude/pr-guardrail/`
-goes along automatically. Future hooks land the same way without manifest
-edits.
+Hook scripts referenced by `settings.template.json` are copied via explicit
+manifest extras. Source files live under `claude/infra/`; installed hook paths
+live directly under `.claude/` (for example `.claude/pr-guardrail/` and
+`.claude/journal/`).
 
 ## 4. Command surface
 
@@ -197,9 +195,9 @@ Actions:
 2. Copy each `claude/<skill>/` directory into `<target>/.claude/skills/<skill>/`,
    skipping `claude/README.md`, `claude/SESSION-CONTEXT.md`, and any other
    source-only docs flagged in a manifest (see §6.3).
-3. Copy `claude/_rubrics/` into `<target>/.claude/skills/_rubrics/`.
-4. Copy `claude/pr-guardrail/` into `<target>/.claude/pr-guardrail/`
-   (referenced by template hooks).
+3. Copy `claude/_internal/` into `<target>/.claude/skills/_internal/`.
+4. Copy `claude/infra/pr-guardrail/`, `claude/infra/journal/`, and
+   `claude/infra/install-scan/` into their `.claude/<asset>/` hook locations.
 5. Copy `claude/settings.template.json` to `<target>/.claude/settings.json`.
 6. Create `<target>/.claude/settings.local.json` containing `{}` if absent.
 7. Create `<target>/CLAUDE.md` from `templates/CLAUDE.starter.md` if absent.
@@ -215,7 +213,7 @@ Actions:
 1. For each `claude/<skill>/`, sync into `<target>/.claude/skills/<skill>/`,
    overwriting shared files. **Never** touch `_project/`, `_local/`, or any
    directory matching `_*` inside the target.
-2. Refresh `_rubrics/`, `pr-guardrail/`, `settings.json` the same way.
+2. Refresh `_internal/`, infra extras, and `settings.json` the same way.
 3. With `--prune`: for each shared skill in target that no longer exists in
    source, prompt the user (`y/N/a/q` per §2.6). With `--prune --yes`: skip
    prompts and delete all orphans. Without `--prune`: list orphans in the
@@ -290,9 +288,11 @@ Declares what the script should and should not copy. Avoids hardcoding
 {
   "claude": {
     "source_dir": "claude",
-    "skip": ["README.md", "SESSION-CONTEXT.md"],
+    "skip": ["README.md", "MODEL-POLICY.md", "SESSION-CONTEXT.md", "settings.template.json", "infra"],
     "extras": [
-      { "from": "claude/pr-guardrail", "to": ".claude/pr-guardrail" },
+      { "from": "claude/infra/pr-guardrail", "to": ".claude/pr-guardrail" },
+      { "from": "claude/infra/journal", "to": ".claude/journal" },
+      { "from": "claude/infra/install-scan", "to": ".claude/install-scan" },
       { "from": "claude/settings.template.json", "to": ".claude/settings.json" }
     ],
     "starters": [

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Precheck: should we bother running session-save on SessionEnd?
+# Precheck: should we bother running journal capture on SessionEnd?
 #
 # Exit 0 (meaningful) when:
 #   - there are uncommitted tracked changes, OR
@@ -22,7 +22,7 @@ if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
 fi
 
 # Any content in today's journal beyond session-start markers and blanks?
-# Matches commit bullets (from PostToolUse), prior session-save-journal
+      # Matches commit bullets (from PostToolUse), prior session-journal
 # entries, or any manual addition.
 if [[ -f "$today_file" ]]; then
   if grep -qvE '^(## Session start|[[:space:]]*$)' "$today_file" 2>/dev/null; then

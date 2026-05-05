@@ -103,7 +103,7 @@ Status legend: `MISSING` (no equivalent in claude/ or built-ins) · `BUILT-IN` (
 | Copilot-native prompt | Claude equivalent | Status | Notes |
 |---|---|---|---|
 | **ba/ideate** | — | MISSING | Mixed business + tech ideation (single prompt wraps both lenses). No 1:1 Claude plugin equivalent. |
-| **ba/prd-validator** | `claude/acceptance` (partial) | MISSING | *Pre*-implementation AERS readiness gate. Acceptance is *post*-implementation. Different stages. |
+| **ba/prd-validator** | `claude/prd-acceptance` (partial) | MISSING | *Pre*-implementation AERS readiness gate. Acceptance is *post*-implementation. Different stages. |
 | **ba/ba-problem-refiner** | `ba-problem-refiner` plugin | BUILT-IN | Use plugin. |
 | **ba/ba-spec-engineer** | `ba-spec-engineer` plugin | BUILT-IN | Use plugin. |
 | **ba/ba-context-builder** | `ba-context-builder` plugin | BUILT-IN | Use plugin. |
@@ -111,17 +111,17 @@ Status legend: `MISSING` (no equivalent in claude/ or built-ins) · `BUILT-IN` (
 | **ba/ba-knowledge-capture** | `ba-knowledge-capture` plugin | BUILT-IN | Use plugin. |
 | **common/environment-check** | — | MISSING | PowerShell/WSL/Linux shell routing. Claude Code has no built-in for this. Small but valuable for your Windows laptop + WSL workflow. |
 | **dev/ado-item** | `claude/work-item` | = | Already ported. |
-| **dev/adversarial-review** | `claude/adversarial-review` | = | Already ported. Evaluate enhancement (model-switch discipline). |
+| **dev/adversarial-review** | `claude/review-adversarial` | = | Already ported. Evaluate enhancement (model-switch discipline). |
 | **dev/autonomous-development-kickoff** | `superpowers:writing-plans` + `executing-plans` (partial) | MISSING | Built-in path is thinner. Copilot version adds: (1) readiness gate before planning, (2) small-change fast path, (3) explicit environment detection gate. |
 | **dev/checkpoint** | `claude/checkpoint` + `checkpoint:checkpoint` plugin | = | Already covered. |
 | **dev/copilot-asset-audit** | — | SKIP | Copilot-platform-specific. Not applicable. |
-| **dev/dependency-audit** | `claude/dependency-audit` | = | Already ported. |
+| **dev/dependency-audit** | `claude/dep-audit` | = | Already ported. |
 | **dev/execute-plan** | `claude/execute-plan` + `superpowers:executing-plans` | = | Already covered. |
 | **dev/execute-workflow** | — | MISSING | **Governed execution** with required artifacts (review-plan, review-code, adversarial-review, disposition-log). Distinct from execute-plan — adds governance layer. |
 | **dev/hotfix** | `claude/hotfix` | = | Already ported. |
 | **dev/investigate-code** | — | MISSING | Cross-repo code investigation with structured JSON match schema + versioned Markdown reports. |
-| **dev/k8s-deploy-verify** | `claude/k8s-deploy-verify` | = | Already ported. |
-| **dev/migration-guide** | `claude/migration-guide` | = | Already ported. |
+| **dev/k8s-deploy-verify** | `claude/k8s-verify` | = | Already ported. |
+| **dev/migration-guide** | `claude/dep-migrate` | = | Already ported. |
 | **dev/postmortem** | — | MISSING | Structured retrospective tied to governed-run artifacts. No built-in equivalent. |
 | **dev/ship** | — | MISSING (as canonical) | Exists only as `_project/ship` in Baker Street. Canonical version would codify delivery flow. |
 | **dev/test-plan** | `claude/test-plan` | = | Already ported. Evaluate rubric merge. |
@@ -145,14 +145,14 @@ Status legend: `MISSING` (no equivalent in claude/ or built-ins) · `BUILT-IN` (
 | **ba-knowledge-ops** | `ba-knowledge-capture` + `ba-eval-harness` plugins | BUILT-IN | Plugins cover this. |
 | **ba-ideation** | — | MISSING (paired with ideate prompt) | Workshop-ready outputs. |
 | **tech-ideation** | `superpowers:brainstorming` (partial) | BUILT-IN? | Brainstorming is more open-ended; tech-ideation is architecture-specific. Evaluate. |
-| **adversarial-review** | `claude/adversarial-review` | = | Already ported. |
+| **adversarial-review** | `claude/review-adversarial` | = | Already ported. |
 | **test-planning** | `claude/test-plan` | = | Evaluate rubric merge — copilot-native version may add checklists. |
 | **test-quality** | Used internally by `claude/review-tests` | = | Already covered. |
 | **api-patterns** | Used internally by `claude/review-api` | = | Already covered. |
 | **db-schema-review** | Used internally by `claude/review-db` | = | Already covered. |
 | **ui-design-compliance** | Used internally by `claude/review-design` | = | Already covered. |
-| **k8s-verification** | Used internally by `claude/k8s-deploy-verify` | = | Already covered. |
-| **dependency-change-management** | Used internally by `claude/dependency-audit` + `migration-guide` | = | Already covered. |
+| **k8s-verification** | Used internally by `claude/k8s-verify` | = | Already covered. |
+| **dependency-change-management** | Used internally by `claude/dep-audit` + `claude/dep-migrate` | = | Already covered. |
 | **ado-work-items** | Used internally by `claude/work-item` | = | Already covered. |
 | **code-investigation-orchestrator** | — | MISSING | Part of investigate-code cluster. |
 | **code-investigation-search** | — | MISSING | JSON match schema. Part of investigate-code cluster. |
@@ -163,7 +163,7 @@ Status legend: `MISSING` (no equivalent in claude/ or built-ins) · `BUILT-IN` (
 | Copilot-native agent | Claude subagent equivalent | Status | Notes |
 |---|---|---|---|
 | **code-reviewer** | `feature-dev:code-reviewer` / `pr-review-toolkit:code-reviewer` | BUILT-IN | Plugin subagents cover this. |
-| **adversarial-reviewer** | Agent tool + `claude/adversarial-review` skill | = | Spawn via Agent with skill reference. |
+| **adversarial-reviewer** | Agent tool + `claude/review-adversarial` skill | = | Spawn via Agent with skill reference. |
 | **plan-reviewer** | Agent tool + plan review skill | MISSING | New subagent for plan readiness/proof obligations. |
 | **disposition-coordinator** | — | MISSING | Pairs with review-disposition-governance. Reconciles findings into disposition log. |
 | **execute-orchestrator** | — | MISSING | Drives the governed workflow. |
@@ -195,8 +195,8 @@ Delivers a distinct workflow beyond `superpowers:executing-plans` — specifical
 
 | Order | New Claude canonical skill | Source | Dependencies |
 |---|---|---|---|
-| A1 | `claude/_rubrics/disposition` | `skills/review-disposition-governance/SKILL.md` | None (foundational, not user-invokable) |
-| A2 | `claude/_rubrics/repo-delivery` | `skills/repo-delivery/SKILL.md` | None (not user-invokable) |
+| A1 | `claude/_internal/disposition` | `skills/review-disposition-governance/SKILL.md` | None (foundational, not user-invokable) |
+| A2 | `claude/_internal/repo-delivery` | `skills/repo-delivery/SKILL.md` | None (not user-invokable) |
 | A3 | `claude/execute-workflow` | `prompts/dev/execute-workflow.prompt.md` | A1, A2 |
 | A4 | **`claude/kickoff`** | `prompts/dev/autonomous-development-kickoff.prompt.md` | A1 |
 | A5 | `claude/postmortem` | `prompts/dev/postmortem.prompt.md` + `agents/postmortem-analyst.agent.md` | A1 |
@@ -257,16 +257,16 @@ Single bundled skill recommended (not 6 separate files). Embed orchestrator/sear
 
 ### Cluster C: PRD Readiness
 
-Fills the **pre-implementation** gap. `claude/acceptance` handles post-impl; this handles pre-impl.
+Fills the **pre-implementation** gap. `claude/prd-acceptance` handles post-impl; this handles pre-impl.
 
 | Order | New Claude canonical skill | Source |
 |---|---|---|
 | C1 | `claude/prd-readiness` | `skills/prd-readiness/SKILL.md` (knowledge — universal rubric) |
 | C2 | `claude/prd-validate` | `prompts/ba/prd-validator.prompt.md` + `agents/prd-quality-gate.agent.md` |
 
-**Naming (per Q3 resolution):** `claude/prd-readiness` for the new pre-impl skill; existing `claude/acceptance` stays unchanged for post-impl.
+**Naming (per Q3 resolution):** `claude/prd-readiness` for the new pre-impl skill; existing `claude/prd-acceptance` stays unchanged for post-impl.
 
-**Environmental templates:** None. PRD readiness rubric is universal. PRD file location detection uses the same pattern as existing `claude/acceptance` (scans common paths).
+**Environmental templates:** None. PRD readiness rubric is universal. PRD file location detection uses the same pattern as existing `claude/prd-acceptance` (scans common paths).
 
 ### Cluster D: Environment Detection
 
@@ -395,7 +395,7 @@ Only proceed to the main workflow if all required config is present.
 
 **Skills that do NOT need pre-flight checks (no required config):**
 
-- `claude/_rubrics/disposition`, `claude/_rubrics/repo-delivery` (pure rubrics)
+- `claude/_internal/disposition`, `claude/_internal/repo-delivery` (pure rubrics)
 - `claude/kickoff` (references other skills, no direct config)
 - `claude/prd-readiness`, `claude/prd-validate` (universal rubrics)
 - `claude/ideate` (universal)
@@ -456,7 +456,7 @@ Places where the copilot-native version may carry additions worth merging into t
 
 | Existing claude skill | Copilot-native counterpart | Candidate enhancement |
 |---|---|---|
-| `claude/adversarial-review` | `prompts/dev/adversarial-review.prompt.md` | Explicit "switch model family" discipline; cross-model verdict rubric |
+| `claude/review-adversarial` | `prompts/dev/adversarial-review.prompt.md` | Explicit "switch model family" discipline; cross-model verdict rubric |
 | `claude/test-plan` | `skills/test-planning/SKILL.md` | Review the TDD-first rubric for any novel checklist items |
 | `claude/review-gauntlet` | `prompts/review/adversarial-review-gauntlet.prompt.md` | Already in parity per `MAPPING.md` — verify no drift |
 
@@ -553,8 +553,8 @@ Dependency-ordered. Each phase is independently reviewable. **Path A adopted —
 3. Document the pre-flight check canonical pattern (as reusable fragment)
 
 ### Phase 1 — Foundations (universal, no config needed)
-4. `claude/_rubrics/disposition` (rubric, not user-invokable)
-5. `claude/_rubrics/repo-delivery` (rubric, not user-invokable)
+4. `claude/_internal/disposition` (rubric, not user-invokable)
+5. `claude/_internal/repo-delivery` (rubric, not user-invokable)
 6. `claude/env-check` skill + ship blank `env.config.template.md` + embed pre-flight check
 7. Author global `~/.claude/CLAUDE.md` pointer rule (5 lines, references `env.config.md`)
 
@@ -580,18 +580,18 @@ Dependency-ordered. Each phase is independently reviewable. **Path A adopted —
 
 ### Phase 5 — Evaluate + retire
 22. Evaluate `claude/ideate` vs `superpowers:brainstorming` — drop or ship
-23. Enhance existing `claude/adversarial-review` with model-switch discipline
+23. Enhance existing `claude/review-adversarial` with model-switch discipline
 24. Retire `vscode/` tree and `MAPPING.md` (archive to `archives/`)
 25. Retire `deploy.sh` (already deprecated)
 
-### Phase 6 — Deferred renames (existing skills)
-26. `claude/acceptance` → `claude/prd-acceptance`
-27. `claude/dependency-audit` → `claude/dep-audit`
-28. `claude/migration-guide` → `claude/dep-migrate`
-29. `claude/k8s-deploy-verify` → `claude/k8s-verify`
-30. `claude/adversarial-review` → `claude/review-adversarial`
-31. `claude/ba-adversarial-review` → `claude/ba-review-adversarial`
-32. Update all cross-references in affected skills after renames
+### Phase 6 — Completed renames in current Claude structure
+26. `claude/prd-acceptance`
+27. `claude/dep-audit`
+28. `claude/dep-migrate`
+29. `claude/k8s-verify`
+30. `claude/review-adversarial`
+31. Remaining future candidate: `claude/ba-adversarial-review` → `claude/ba-review-adversarial`
+32. Keep cross-references aligned with the current names.
 
 **Out of scope for this document:** Actual porting work. This is a plan for review.
 
@@ -607,7 +607,7 @@ Recorded here for audit trail. Each resolution is reflected in the plan above.
 |---|---|---|
 | Q1 | Governance fit? | **Port as opt-in.** Default stays `claude/execute-plan`. Heavyweight `claude/execute-workflow` ships for projects that invest in the process-doc setup. |
 | Q2 | Subagent strategy? | **Agent tool + skill reference** for most governance agents. **Custom subagents** only for `orchestrator-code-investigation` + `specialist-code-investigation-search` (distinct JSON-contract protocol). |
-| Q3 | PRD naming? | **New `claude/prd-readiness`, keep existing `claude/acceptance`.** |
+| Q3 | PRD naming? | **New `claude/prd-readiness`, keep existing `claude/prd-acceptance`.** |
 | Q4 | Ideate evaluate vs port? | **Direct port with in-flight evaluation.** Drop if 30-min port reveals `brainstorming` + BA plugin covers it. |
 | Q5 | Shell-routing scope? | **Global `~/.claude/CLAUDE.md` with short pointer** to `~/.claude/env.config.md` (separate editable file). Keeps CLAUDE.md lean; shell-map lives where it can be edited without touching CLAUDE.md. |
 | Q6 | MAPPING.md scope? | **Retire `MAPPING.md` after port** along with the `vscode/` tree. Going forward only `claude/` and `copilot-native/` are canonical. |
@@ -623,7 +623,7 @@ Recorded here for audit trail. Each resolution is reflected in the plan above.
 | **Self-heal copilot-native (item 2)** | New Cluster G added. `execution-environment` skill + instruction + prompt rewritten to use detection protocol + user-config pattern. `personal.instructions.md` unchanged (already correct). |
 | **Path A — Direct port** | Skills authored by hand in `~/repos/skills/{claude,copilot-native}/`. Skill-factory migration deferred to separate future effort. |
 | **Configure skill + pre-flight checks (Cluster H)** | New `/configure <target>` skill interviews user and fills blank templates. Every config-dependent skill embeds a pre-flight check that halts with actionable "run /configure" or "hand-edit" message if config is missing. Ships first (Phase 0) as dependency for all other clusters. |
-| **Naming conventions (§13)** | Prefix-grouped names for alphabetical clustering. Short verbs for atomic ops. `_rubrics/` namespace hides knowledge skills from `/`-menu. `/kickoff` for autonomous dev, `/env-check`, `/code-investigate`. Copilot agents wrap governed flows. 6 deferred renames for existing skills (Phase 6). |
+| **Naming conventions (§13)** | Prefix-grouped names for alphabetical clustering. Short verbs for atomic ops. `_internal/` namespace hides knowledge skills from `/`-menu. `/kickoff` for autonomous dev, `/env-check`, `/code-investigate`. Copilot agents wrap governed flows. 6 deferred renames for existing skills (Phase 6). |
 
 ## 13. Naming Conventions & Discoverability
 
@@ -660,13 +660,13 @@ Post-port, the `/`-menu will contain 40+ entries. Without naming discipline, the
 
 **Rule 4 — Rubric/knowledge skills are NOT in `/`-menu:**
 
-Knowledge rubrics that other skills reference are placed in `claude/_rubrics/` namespace. They do NOT appear as slash commands and are never user-invoked directly.
+Knowledge rubrics that other skills reference are placed in `claude/_internal/` namespace. They do NOT appear as slash commands and are never user-invoked directly.
 
 | Rubric skill | Path | Referenced by |
 |---|---|---|
-| disposition | `claude/_rubrics/disposition/SKILL.md` | execute-workflow, postmortem, kickoff |
-| repo-delivery | `claude/_rubrics/repo-delivery/SKILL.md` | execute-plan, ship, hotfix, checkpoint |
-| review-foundations | `claude/_rubrics/review-foundations/SKILL.md` (future, Cluster F) | review-api, review-db, review-design, review-tests |
+| disposition | `claude/_internal/disposition/SKILL.md` | execute-workflow, postmortem, kickoff |
+| repo-delivery | `claude/_internal/repo-delivery/SKILL.md` | execute-plan, ship, hotfix, checkpoint |
+| review-foundations | `claude/_internal/review-foundations/SKILL.md` (future, Cluster F) | review-api, review-db, review-design, review-tests |
 
 **Rule 5 — `/configure` with subcommand-style argument (one command):**
 - `/configure` with no arg → list available targets + which are unconfigured
@@ -693,25 +693,25 @@ Knowledge rubrics that other skills reference are placed in `claude/_rubrics/` n
 |---|---|---|
 | N1 | Rename `acceptance` → `prd-acceptance`? | **Yes.** Groups the PRD lifecycle together. |
 | N2 | `autonomous-dev` name | **`/kickoff`** — short, distinctive, no jargon. |
-| N3 | Rubric skills placement | **`_rubrics/` namespace** — keeps `/`-menu clean, still discoverable by skills that reference them. |
+| N3 | Rubric skills placement | **`_internal/` namespace** — keeps `/`-menu clean, still discoverable by skills that reference them. |
 | N4 | `/configure` structure | **One command + target argument** — no separate `/configure-env`, `/configure-workflow`. |
 | N5 | Copilot agent wrappers? | **Yes.** Agents wrap governed flow entry points. Prompts are thin launchers; agents do the orchestration. |
 
-### Deferred renames (existing skills — Phase 6)
+### Rename status (existing skills — Phase 6)
 
-These existing `claude/` skills should be renamed for consistency, but after the port is complete:
+These existing `claude/` skill names are now aligned with the prefix-group convention unless noted:
 
-| Current name | Proposed | Change |
+| Current name | Status | Change |
 |---|---|---|
-| `claude/acceptance` | `claude/prd-acceptance` | Prefix-group |
-| `claude/dependency-audit` | `claude/dep-audit` | Shorten prefix |
-| `claude/migration-guide` | `claude/dep-migrate` | Shorten + cluster |
-| `claude/k8s-deploy-verify` | `claude/k8s-verify` | Shorten |
-| `claude/code-review` | `claude/code-review` | (no change — already good) |
-| `claude/adversarial-review` | `claude/review-adversarial` | Cluster-prefix |
-| `claude/ba-adversarial-review` | `claude/ba-review-adversarial` | Cluster-prefix |
-| `claude/env-check` | n/a — new skill ships as `env-check` | — |
-| `claude/code-investigate` | n/a — new skill ships as `code-investigate` | — |
+| `claude/prd-acceptance` | done | Prefix-group |
+| `claude/dep-audit` | done | Shorten prefix |
+| `claude/dep-migrate` | done | Shorten + cluster |
+| `claude/k8s-verify` | done | Shorten |
+| `claude/code-review` | done | Already good |
+| `claude/review-adversarial` | done | Cluster-prefix |
+| `claude/ba-adversarial-review` | future candidate | Cluster-prefix |
+| `claude/env-check` | done | New skill ships as `env-check` |
+| `claude/code-investigate` | done | New skill ships as `code-investigate` |
 
 ---
 
@@ -724,12 +724,12 @@ All scope questions resolved. Path A adopted. Naming conventions adopted. Plan i
 | Phase | Scope | Item count |
 |---|---|---|
 | 0 | Configure skill + pre-flight pattern (Cluster H) | 3 |
-| 1 | Foundations — `_rubrics/disposition`, `_rubrics/repo-delivery`, `env-check` | 4 |
+| 1 | Foundations — `_internal/disposition`, `_internal/repo-delivery`, `env-check` | 4 |
 | 2 | Governed execution — `execute-workflow`, process-doc templates, `kickoff`, `ship`, `postmortem` | 6 |
 | 3 | Readiness + investigation — `prd-readiness`, `prd-validate`, `code-investigate` | 3 |
 | 4 | copilot-native self-heal (Cluster G) | 5 |
 | 5 | Evaluate + retire (ideate eval, adversarial-review enhancement, vscode retirement) | 4 |
-| 6 | Deferred renames of existing skills (acceptance→prd-acceptance, dep-audit, k8s-verify, etc.) | 7 |
+| 6 | Completed/current rename alignment (prd-acceptance, dep-audit, k8s-verify, etc.) | 7 |
 
 **When ready to start building, invoke me with something like:**
 

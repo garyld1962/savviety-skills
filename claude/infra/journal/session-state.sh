@@ -36,7 +36,7 @@ $(if [[ -n "$uncommitted" ]]; then echo "$uncommitted" | head -5 | sed 's/^/- /'
 - Review uncommitted changes or continue from last commit
 
 ## Pointers
-- Run /session-save-state mid-session for a richer resume context
+- Add a manual journal note mid-session for richer resume context
 EOF
 }
 

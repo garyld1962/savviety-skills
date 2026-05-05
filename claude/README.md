@@ -10,10 +10,11 @@ real project, the deployed runtime layout is different:
 | Source in this repo | Project destination | Notes |
 |---|---|---|
 | `claude/<skill>/` | `.claude/skills/<skill>/` | Shared user-invokable skills |
-| `claude/_rubrics/` | `.claude/skills/_rubrics/` | Shared reference material |
+| `claude/_internal/` | `.claude/skills/_internal/` | Internal callable contracts and rubrics; hidden from normal help |
+| `claude/infra/<asset>/` | `.claude/<asset>/` | Hook and utility scripts; not installed as skills |
 | `claude/settings.template.json` | `.claude/settings.json` | Optional starter for permissions and hooks |
 | `templates/CLAUDE.local.md` | `CLAUDE.local.md` | Personal local overrides; never overwrite once created |
-| `claude/README.md`, `claude/SESSION-CONTEXT.md` | Do not copy into `.claude/skills/` | Source docs and reference material |
+| `claude/README.md`, `claude/MODEL-POLICY.md`, `claude/SESSION-CONTEXT.md` | Do not copy into `.claude/skills/` | Source docs and reference material |
 
 If you're testing directly from this source repo, copy the shared skill folders
 into `.claude/skills/` with that mapping. If you're consuming a published
@@ -31,34 +32,38 @@ project-local `.claude/skills/_project/` content.
 | Skill | Invocation | Purpose |
 |-------|------------|---------|
 | kickoff | `/kickoff` | Start autonomous development from a PRD, story, or AERS |
-| plan | `/plan` | Create an implementation plan from requirements |
+| execute-prd | `/execute-prd` | Convert PRD/work-item context into a plan and execute it |
 | execute-plan | `/execute-plan` | Execute a plan file with task-by-task validation |
-| execute-workflow | `/execute-workflow` | Run the governed execution workflow with review artifacts |
+| validate-plan | `/validate-plan` | Validate that a written plan is ready to execute |
 | checkpoint | `/checkpoint` | Quality gate: lint, build, tests for changed scope |
 | ship | `/ship` | Move completed work through the repo's delivery flow |
 | pr | `/pr` | Create and merge a pull request from the current branch |
 | hotfix | `/hotfix` | Fast-path emergency fix workflow |
-| teams | `/teams` | Run 2-4 parallel implementation streams with nested worker roles |
 | changelog | `/changelog` | Generate or update changelog content from repo changes |
 | sync-main | `/sync-main` | Sync the current branch with main safely |
+| audit-existing | `/audit-existing` | Audit an existing implementation against test and delivery expectations |
+| parallel-optimization | `/parallel-optimization` | Restructure a plan for safe parallel execution |
+| process-tune | `/process-tune` | Tune shared workflow rules from repeated run evidence |
 
 ### Requirements, Design & BA
 
 | Skill | Invocation | Purpose |
 |-------|------------|---------|
-| prd-validate | `/prd-validate` | Turn a PRD, story, or rough spec into an implementation-ready AERS (rubric: `dev/_rubrics/aers-readiness/`) |
+| prd-validate | `/prd-validate` | Turn a PRD, story, or rough spec into an implementation-ready AERS (rubric: `_internal/aers-readiness/`) |
 | prd-acceptance | `/prd-acceptance` | Validate whether delivered work satisfies the PRD/acceptance bar |
 | spec-review-adversarial | `/spec-review-adversarial` | Adversarial review of specs, requirements, stories, and acceptance criteria |
 | ideate | `/ideate` | Explore solution directions before detailed planning |
 | thesis | `/thesis` | Interrogate for a single-sentence product or architectural thesis, then audit scope against it |
 | grill-me | `/grill-me` | Stress-test a plan or design by walking decision branches |
 | ubiquitous-language | `/ubiquitous-language` | Build a shared business/domain vocabulary |
+| what-is-it-about | `/what-is-it-about` | Extract a thesis and outline from a YouTube/video artifact |
 
 ### Review & Investigation
 
 | Skill | Invocation | Purpose |
 |-------|------------|---------|
 | code-review | `/code-review` | Domain-based review controller with profiles and overlays |
+| code-review-professional | `/code-review-professional` | Seniority-calibrated craft grading for a code change |
 | review-adversarial | `/review-adversarial` | Cross-model adversarial review |
 | review-gauntlet | `/review-gauntlet` | Meta-review that challenges review output itself |
 | code-investigate | `/code-investigate` | Evidence-backed code investigation across one or more repos |
@@ -93,13 +98,12 @@ Several review skills overlap with Claude Code built-ins. Use this matrix to pic
 | dep-audit | `/dep-audit` | Audit dependency health and risk |
 | dep-migrate | `/dep-migrate` | Plan major-version dependency migrations |
 | work-item | `/work-item` | Fetch Azure DevOps or Linear work-item context |
+| repo-status | `/repo-status` | Show live branch, worktree, push, stash, and PR state |
 
 ### Session & Meta
 
 | Skill | Invocation | Purpose |
 |-------|------------|---------|
-| whereami | `/whereami` | Restore session/project context |
-| session-save | `/session-save` | Persist session context for later restoration |
 | skill-help | `/skill-help` | Discover available shared and local Claude skills |
 | skill-audit | `/skill-audit` | Audit skill and plugin ecosystem coverage |
 | find-skills | `/find-skills` | Discover installable ecosystem skills for a given need |
@@ -110,7 +114,9 @@ Non-skill assets that ship alongside the skills — typically hooks or shared sc
 
 | Asset | Purpose |
 |-------|---------|
-| pr-guardrail | PreToolUse hook that intercepts `gh pr create` and warns about existing open PRs. See `claude/pr-guardrail/INSTALL.md` |
+| pr-guardrail | PreToolUse hook that intercepts `gh pr create` and warns about existing open PRs. See `claude/infra/pr-guardrail/INSTALL.md` |
+| journal | Session journal hook scripts. Installed to `.claude/journal/`. |
+| install-scan | Dependency/install scanning hook scripts. Installed to `.claude/install-scan/`. |
 
 ## Starting execution from a PRD or AERS
 
@@ -123,16 +129,16 @@ workflow skills against that file.
 | Use case | Trigger |
 |---|---|
 | Lightweight autonomous implementation | `/kickoff PRD.md` |
-| Governed execution with review/disposition artifacts | `/execute-workflow PRD.md` |
-| Manual staged path | `/prd-validate PRD.md` → `/plan ...` → `/execute-plan <plan-file>` |
+| PRD-to-execution path | `/execute-prd PRD.md` |
+| Manual staged path | `/prd-validate PRD.md` → write a plan → `/validate-plan ...` → `/execute-plan <plan-file>` |
 
 ### Typical flow
 
 1. **Read the artifact** (`PRD.md`, `AERS.md`, story, or spec).
 2. **Run readiness** if ambiguity remains (`/prd-validate` directly, or via
-   `/kickoff` / `/execute-workflow`).
-3. **Plan** with `/plan` once the artifact is ready enough to build.
-4. **Execute** with `/execute-plan` or let `/kickoff` / `/execute-workflow`
+   `/kickoff` / `/execute-prd`).
+3. **Plan** once the artifact is ready enough to build.
+4. **Execute** with `/execute-plan` or let `/kickoff` / `/execute-prd`
    carry the workflow through implementation and review.
 
 ## Multi-File Skills
@@ -152,15 +158,11 @@ analysts, worker prompts, or foundations:
 ```
 code-review/
 ├── SKILL.md                           # Orchestrator
-├── foundations/                        # Shared schemas, rubrics, templates
-│   ├── finding-schema.md
-│   ├── severity.md
-│   └── report-template.md
-├── specialists/                       # Domain-specific reviewers
-│   ├── typescript-quality/SKILL.md
-│   ├── security/SKILL.md
-│   └── ...
-└── report-writer/SKILL.md             # Report formatter
+├── concept/                            # Base review lenses
+├── dialect/                            # Language-specific overlays
+├── platform/                           # Platform/infrastructure overlays
+├── profiles/                           # Review profile YAML
+└── references/                         # Controller support docs
 
 test-plan/
 ├── SKILL.md                           # Orchestrator
@@ -168,12 +170,17 @@ test-plan/
 ├── analysts/                          # Domain-specific analysts
 └── test-writer/SKILL.md               # Test case writer
 
-teams/
+execute-plan/
 ├── SKILL.md                           # Orchestrator
-└── agents/                            # Role definitions
+└── agents/                            # Private worker prompts
     ├── implementer.md
     ├── reviewer.md
     └── fixer.md
+
+_internal/
+├── aers-readiness/SKILL.md             # Internal callable rubric
+├── disposition/SKILL.md                # Internal callable contract
+└── repo-delivery/SKILL.md              # Internal callable contract
 ```
 
 The important architectural distinction is **private worker role vs reusable
@@ -205,7 +212,7 @@ testing manually from the source repo.
 
 ## BA Skills
 
-Most BA discipline skills (problem-thesis, stakeholder, requirements, etc.) live in the [superpowers plugin](https://github.com/anthropics/superpowers) rather than this repo. The local `ba/` folder holds `ubiquitous-language` (DDD glossary). Adversarial review of specs, validation of PRDs against the AERS rubric, and acceptance verification of delivered work all live in `dev/` (`/spec-review-adversarial`, `/prd-validate`, `/prd-acceptance`) since they're spec-engineering / verification concerns rather than core BA elicitation.
+Most BA discipline skills (problem-thesis, stakeholder, requirements, etc.) live in the [superpowers plugin](https://github.com/anthropics/superpowers) rather than this repo. The local `ubiquitous-language` skill provides a DDD glossary workflow. Adversarial review of specs, validation of PRDs against the AERS rubric, and acceptance verification of delivered work live as user-invokable skills (`/spec-review-adversarial`, `/prd-validate`, `/prd-acceptance`) since they're spec-engineering / verification concerns rather than core BA elicitation.
 
 ## Platform Notes
 
@@ -214,8 +221,10 @@ Most BA discipline skills (problem-thesis, stakeholder, requirements, etc.) live
   from `claude/settings.template.json` if you need a neutral baseline
 - Skills can reference sub-files using relative paths
 - Claude worker roles may be nested under a skill (for example
-  `teams/agents/*.md`) or represented as subskills such as specialists,
-  analysts, and writers
+  `execute-plan/agents/*.md`) or represented as private resources such as
+  analysts and writers under the owning skill
+- Internal callable contracts live under `_internal/` and should not be listed
+  in normal user help
 - Review/fix loops should dispatch a **fresh** worker for each pass rather than
   assuming an earlier worker conversation can be resumed
 - Project-specific skills go in `.claude/skills/_project/` (never overwritten by
