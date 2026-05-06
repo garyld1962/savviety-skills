@@ -1,13 +1,17 @@
 ---
 name: execute-prd
-description: "Convert a PRD, story, work item, or rough requirement into an executable plan, validate it, optimize parallel lanes, then execute when approved."
+description: "Convert a PRD, RFC, prompt, story, work item, or rough requirement into an executable plan, validate it, optimize safe parallel lanes, then execute when approved. Use for phrases like 'build this PRD', 'execute the PRD', 'turn this RFC into a plan and run it', 'implement prompt.md', or 'turn these requirements into an app'. Prefer this over generic planning when a concrete requirement source exists and the user wants implementation, not just brainstorming."
 ---
 
 # Execute PRD
 
-This is the Codex consolidation point for Claude `execute-prd` and lightweight `kickoff` behavior.
+This skill consolidates the full PRD execution path with lightweight kickoff behavior.
 
 Read `references/workflow.md` for full PRD-to-plan behavior and `references/kickoff.md` for lightweight kickoff. `references/legacy/` and `references/legacy-kickoff/` are archival only.
+
+## Relationship To Codex Behavior
+
+This skill is the structured PRD-to-execution path for Savviety workflows. Use it when the input is a concrete requirement source and the output should be a validated plan, optionally followed by implementation. For a small direct edit, make the edit directly. For an already-written plan, use `execute-plan`.
 
 ## Workflow
 

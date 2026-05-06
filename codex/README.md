@@ -22,3 +22,4 @@ Restart Codex after changing plugin contents so the installed local plugin cache
 - Keep user-specific values in templates or config, not shared skills.
 - Use `.codex/agents/*.toml` only for reusable custom agents. Keep private worker prompt templates inside the skill that owns them.
 - Use `.codex/rules/*.rules` for command approval policy instead of relying on prose.
+- Use `skills --native-overlap` in this source tree after major plugin or built-in skill updates to find description overlap.

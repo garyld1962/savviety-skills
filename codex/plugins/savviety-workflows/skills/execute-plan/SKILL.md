@@ -1,6 +1,6 @@
 ---
 name: execute-plan
-description: "Execute a written implementation plan with validation, task checkpoints, reviews, milestone verification, and optional user-authorized parallel lanes."
+description: "Execute an existing written implementation plan end-to-end with validation, task checkpoints, focused build/test cycles, milestone verification, review gates, retry discipline, and optional user-authorized parallel lanes. Use when the user already has a plan file, often produced by execute-prd, and says 'execute the plan', 'run docs/plans/X.md', 'resume the plan', or 'work through this plan'. Prefer this over ad-hoc execution when the plan has tasks, acceptance criteria, verification commands, or parallel metadata."
 ---
 
 # Execute Plan
@@ -18,6 +18,10 @@ Load Codex-native references as needed:
 - `scripts/toolchain_probe.py` for deterministic PATH checks.
 
 `references/legacy/` is archival only. Do not load it during normal execution.
+
+## Relationship To Codex Behavior
+
+This skill is the structured plan executor for Savviety workflows. It adds plan validation, delivery contracts, per-task verification, review gates, and explicit subagent authorization around normal Codex implementation work. For vague intent without a plan, use `execute-prd` or clarify requirements first. For a trivial change, edit directly.
 
 ## Workflow
 
