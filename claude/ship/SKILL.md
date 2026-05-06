@@ -72,9 +72,13 @@ Unless `--skip-checkpoint`:
 
 ### Step 2.5: Security Quick Check (when warranted)
 
-If the diff touches authentication, authorization, input handling, rendering of user content, or persistence, apply the **security-quick-check** rubric (`_internal/security-quick-check/SKILL.md`).
+Apply the **security-quick-check** rubric
+(`_internal/security-quick-check/SKILL.md`) when the diff matches the
+canonical trigger criteria defined there (sensitive functional
+surfaces or sensitive paths). Skip criteria are also defined there;
+do not restate them here.
 
-Skip when the diff is purely cosmetic or has no trust-boundary involvement. Halt on findings; do not ship until resolved.
+Halt on findings; do not ship until resolved.
 
 ### Step 3: Commit
 
@@ -106,3 +110,11 @@ Only run with user confirmation.
 - Do NOT claim success without build/test passing.
 - Do NOT run release steps without user confirmation.
 - Do NOT push to main/master without explicit user instruction.
+
+## Contract
+
+- **Inputs:** current working tree with uncommitted changes (or commits ahead of default). Optional release flags. Calls `/checkpoint` (mandatory) and `_internal/security-quick-check` (conditional, per its trigger criteria).
+- **Preconditions:** CLAUDE.md `## Commands` declares lint/build/test/default_branch/package_manager (per `_internal/repo-delivery`); remote configured; `gh` CLI authenticated when opening a PR.
+- **Outputs:** clean commit, pushed branch, optionally a PR (delegated to `/pr`), optionally tag/release/deploy steps when configured and confirmed.
+- **Postconditions:** code is on the remote on the user-confirmed branch; release steps run only after explicit confirmation.
+- **Failure modes:** `/checkpoint` FAIL → halt. Security findings → halt until resolved. Push to main/master without explicit instruction → refuse. Never `git push --force` to a shared branch.

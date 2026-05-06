@@ -153,3 +153,11 @@ At the end, recommend the next workflow:
 - Do NOT turn routine implementation defaults into workshop decisions.
 - Do NOT jump to `/plan` until the direction is chosen.
 - Do NOT lose shared ideation context when switching from `idea` into `ba` or `tech` mode.
+
+## Contract
+
+- **Inputs:** a rough ask, a single document path, or a folder of related documents; mode flag (`idea` | `ba` | `tech`, default `idea`).
+- **Preconditions:** human operator at the keyboard (this is interactive ideation, not autonomous synthesis); inputs are readable.
+- **Outputs:** a direction document with identified options, risks, closed decisions where settled, and explicit open questions. Hands off to `/prd-validate`, `/plan`, or `superpowers:brainstorming` once the direction is chosen.
+- **Postconditions:** the artifact is concrete enough to drive `/prd-validate` or `/plan`; routine implementation defaults are NOT promoted into workshop decisions; mode-switch transitions preserve shared context.
+- **Failure modes:** input too vague for any mode → ask one clarifying question and stop; multi-document inputs disagree on direction → surface the conflict, do not silently average them.

@@ -7,6 +7,8 @@ private-resource: true
 
 # State Lifecycle Analyst
 
+> **Sub-skill of `/test-plan`.** Invoke this via `/test-plan` (State 4 dispatches it only when the entity has a status/state column; State 3 skips it otherwise). Direct invocation is unsupported — without the orchestrator's status-field detection and State 5 deduplication, the output will be incomplete and may collide with contract-compliance specs.
+
 **"Do state transitions work correctly?"** — For entities with status fields.
 
 ## Purpose
@@ -156,6 +158,14 @@ Status transitions often trigger side effects:
 
 Emit `TestSpecification` objects with `analyst: "state-lifecycle"`.
 
+### Output schema
+
+Every emitted spec MUST conform to the canonical schema in
+`test-plan/foundations/test-case-schema.md`. Use the `traceability`
+field to cite the source state machine (DB enum, Zod enum, business
+rule). State-lifecycle specs typically populate
+`category: "state-transition"`.
+
 ### Typical Output Distribution
 
 | Category | % of Specs |
@@ -188,3 +198,11 @@ Use the transition method name in the test name:
 
 ### 5. Don't Duplicate Contract Compliance
 This analyst focuses on the state machine mechanics. Contract compliance handles "does the operation return the right data." If both produce a spec for the same transition, the state-lifecycle spec focuses on status assertions while contract compliance focuses on return value assertions.
+
+## Contract
+
+- **Inputs:** DB schema column for status, Zod enum for status, business rules describing valid transitions, CLAUDE.md conventions.
+- **Preconditions:** invoked from `/test-plan` State 4 only when the entity has a status/state column (otherwise State 3 skips this analyst).
+- **Outputs:** `TestSpecification[]` conforming to `test-plan/foundations/test-case-schema.md`, with `analyst: "state-lifecycle"` and `category: "state-transition"` for the majority.
+- **Postconditions:** orchestrator validates, dedupes, and merges with other analysts' specs; status assertions stay in this analyst's specs.
+- **Failure modes:** no status field detected → analyst not selected by State 3; ambiguous transition rules → emit specs only for the rules the schema/code enforces and cite the gap in `traceability`.

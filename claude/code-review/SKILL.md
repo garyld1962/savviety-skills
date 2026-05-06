@@ -28,7 +28,7 @@ You are given:
 - **`profile`** — the ID of a review profile: `breakpoint` (light, run at milestones) or `full` (all 11 domains, run at PR boundary). The profile file lives at `profiles/{profile}.yaml`. If no profile is specified, default to `full`.
 - **`diff`** — the set of changed files and their contents, plus any necessary context files (callers, callees, manifests, migrations, config).
 - **`pr_description`** — optional text describing what the change is trying to do. If absent, note it and proceed.
-- **`diff_manifest`** — optional pre-computed triage object (provided by `/execute-plan` at the Phase 3 preamble). When present, use it and **skip step 2 (Triage the diff)** — the manifest already supplies the clusters, per-file language tagging, and the `touches` flags (persistence, public_surface, concurrency, auth, dependencies) that triage would otherwise compute. When absent (e.g., direct invocation of `/code-review`), fall back to step 2's internal triage.
+- **`diff_manifest`** — optional pre-computed triage object (provided by `/execute-plan` at the Phase 3 preamble). Schema, field reference, and consumer contract live in `_internal/diff-manifest/SKILL.md` — read it before consuming. When present and `schema_version` is recognised, use it and **skip step 2 (Triage the diff)** — the manifest already supplies the clusters, per-file language tagging, and the `touches` flags. When `schema_version` is unknown, log a warning and fall back to internal triage. When absent (e.g., direct invocation of `/code-review`), fall back to step 2's internal triage.
 
 ## Your job, in order
 
@@ -196,8 +196,9 @@ Return control to the human (rather than just emitting the report) when:
 
 When invoked from `/execute-plan`, check how many decision records
 the current task produced (counted from `docs/decisions/<plan-slug>/`
-records with `task: <current-task-id>` in frontmatter). If the count
-exceeds 5, emit a `minor` finding:
+records with `task: <current-task-id>` in frontmatter; record schema
+is canonically defined in `_internal/decision-record/SKILL.md`). If
+the count exceeds 5, emit a `minor` finding:
 
 ```
 [minor] too-many-decisions: Task <N> produced <count> decision
@@ -208,8 +209,8 @@ forced/trivial/fully-plan-prescribed choices.
 ```
 
 This is the backstop against index noise. The primary defence is the
-filter rule in `/execute-plan`'s decision-records section: write only
-when a future LLM could plausibly reverse the choice.
+filter rule in `_internal/decision-record/SKILL.md`: write only when
+a future LLM could plausibly reverse the choice.
 
 ## Things you must not do
 
@@ -219,3 +220,11 @@ when a future LLM could plausibly reverse the choice.
 - Do not run a single combined "review everything" worker as a shortcut. The separation is the point.
 - Do not skip the "Selected domains" section. It's how the human audits your triage.
 - Do not apply `severity_bump` before merging — apply it as the final step, so the bump is transparent and the human can see which findings moved.
+
+## Contract
+
+- **Inputs:** `profile` (`breakpoint` | `full`, default `full`), `diff`, optional `pr_description`, optional `diff_manifest` (schema in `_internal/diff-manifest`).
+- **Preconditions:** profile file `profiles/{profile}.yaml` exists and is readable. If `diff_manifest` provided, its `schema_version` is recognised (else fall back).
+- **Outputs:** structured findings list per selected domain, with file:line, severity, and a fix recommendation; report includes `Loaded profile` and `Selected domains` headers; merged findings with `severity_bump` applied last.
+- **Postconditions:** caller has actionable findings; no code edits; controller (this skill) does not generate findings of its own — only forwards from domain workers.
+- **Failure modes:** profile missing → halt with "Profile not found"; unknown `diff_manifest` schema_version → log warning and fall back to step-2 internal triage; domain worker disagreement → preserve both findings, do not collapse.

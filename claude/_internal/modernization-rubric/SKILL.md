@@ -3,6 +3,7 @@ name: modernization-rubric
 description: "Internal calibration rubric for /modernize. Encodes project-shape detection, sample-read strategy, per-theme finding patterns, admissible-moves matrix, and cull criteria. Embedded by /modernize. Not user-invocable."
 user-invocable: false
 internal: true
+kind: reference
 ---
 
 # Modernization Rubric

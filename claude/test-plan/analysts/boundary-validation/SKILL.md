@@ -7,6 +7,8 @@ private-resource: true
 
 # Boundary Validation Analyst
 
+> **Sub-skill of `/test-plan`.** Invoke this via `/test-plan` (State 4 dispatches it automatically when the entity has Zod constraints or DB nullability rules to test). Direct invocation is unsupported — without the orchestrator's State 2 context (project config, schemas, layer detection) and State 5 deduplication, the output is incomplete and may collide with other analysts' specs.
+
 **"What happens with bad input?"** — Tests the edges and error paths.
 
 ## Purpose
@@ -151,6 +153,14 @@ If the DB schema uses soft-delete (a `deletedAt` column):
 
 Emit `TestSpecification` objects with `analyst: "boundary-validation"`.
 
+### Output schema
+
+Every emitted spec MUST conform to the canonical schema in
+`test-plan/foundations/test-case-schema.md`. That doc defines every
+required and optional field, the `Assertion` shape, and the priority
+rubric. Do not invent additional top-level fields; use the
+`traceability` string to encode source-of-truth references.
+
 ### Typical Output Distribution
 
 | Category | % of Specs |
@@ -200,3 +210,11 @@ Testing that error messages include helpful context (IDs, field names) is nice b
   ]
 }
 ```
+
+## Contract
+
+- **Inputs:** entity Zod input schemas (with constraints), DB schema (nullable / defaults / unique), task context, CLAUDE.md conventions.
+- **Preconditions:** invoked from `/test-plan` State 4; schemas readable; analyst is enabled in `.test-plan/config.json`.
+- **Outputs:** `TestSpecification[]` conforming to `test-plan/foundations/test-case-schema.md`, with `analyst: "boundary-validation"`. Distribution skews error-path / edge-case.
+- **Postconditions:** orchestrator (State 5) validates, dedupes, and merges with other analysts' specs.
+- **Failure modes:** missing schemas → emit empty array with a `traceability` note explaining the gap; do not invent constraints.

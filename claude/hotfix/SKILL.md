@@ -196,3 +196,11 @@ Follow-up:
 4. **Document for follow-up.** If the root cause needs a deeper fix, note it in the PR and report.
 5. **Do not use hotfix for non-critical issues.** The normal pipeline exists for a reason.
 6. **Never merge without user confirmation.** Step 9 requires explicit approval.
+
+## Contract
+
+- **Inputs:** bug description; optional `--ado <id>` / `--linear <id>` (delegates to `/work-item`). Calls `_internal/security-quick-check` (mandatory, all 7 points).
+- **Preconditions:** repository on a clean working tree; ability to branch from default; tests are runnable; tracker auth if `--ado`/`--linear`.
+- **Outputs:** minimal-scope fix on a `hotfix/<slug>` branch; regression test that fails before the fix and passes after; PR with follow-up note if root cause warrants deeper work.
+- **Postconditions:** fix landed on default branch only after explicit user approval (Step 9); follow-up captured in PR body or report.
+- **Failure modes:** security-quick-check FAIL → halt unless user passes `--security-override <reason>`. Missing regression test → halt. Push to default without approval → refuse.

@@ -3,6 +3,7 @@ name: professional-rubric
 description: "Grade definitions and axis descriptions for the Craft grading (seniority-calibrated) used by code-review-professional. Not user-invokable — referenced by code-review-professional."
 user-invocable: false
 internal: true
+kind: reference
 ---
 
 # Professional Review Rubric

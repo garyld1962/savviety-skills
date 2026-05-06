@@ -230,3 +230,11 @@ Next steps:
 4. **Kill your processes.** Any background servers started during verification MUST be killed before the skill exits.
 5. **Detect, don't assume.** Ports, commands, paths, frameworks — detect them from the project. The PRD might say port 3001 but the implementation might use 8080. Check the actual code.
 6. **Build first.** If the project doesn't compile, stop early. API and UI checks are meaningless against broken code.
+
+## Contract
+
+- **Inputs:** path to the PRD/AERS to verify against; the built / running application. Calls `/prd-validate` if the artifact is incomplete and `/code-review` when defects warrant a structured list.
+- **Preconditions:** project compiles; required services (DB, queue, etc.) are reachable; ports/paths detected from the actual implementation, not assumed from the PRD.
+- **Outputs:** acceptance report with PASS/FAIL per criterion plus evidence (exit code, response body, code snippet, screenshot reference); list of mismatches between PRD and implementation.
+- **Postconditions:** all background processes started during verification are killed before exit; report attached to the PRD or the run report; no code edits are made.
+- **Failure modes:** build fails → halt early; required service unreachable → fail with platform-specific setup instructions; PRD declares behaviour the implementation contradicts → report as `prd-implementation-mismatch`, do not assume the PRD is wrong.

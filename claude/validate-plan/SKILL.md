@@ -311,3 +311,11 @@ three ambiguity categories.
 
 Those are separate concerns. This skill only answers: *is the plan
 structurally ready for `execute-plan` to consume?*
+
+## Contract
+
+- **Inputs:** path to a plan file (markdown with YAML frontmatter).
+- **Preconditions:** plan file exists and is readable.
+- **Outputs:** `VERDICT: PASS | WARN | FAIL` with a check-by-check breakdown (frontmatter shape, task discreteness, acceptance criteria, milestones, forbidden placeholders, parallel-execution shape if present, etc.); structured findings caller can act on.
+- **Postconditions:** caller (`/execute-plan` Phase 0b, `/execute-prd` step 7) decides whether to proceed (`PASS`), warn (`WARN`), or fix (`FAIL`).
+- **Failure modes:** plan file unreadable → `FAIL` with a file-access finding; plan present but parses inconsistently → `FAIL` with a `plan-ambiguity` finding; this skill never edits the plan — it only reports.

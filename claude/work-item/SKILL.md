@@ -146,7 +146,16 @@ Error: Not authenticated to <ADO|Linear>. <specific instructions for the platfor
 
 ## Key Rules
 
-1. **Read-only.** This skill fetches and displays. It does not modify work items.
-2. **Clean output.** Strip HTML, decode entities, preserve logical structure. The output must be readable as plain text.
-3. **Fail clearly.** If the tool or CLI is not available, say so with specific setup instructions. Do not guess at work item contents.
-4. **Used by other skills.** When /triage or /hotfix passes `--ado` or `--linear`, they call this skill internally. The output format must be consistent so callers can parse it.
+1. **Read-only on the tracker.** This skill fetches and displays. It does not modify work items.
+2. **Stdout-only output. Does not write to disk.** Renders the work item to stdout in the format above. Persisting the rendered markdown to a file (e.g. `docs/plans/PRD-<slug>.md`) is the caller's responsibility. `/triage`, `/hotfix`, and `/execute-prd` each handle persistence on their own terms.
+3. **Clean output.** Strip HTML, decode entities, preserve logical structure. The output must be readable as plain text and parseable by callers.
+4. **Fail clearly.** If the tool or CLI is not available, say so with specific setup instructions. Do not guess at work item contents.
+5. **Stable output format.** When /triage, /hotfix, or /execute-prd pass `--ado` or `--linear`, they call this skill internally and parse the output. Changes to the format are breaking changes to all callers.
+
+## Contract
+
+- **Inputs:** exactly one of `--ado <work-item-id>` or `--linear <issue-id>`.
+- **Preconditions:** Azure CLI installed and authenticated (`az login`, `az devops configure`) for ADO; Linear MCP server configured for Linear.
+- **Outputs:** rendered markdown to **stdout** in the fixed format under "Output Format". No file writes; no tracker mutations.
+- **Postconditions:** caller receives parseable markdown and is responsible for any persistence (e.g. `/execute-prd` writes it to `docs/plans/PRD-<slug>.md`).
+- **Failure modes:** auth/CLI/MCP unavailable → write `Error: …` to stdout with platform-specific setup instructions and exit non-zero. Item not found → `Error: Work item <id> not found.` Never invent content.

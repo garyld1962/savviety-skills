@@ -255,3 +255,27 @@ reviewed → create PR
 - Style/formatting changes
 - Documentation updates
 - Changes that already have comprehensive test coverage
+
+## Recursion safety
+
+Adversarial review cannot recurse:
+
+- The hard constraint above forbids subagents / `Agent` tool /
+  internal delegation — reviewers run only via opposite-model CLIs
+  (`codex`, `claude -p`, `gemini -p`).
+- Those CLI processes operate inside a sandboxed prompt and have no
+  access to invoke `/review-adversarial`.
+- Effective max depth is **1**. The orchestrator (this skill) is the
+  only frame; reviewers cannot spawn further reviews.
+
+If adversarial findings warrant another pass after fixes, the
+operator re-invokes this skill manually — that is a fresh, bounded
+invocation, not recursion.
+
+## Contract
+
+- **Inputs:** cumulative diff (when invoked from `/execute-plan`, this is `git diff $EXECUTE_PLAN_BASE_SHA..HEAD`); optional `pr_description`; optional `--model=<codex|gemini|claude>` override.
+- **Preconditions:** opposite-model CLI on PATH and authenticated (Step 0 preflight selects one); CLAUDE.md present at repo root; this skill is the orchestrator only — it never recurses (max effective depth: 1).
+- **Outputs:** synthesized verdict from cross-model reviewers; adversarial findings list with severity and rationale; never makes code changes.
+- **Postconditions:** verdict report attached to the PR or `/execute-plan` final report; the report distinguishes "ran and found nothing" from "didn't run".
+- **Failure modes:** no opposite-model CLI available → **auto mode** (from `/execute-plan --adversarial=auto`) skips silently and notes the reason in the report; **explicit invocation** (user direct or `--adversarial=always`) fails loudly and exits non-zero. Never use subagents / Agent tool / internal delegation — those run on the orchestrator's own model and defeat the cross-model purpose.

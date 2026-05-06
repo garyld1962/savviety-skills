@@ -118,3 +118,11 @@ Bias toward:
 - Do NOT mark the artifact ready if blocking ambiguity remains.
 - Do NOT stop at a business-oriented PRD if the user needs an engineering-executable output.
 - Do NOT drift into implementation planning — that belongs in `/plan`.
+
+## Contract
+
+- **Inputs:** `<path>` to a requirements artifact, OR the artifact pasted into the conversation. Optional flags: `--refine-problem`, `--full-spec`. Embeds `_internal/aers-readiness` for the rubric.
+- **Preconditions:** human operator is at the keyboard — this is an interactive interview, not a gate. Callers (`/kickoff`, `/execute-prd`) MUST NOT auto-invoke this skill from a non-interactive context.
+- **Outputs:** an enriched AERS written back to the artifact path (or a sibling `AERS.md` when started from a non-file source); closed decisions inlined; a fresh readiness score per the rubric's automated check; a gap list for residual unresolved items.
+- **Postconditions:** artifact moves toward `Ready` — but does not require it (`Partially ready` is an acceptable exit when residual gaps are documented as open decisions); callers can re-score with `_internal/aers-readiness` to confirm.
+- **Failure modes:** non-interactive context detected → refuse to start and suggest `_internal/aers-readiness` for a deterministic score instead; user says "you choose" on a non-default question → propose a default and ask for confirmation, do not silently pick.

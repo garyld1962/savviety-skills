@@ -143,3 +143,11 @@ Output a summary:
 - This is the fast gate. It does NOT run `/code-review`.
 - `/pr` and `/ship` call this skill as a prerequisite.
 - Known pre-existing test failures (documented in CLAUDE.md or auto-memory) should be noted but not block the verdict unless they are new regressions.
+
+## Contract
+
+- **Inputs:** working tree state. Reads `## Commands` from CLAUDE.md for `lint` / `build` / `test` / `package_manager` (per `_internal/repo-delivery`).
+- **Preconditions:** inside a git repo; toolchain available on PATH; not on the default branch unless explicitly invoked there.
+- **Outputs:** `PASS` or `FAIL` verdict plus per-check breakdown (lint, build, test for changed packages).
+- **Postconditions:** lint/build/test have actually run; the calling workflow may proceed only on `PASS`.
+- **Failure modes:** any check fails → `FAIL`; calling workflow (`/pr`, `/ship`) must halt. No retries here.

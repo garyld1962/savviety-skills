@@ -63,3 +63,11 @@ say so and list the evidence.
 - Do not propose fixes — only surface gaps. Fixes are the planner's job.
 - Do not duplicate work `/code-review` does. Audit is *what exists*, not
   *what's wrong with what exists*.
+
+## Contract
+
+- **Inputs:** repository path (default cwd); optional scope hints from the calling skill. Calls `_internal/dependency-classification` to label dependencies (mocked / substituted / real).
+- **Preconditions:** in a git repo (or a directory with a recognisable project shape); read access only — never modifies the working tree.
+- **Outputs:** structured audit report listing existing packages, public surfaces, persistence layout, current verification posture, dependency classifications, and gaps relative to the requested feature scope.
+- **Postconditions:** caller (`/execute-prd`, `/modernize`) consumes the audit as a plan input; the audit reports state-of-the-repo, not opinions about state-of-the-repo.
+- **Failure modes:** repo unreadable → halt; asked to propose fixes → refuse and surface the request as a finding (fixes belong to the planner); duplication with `/code-review` requested → refuse — audit is "what exists", review is "what's wrong with what exists".

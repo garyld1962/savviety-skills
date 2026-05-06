@@ -273,122 +273,23 @@ every execution is knowledge-destroying — the next LLM touching the
 same code starts cold and may reverse choices the previous execution
 spent effort to make. Decision records fill that gap.
 
-#### Record format
+The canonical schema, body sections, index format, write/read
+triggers, supersede mechanism, and proliferation guard live in
+`_internal/decision-record/SKILL.md`. Read it before producing or
+consuming a record. The summary below is a pointer, not a
+specification — when these two diverge, the canonical doc wins.
 
-One markdown file per decision at:
+`execute-plan` is the producer. It writes a record at
+`docs/decisions/<plan-slug>/<NNNN>-<kebab-slug>.md` on the trigger
+events listed in the canonical doc, and updates both
+`docs/decisions/INDEX.md` and `docs/decisions/index.json`. Phase 2b
+(per-task implementation) is also the read trigger: workers see all
+non-superseded records whose `files` glob matches the task's target
+set. Workers who silently reverse a non-superseded decision must
+raise a `plan-ambiguity` finding citing the decision's `id`.
 
-```
-docs/decisions/<plan-slug>/<NNNN>-<kebab-slug>.md
-```
-
-- `<plan-slug>` — the executing plan's `slug` frontmatter field.
-- `<NNNN>` — zero-padded sequence number within that plan-slug.
-- `<kebab-slug>` — short imperative: `0042-route-validation-at-controller`.
-
-Frontmatter (required):
-
-```yaml
----
-id: YYYYMMDD-NNNN
-plan: <plan-slug>
-task: <task-id>
-date: YYYY-MM-DD
-files:
-  - path/to/affected/file.ts
-  - path/to/glob/**
-tags: [routing, validation, ...]
-supersedes: null           # or the id of the decision this replaces
-superseded_by: null        # set when a later decision replaces this
----
-```
-
-Body sections, required in this order:
-Context · Decision · Reasoning · Rejected alternatives · Consequences · Revisit if.
-
-Detail:
-
-1. **Context** — what the executor was doing; what the plan said.
-2. **Decision** — what was chosen, stated as a complete imperative.
-3. **Reasoning** — why; cite the options considered.
-4. **Rejected alternatives** — each option considered with a one-line
-   rejection reason.
-5. **Consequences** — downstream effects. What now becomes easier, what
-   becomes harder.
-6. **Revisit if** — named triggers under which this decision should be
-   reconsidered.
-
-#### Index
-
-Two artefacts under `docs/decisions/`:
-
-- **`docs/decisions/INDEX.md`** — human-facing markdown with file globs → decision IDs.
-- **`docs/decisions/index.json`** — machine-queryable counterpart for the read-trigger:
-
-```json
-[
-  {
-    "id": "20260419-0042",
-    "files": ["src/services/auth.ts", "src/api/user/**"],
-    "tags": ["routing", "validation"],
-    "supersedes": null,
-    "superseded_by": null,
-    "path": "docs/decisions/user-validation-march/0042-controller-layer.md"
-  }
-]
-```
-
-Both files are updated whenever a record is written or superseded.
-
-#### Write triggers
-
-`execute-plan` writes a record on exactly these events:
-
-- A `plan-ambiguity` is resolved (Phase 1.5) — clarification answered
-  in interactive mode, or operator resolved on resume.
-- A `plan-deviation` is dispositioned (Phase 3d) — the disposition and
-  its rationale.
-- A non-trivial design call the plan didn't prescribe is made: API
-  shape, pattern choice, layer placement, library selection, state
-  machine, concurrency model, etc.
-
-**Filter rule to prevent noise.** Write a record ONLY when a
-reasonable future LLM, seeing only the code, could plausibly reverse
-the choice. Forced, trivial, or fully-plan-prescribed choices do NOT
-get records. If in doubt, err toward not writing; the index is noise
-when it records every comma.
-
-#### Read trigger
-
-At the start of each task's implementation (Phase 2b), before any
-worker dispatch:
-
-1. Compute the task's target file set from the plan.
-2. Query `docs/decisions/index.json` for records where any `files`
-   entry matches a target file (glob match).
-3. Filter out records with `superseded_by != null`.
-4. Read each matching record's full content.
-5. Include them in the implementing worker's context with the
-   directive: *"These decisions govern files you're about to modify.
-   Do not reverse a non-superseded decision without raising a
-   `plan-ambiguity` finding that cites the decision's ID. Workers who
-   silently reverse prior decisions undo effort and introduce drift."*
-
-#### Supersede mechanism
-
-When a new decision contradicts an existing one:
-
-1. Write the new record with `supersedes: <old-id>` in frontmatter.
-2. Rewrite the old record's frontmatter: set `superseded_by: <new-id>`.
-3. Neither record is deleted. The chain is traversable forward and
-   backward, preserving audit history.
-4. Update both `INDEX.md` and `index.json`.
-
-#### Proliferation guard
-
-`/code-review` flags any task that produces more than **5 decision
-records** in a single execution as a `minor` finding
-(`too-many-decisions`). The filter rule above is the first defence;
-this is the backstop against noise accretion.
+`/code-review` enforces the proliferation guard (>5 records per task
+→ `[minor] too-many-decisions`).
 
 ### Retry budget (global circuit breaker)
 
@@ -1073,50 +974,26 @@ Phase 3d (Plan alignment check) still reads the original plan
 task-list reconciliation works regardless of in-run plan edits.
 
 **Shared manifest.** Produce a single `diff_manifest` describing the
-effective diff (not the raw diff):
+effective diff (not the raw diff). The canonical schema, field
+reference, and producer/consumer contracts live in
+`_internal/diff-manifest/SKILL.md` — read it before producing the
+manifest.
 
-```json
-{
-  "base_sha": "<EXECUTE_PLAN_BASE_SHA>",
-  "head_sha": "<git rev-parse HEAD>",
-  "files": [
-    {
-      "path": "src/api/auth.ts",
-      "language": "typescript",
-      "lines_added": 42,
-      "lines_removed": 7,
-      "touches": ["public-surface", "persistence", "auth"]
-    }
-  ],
-  "clusters": [
-    { "id": "backend", "paths": ["src/api/**", "src/services/**"] },
-    { "id": "ui",      "paths": ["src/web/**"] },
-    { "id": "db",      "paths": ["migrations/**", "src/db/**"] }
-  ],
-  "languages": { "typescript": 7, "sql": 2, "markdown": 1 },
-  "touches": {
-    "persistence": true,
-    "public_surface": true,
-    "concurrency": false,
-    "auth": true,
-    "dependencies": false
-  }
-}
-```
+Always set `schema_version: 1`. Bump only on breaking changes (and
+update the canonical schema doc in the same commit).
 
-Pass the same manifest to both `code-review` (in 3b) and
-`code-review-professional` (in 3c). Both skills accept a
-`diff_manifest` input and, when provided, skip their own internal
-clustering step — they use the clusters, languages, and `touches`
-flags already computed.
+Pass the same manifest to `code-review` (in 3b) and
+`code-review-professional` (in 3c). Both accept `diff_manifest` and,
+when provided, skip their own internal clustering step — they use the
+clusters, languages, and `touches` flags already computed. This
+guarantees component boundaries match across reports.
 
-This ensures the two skills agree on component boundaries, eliminates
-redundant triage work, and makes their reports comparable
-cluster-by-cluster.
+`review-adversarial` (3e) does not currently consume `diff_manifest`;
+it receives the diff and `pr_description` only.
 
-When either skill is invoked **directly** (not via execute-plan),
-`diff_manifest` is absent and each skill falls back to its own internal
-triage — no behavioural change for external users.
+When either consumer is invoked **directly** (not via execute-plan),
+`diff_manifest` is absent and each consumer falls back to its own
+internal triage — no behavioural change for external users.
 
 ##### Intent / `pr_description` synthesis
 
@@ -1874,3 +1751,11 @@ The postmortem is the only artefact in the flow whose audience is the
 - **Single-message dispatch is mandatory for parallel waves.** All lane implementers (and later, all lane reviewers) dispatch in **one** message. Sequential dispatch produces sequential execution disguised as parallel; the fan-out is illusory.
 - **Never resume a prior subagent.** Each fixer pass is a fresh dispatch with the findings and target files in its prompt. Subagent state is not durable across calls; assuming it is silently drops fix attempts.
 - **Sequential merge after parallel waves.** Parallel-wave branches merge to `default_branch` one at a time per Phase 2.8: dependency-provider first, infrastructure before dependents, smallest-diff tiebreaker. Downstream lanes rebase with `--force-with-lease` (never `--force`) onto the updated `default_branch` after each merge. Build + test re-runs on `default_branch` after every merge.
+
+## Contract
+
+- **Inputs:** path to a plan file, plus optional flags (`--force`, `--adversarial=<auto|always|never|ask>`, `--run-folder`, `--postmortem`, `--postmortem-mode`, etc.). Calls `/validate-plan` (mandatory, Phase 0b), `/checkpoint` (mandatory, final task), `/code-review` (breakpoint and full), `/code-review-professional` (PR boundary), `/review-adversarial` (per `--adversarial`), `_internal/repo-delivery`, `_internal/disposition`, `_internal/diff-manifest` (producer), `_internal/security-quick-check` (per its trigger criteria).
+- **Preconditions:** plan file exists; CLAUDE.md `## Commands` section per `_internal/repo-delivery`; toolchain on PATH; not on default branch (Phase 0b.5); when `--adversarial=always`, an opposite-model CLI is reachable.
+- **Outputs:** completed-task markers per task, decision records under `docs/decisions/<plan-slug>/` (schema in `_internal/decision-record`), `diff_manifest` produced at Phase 3 preamble (schema in `_internal/diff-manifest`), execution report (`execution-report.md`/`.json`), optional `postmortem.md`, optional run folder bundle.
+- **Postconditions:** all plan tasks have completed-markers OR explicit unproved/blocked entries; `Plan-SHA` and `Base-SHA` appear on every commit; on failure, branch preserved and tagged `execute-plan/abort/...`; never destructive on failure.
+- **Failure modes:** Phase 0a/0b gate fail → halt; `/validate-plan` FAIL → refuse unless `--force` (logged prominently); plan-ambiguity / overlapping write scopes → halt; retry budget exhaustion (3 retries) → stop and report; subagent dispatch failure in parallel wave → fix-loop with fresh dispatch (never resume); destructive git ops forbidden in all paths.

@@ -30,7 +30,7 @@ record it as a grading finding.
 - **`diff`** — the set of changed files. Prefer `git diff $EXECUTE_PLAN_BASE_SHA..HEAD` at the PR boundary when invoked from `/execute-plan`.
 - **`pr_description`** — optional. If absent, note it and proceed.
 - **`requirements_source`** — optional prompt, PRD, RFC, issue, or plan text containing explicit non-negotiables. When present, use it for the Contract Compliance section below.
-- **`diff_manifest`** — optional pre-computed triage object (provided by `/execute-plan` at the Phase 3 preamble). When present, use its `clusters` as the component boundaries for step 1 (Identify components); do **not** re-cluster the diff. This guarantees you and `/code-review` report on the same components. When absent (e.g., direct invocation), fall back to clustering from the diff yourself.
+- **`diff_manifest`** — optional pre-computed triage object (provided by `/execute-plan` at the Phase 3 preamble). Schema, field reference, and consumer contract live in `_internal/diff-manifest/SKILL.md` — read it before consuming. When present and `schema_version` is recognised, use its `clusters` as the component boundaries for step 1 (Identify components); do **not** re-cluster the diff. This guarantees you and `/code-review` report on the same components. When `schema_version` is unknown, log a warning and fall back to clustering from the diff yourself. When absent (e.g., direct invocation), fall back to clustering from the diff yourself.
 
 ## Grade scale
 
@@ -249,3 +249,11 @@ The report does not ship until:
 - Do not force a single overall grade when components clearly differ. Split decisions are the expected output, not the exception.
 - Do not use the grade to judge the author as a person. Grade the code in this diff, not the human.
 - Do not grade a component staff unless all 7 axes are at senior or above and there's evidence the design improves the codebase beyond this change.
+
+## Contract
+
+- **Inputs:** `diff` (prefer `git diff $EXECUTE_PLAN_BASE_SHA..HEAD` when invoked from `/execute-plan`); optional `pr_description`; optional `requirements_source`; optional `diff_manifest` (schema in `_internal/diff-manifest`).
+- **Preconditions:** diff is at least ~10 lines (otherwise grading is noise — refuse). Rubric in `_internal/professional-rubric/SKILL.md` is current. If `diff_manifest` provided, its `schema_version` is recognised (else fall back).
+- **Outputs:** per-component grades on the 7 axes (junior/mid/senior/staff) with **2–3 diff-line citations per axis**; "Overall Read" with actionable takeaways per component; defects (if seen) listed under "Notes for code-review", not folded into axis grades.
+- **Postconditions:** caller (typically `/execute-plan` Phase 3e or a human reviewer) has a graded report; no code edits; component boundaries match `/code-review` when `diff_manifest` was shared.
+- **Failure modes:** axis with no citations → skip the axis and note it; components with materially different grades → split decision (do not force a single overall grade); unknown `diff_manifest` schema_version → log warning and fall back to internal clustering.

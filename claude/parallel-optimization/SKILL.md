@@ -1,6 +1,6 @@
 ---
 name: parallel-optimization
-description: "Analyze a PRD or plan and produce a parallel-agent execution map with dependency barriers, write scopes, and task ownership for LLM code generation."
+description: "Analyze a PRD or plan and produce a parallel-agent execution map with dependency barriers, write scopes, and task ownership for LLM code generation. TRIGGER on: 'parallelize the plan', 'parallel execution map', 'concurrency shape', 'optimize task ownership', 'parallel-safe lanes', 'split this plan into waves', 'after I draft the plan run parallel-optimization', 'add a Parallel Execution section'. Auto-invoked by /execute-prd step 6 — humans rarely need to call this directly except when reshaping a sequential plan into parallel before re-running /execute-plan."
 ---
 
 # parallel-optimization
@@ -11,7 +11,7 @@ embedded in the execution plan that later governs `/execute-plan`.
 
 ## When to Use
 
-- Inside `/execute-prd`, after the plan is drafted and before
+- Inside `/execute-prd` step 6, after the plan is drafted and before
   `/validate-plan` runs.
 - When converting a sequential plan to a parallel one, before re-running
   `/execute-plan`.
@@ -23,6 +23,26 @@ embedded in the execution plan that later governs `/execute-plan`.
 - Single-package change where parallelism cannot help.
 - The plan already has a `## Parallel Execution` section and you are
   not changing it — `/execute-plan` reads it as-is.
+
+## Who calls this
+
+This skill is **not standalone** — its output is a section embedded in
+an execution plan that `/execute-plan` will consume.
+
+| Caller | When |
+|---|---|
+| `/execute-prd` | step 6, mandatory, on every plan it drafts |
+| Operator manually | when re-shaping an existing plan from sequential to parallel before a new `/execute-plan` run |
+
+Plan-writers that emit an execution plan (such as `/execute-prd`) MUST
+either invoke this skill or inherit a `## Parallel Execution` section
+from elsewhere. `/execute-plan` defaults to sequential when the
+section is absent, but an explicit declaration is preferred so the
+mode (and rationale) are auditable.
+
+`/modernize` does not invoke `/parallel-optimization` itself — it
+emits a refactor PRD that `/execute-prd --type=refactor` consumes,
+and the parallelism decision happens there.
 
 ## Inputs
 
@@ -130,3 +150,11 @@ when a package path can be named.
   shape, not scope.
 - Do not duplicate the section in multiple plan files. The plan
   `/execute-plan` consumes is the only source.
+
+## Contract
+
+- **Inputs:** the PRD or draft execution plan; CLAUDE.md `## Commands`; existing package/module layout if present; existing tests and manifests if present.
+- **Preconditions:** caller is a plan-writer (typically `/execute-prd` step 6); plan tasks have file/scope information sufficient to compute write scopes and dependencies.
+- **Outputs:** a `## Parallel Execution` section (Mode + Rationale + Shared Context Packet + Ownership table + Barriers + Single-Owner Files + Parallel Safety Checks); optionally a `## Waves` section when foundation→fan-out structure exists. Output is embedded in the plan, not written to a separate file.
+- **Postconditions:** `/execute-plan` Phase 0b.25 / Phase 1 / Phase 1.1 consume the section as authoritative metadata; the section is the single source of truth for parallelism.
+- **Failure modes:** safe-parallel conditions cannot be met → emit `Mode: sequential` with rationale (do not silently fall back to unsafe parallelism); ≥5 parallel lanes per wave → refuse and require the operator to split the wave.

@@ -57,11 +57,13 @@ See _internal/repo-delivery for the schema.
 Resolution order:
 
 1. If `--ado <id>` or `--linear <id>` was supplied, invoke `/work-item`
-   to fetch the ticket. Extract title, description, acceptance
-   criteria, and work-item type. Materialise the result as the
-   canonical source artefact at
-   `docs/plans/PRD-<source-slug>.md` so the rest of the flow has a
-   stable file to reference. The plan header carries
+   to fetch the ticket. `/work-item` returns the rendered markdown to
+   stdout — it does **not** write to disk. **execute-prd** then
+   persists that rendered markdown to
+   `docs/plans/PRD-<source-slug>.md` (creating the directory if
+   needed) so the rest of the flow has a stable file to reference.
+   Extract title, description, acceptance criteria, and work-item type
+   from the rendered markdown. The plan header carries
    `**Source:** ADO #<id> — <title>` (or `Linear <id> — <title>`).
    Reject if more than one of `<path>` / `--ado` / `--linear` is set.
 2. Otherwise, use the explicit `<path>` if provided.
@@ -98,23 +100,30 @@ tests before drafting the plan.
 ### 3.5. Readiness gate
 
 Before extracting non-negotiables or drafting the plan, score the
-requirements source against the AERS readiness rubric in
-`_internal/aers-readiness/SKILL.md`. The audit from step 3 is an input —
-readiness is judged against *this repo*, not in the abstract.
+requirements source using the **Automated readiness check** in
+`_internal/aers-readiness/SKILL.md` (compute the points; verdict is
+`Ready` / `Partially ready` / `Not ready`). The audit from step 3 is
+an input — readiness is judged against *this repo*, not in the
+abstract.
 
-Behaviour:
+Behaviour by verdict:
 
-- If the source meets the rubric, proceed silently to step 4.
-- If gaps are minor and the operator is interactive, ask one question
-  at a time and inline the answers as **closed decisions** in the
-  generated plan (step 5). Do not invent answers.
-- If gaps are blocking and the run is autonomous (`--interactive=no`
-  passed through), abort with a `requirements-incomplete` finding
-  listing the unresolved rubric items. Do not draft a plan against an
-  unready PRD.
-- If the operator wants a focused interactive review, suggest
-  `/prd-validate` and stop. Do not invoke `/prd-validate` automatically
-  — it's an interview, not a gate.
+- **Ready (0–2 pts):** proceed silently to step 4.
+- **Partially ready (3–6 pts):**
+  - Interactive operator → ask the gap questions inline (one at a
+    time) and record answers as **closed decisions** in the
+    generated plan (step 5). Do not invent answers. Suggest
+    `/prd-validate` if the operator prefers a structured interview.
+  - Autonomous (`--interactive=no` passed through) → proceed and log
+    the gap list in the plan as a known risk under `## Open
+    Decisions`. Do not auto-invoke `/prd-validate`.
+- **Not ready (7+ pts):**
+  - Interactive operator → halt; suggest `/prd-validate` to close
+    gaps. Do not invoke it automatically — it's an interview, not a
+    gate.
+  - Autonomous → abort with a `requirements-incomplete` finding
+    listing the rubric points and the unresolved high-risk
+    ambiguities. Do not draft a plan against an unready PRD.
 
 The readiness gate's purpose is to refuse the most expensive failure
 mode this skill exists to prevent: a beautifully-validated plan built
@@ -277,6 +286,21 @@ section entirely — a single-wave plan is the common case.
 Run `/validate-plan` against the generated plan. If it fails, fix the
 plan and revalidate; do not execute a failing plan.
 
+**Loop bound.** Cap the fix-and-revalidate cycle at **3 attempts**.
+After 3 failed validations:
+
+1. Stop drafting.
+2. Surface to the operator the top blocking finding from the most
+   recent `/validate-plan` run, the two prior fix attempts, and what
+   each attempt changed.
+3. Ask whether to (a) escalate readiness back to step 3 (the PRD may
+   be the actual blocker), (b) accept a manual override and execute
+   anyway with the failing finding logged as a known risk, or
+   (c) abandon.
+
+The cap exists because an LLM author can otherwise generate the same
+shape of invalid plan indefinitely.
+
 ### 8. Execute
 
 Invoke `/execute-plan <generated-plan>` with any pass-through flags.
@@ -348,4 +372,14 @@ silently changing scope.
   the third most expensive failure mode.
 - Do not draft and execute in one shot — the staged validation is the
   point.
+- Do not loop on `/validate-plan` without bound. Three attempts then
+  surface to the operator (see step 7).
 - Do not invent product decisions to close ambiguity. Halt and ask.
+
+## Contract
+
+- **Inputs:** one of `<path>` to a PRD/RFC/spec, `--ado <id>`, or `--linear <id>`. Optional flags: `--type`, `--plan-path`, pass-throughs to `/execute-plan`. Calls `/work-item` (when `--ado`/`--linear`), `/audit-existing`, `_internal/aers-readiness`, `/prd-validate` (interactive), `/parallel-optimization`, `/validate-plan`, `/execute-plan`.
+- **Preconditions:** repo has CLAUDE.md `## Commands` per `_internal/repo-delivery`; `docs/plans/` is writable; tracker auth if `--ado`/`--linear`; `/audit-existing` is runnable on this repo.
+- **Outputs:** canonical PRD artefact at `docs/plans/PRD-<source-slug>.md`; validated execution plan at `--plan-path` (default `docs/plans/<slug>.plan.md`); execution begins via `/execute-plan` in step 8.
+- **Postconditions:** plan passes `/validate-plan` before execution; `## Parallel Execution` section present in the plan; closed decisions captured in plan frontmatter.
+- **Failure modes:** readiness gate (step 3.5) blocks → halt; `/validate-plan` fails → fix-and-revalidate up to 3 attempts then escalate to operator (see step 7); plan-ambiguity in autonomous mode → halt with finding; never invent product decisions.

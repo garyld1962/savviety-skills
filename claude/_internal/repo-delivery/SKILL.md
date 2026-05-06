@@ -3,6 +3,7 @@ name: repo-delivery
 description: "Declarative schema every repo must satisfy so execute-plan, checkpoint, and review-adversarial don't have to guess. Not user-invokable."
 user-invocable: false
 internal: true
+kind: reference
 ---
 
 # Repo Delivery

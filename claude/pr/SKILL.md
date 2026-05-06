@@ -68,9 +68,11 @@ Invoke the `/checkpoint` skill to run the quality gate (lint, typecheck, tests, 
 
 ### Step 3.5: Security Quick Check (when warranted)
 
-If the diff touches authentication, authorization, input handling, rendering of user content, or persistence (SQL, ORM, file I/O, deserialization), apply the **security-quick-check** rubric (`_internal/security-quick-check/SKILL.md`).
-
-Skip when the diff is purely cosmetic (formatting, comments, docs, type-only changes) or strictly internal logic with no trust boundary involvement.
+Apply the **security-quick-check** rubric
+(`_internal/security-quick-check/SKILL.md`) when the diff matches the
+canonical trigger criteria defined there (sensitive functional
+surfaces or sensitive paths). Skip criteria are also defined there;
+do not restate them here.
 
 - If the rubric reports findings: stop and address them before push.
 - If clean: continue.
@@ -155,3 +157,11 @@ If not merging: "PR created and ready for review." Report the PR URL.
 - This skill always uses **squash merge** to keep main history clean.
 - After merge, both remote and local feature branches are deleted.
 - The PR body is always shown for approval — never auto-submitted without user seeing it.
+
+## Contract
+
+- **Inputs:** current branch with committed changes. Optional flags: `--draft`, `--merge`, `--no-merge`. Calls `/checkpoint` (mandatory) and `_internal/security-quick-check` (conditional, per its trigger criteria).
+- **Preconditions:** branch has commits ahead of default; remote configured; `gh` CLI authenticated; CLAUDE.md `## Commands` declares lint/build/test.
+- **Outputs:** opened PR URL; on `--merge`, merged commit on default branch and deleted feature branch.
+- **Postconditions:** PR exists and is visible to reviewers; PR title/body shown to user before creation; squash merge if merged.
+- **Failure modes:** `/checkpoint` FAIL → halt before push. Security findings → halt until resolved. Push reject / merge conflict → halt and report; never force-push.

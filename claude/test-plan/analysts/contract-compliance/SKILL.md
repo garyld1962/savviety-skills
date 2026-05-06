@@ -7,6 +7,8 @@ private-resource: true
 
 # Contract Compliance Analyst
 
+> **Sub-skill of `/test-plan`.** Invoke this via `/test-plan` (State 4 dispatches it on every plan — it's the always-on core analyst). Direct invocation is unsupported — without the orchestrator's State 2 context and State 5 deduplication, the output will be incomplete and may collide with other analysts' specs.
+
 **"Does it satisfy the ask?"** — The core analyst. Every test plan includes this analyst.
 
 ## Purpose
@@ -106,6 +108,14 @@ Specs needed:
 
 Emit `TestSpecification` objects conforming to `foundations/test-case-schema.md` with `analyst: "contract-compliance"`.
 
+### Output schema
+
+The canonical schema at `test-plan/foundations/test-case-schema.md`
+defines every required and optional field, the `Assertion` shape, and
+the priority rubric. Do not invent additional top-level fields.
+Contract-compliance specs typically populate `category` with
+`happy-path`, `error-path`, or `side-effect`.
+
 ### Typical Output Distribution
 
 | Category | % of Specs |
@@ -143,3 +153,11 @@ Each `testName` should read like a requirement statement. If you can't express i
 ❌ "vendor creation works"
 ❌ "test the create function"
 ```
+
+## Contract
+
+- **Inputs:** task description; entity Zod input/output schemas; DB schema; reference implementation if present; CLAUDE.md conventions.
+- **Preconditions:** invoked from `/test-plan` State 4; task description present; at least one schema readable.
+- **Outputs:** `TestSpecification[]` conforming to `test-plan/foundations/test-case-schema.md`, with `analyst: "contract-compliance"`. Every stated requirement gets at least one P1 spec.
+- **Postconditions:** orchestrator validates, dedupes, and merges with other analysts' specs.
+- **Failure modes:** task description vague or schemas unreadable → emit specs only for what is defensible and cite missing context in `traceability`; do not paper over gaps with happy-path-only coverage.

@@ -109,7 +109,13 @@ A short list of high-confidence moves beats a long list of taste calls. **Cull a
 
 ### Phase 7: Emit refactor plan
 
-Write to `--out` (default `docs/plans/modernization-<YYYYMMDD>.md`). Format must be consumable by `/execute-prd --type=refactor`:
+Write to `--out` (default `docs/plans/modernization-<YYYYMMDD>.md`).
+The output is a **refactor PRD**, not an execution plan — it does
+**not** contain a `## Parallel Execution` section. `/execute-prd
+--type=refactor` consumes the refactor PRD and runs
+`/parallel-optimization` itself in step 6 to produce the parallel
+metadata for the eventual execution plan. Format must be consumable
+by `/execute-prd --type=refactor`:
 
 ```
 ---
@@ -205,3 +211,11 @@ For ad-hoc single-file simplification, use `/simplify`. For dependency-driven mo
 - Do not invoke `/execute-prd` until Phase 7 has written a complete plan file.
 - Do not propose framework, language, or public-API changes inside primary moves. Surface them in the out-of-scope appendix.
 - Do not exhaustive-read large codebases. Sample by the rubric's signal categories or halt with a "too large for safe modernization audit" finding.
+
+## Contract
+
+- **Inputs:** codebase path (default cwd); optional `--max-moves` (default 10), `--out` (default `docs/plans/modernization-<YYYYMMDD>.md`), `--handoff` (default) / `--report-only`. Calls `/audit-existing`, `_internal/modernization-rubric`, and on `--handoff` invokes `/execute-prd --type=refactor`.
+- **Preconditions:** codebase is readable; CLAUDE.md present; size is within "safe to audit" (sample by the rubric's signal categories — refuse exhaustive reads on very large repos).
+- **Outputs:** refactor PRD at `--out` consumable by `/execute-prd --type=refactor`. The PRD does **not** include `## Parallel Execution` (that is added downstream by `/execute-prd` step 6 via `/parallel-optimization`).
+- **Postconditions:** stay-within-stack constraint enforced (no framework / language / public-API changes in primary moves); out-of-scope items in the appendix; on `--handoff`, `/execute-prd` takes over.
+- **Failure modes:** codebase too large for safe sampling → halt with "too large for safe modernization audit" finding; rubric calibration impossible (no clear signal categories detected) → halt and surface the gap; never auto-apply changes outside `/execute-prd`.

@@ -3,6 +3,7 @@ name: aers-readiness
 description: "Reusable rubric defining the AERS (Agent-Executable Requirements Spec) readiness standard — required sections, closed-decision categories, ambiguity priorities, and interaction rules. Embedded by /prd-validate, /spec-review-adversarial, and /prd-acceptance. Not user-invokable."
 user-invocable: false
 internal: true
+kind: reference
 ---
 
 # AERS Readiness Rubric
@@ -210,6 +211,51 @@ Recommended follow-ups:
 - ...
 ```
 
+## Automated readiness check (for callers)
+
+`/kickoff` and `/execute-prd` need to decide whether to suggest the
+interactive `/prd-validate` interview or proceed without it. Use this
+deterministic heuristic — do not invent your own.
+
+Compute the readiness score by inspecting the artifact for the
+**Required Sections** above. For each section:
+
+- **Present and substantive** (not just a heading; has at least one
+  concrete bullet, table row, or sentence specific to this work) →
+  **0 points**.
+- **Present but stub** (heading exists but body is "TBD" /
+  "TODO" / empty / generic boilerplate) → **1 point**.
+- **Missing entirely** → **2 points**.
+
+Also score these high-risk ambiguity categories (each unresolved one
+adds **2 points**):
+
+- unclear problem statement
+- unclear actor/user
+- unclear scope boundary
+- unclear destructive behavior
+- unclear source of truth
+- unclear permissions/security boundary
+- unclear calculation/normalization rules
+- unclear stack/platform choice that changes implementation
+
+### Verdict thresholds
+
+| Total points | Readiness | Caller behavior |
+|---|---|---|
+| `0–2` | **Ready** | Proceed without `/prd-validate`. Note any single gap inline. |
+| `3–6` | **Partially ready** | **Suggest** `/prd-validate` to the operator, but do not auto-invoke. In autonomous mode (no human at the keyboard), proceed and log the gap list as a known risk. |
+| `7+` | **Not ready** | **Do not** draft a plan. In interactive mode, suggest `/prd-validate` to close gaps. In autonomous mode, halt with `prd-not-ready` finding and the gap list. |
+
+### Why "suggest, don't auto-invoke"
+
+`/prd-validate` is an interactive interview, not a gate. Auto-invoking
+it from a non-interactive context (CI, autonomous run, scheduled
+agent) hangs waiting for input. Callers must respect the interaction
+boundary: `/prd-validate` runs only when a human is supervising.
+
+The score is the gate; the interview is the remedy.
+
 ## Engineering Hardening Rule
 
 If the input is a business PRD, do not simply polish it. Transform it into an engineer-executable AERS by adding the missing required sections.
@@ -222,3 +268,11 @@ This rubric succeeds when:
 - downstream planning no longer needs to re-derive core decisions
 - test and UX expectations are clear enough to verify implementation later
 - the output is clearly an AERS, not just a business PRD with nicer wording
+
+## Contract
+
+- **Inputs:** a requirements artifact in any flavor (PRD, BRD, story, notes, partial spec, prompt). Optional repo audit from `/audit-existing` for repo-specific readiness scoring.
+- **Preconditions:** the artifact is text and readable; this is a reference rubric, not an interactive interview (`/prd-validate` is the interactive remedy).
+- **Outputs:** a deterministic readiness score using the **Automated readiness check** above (`Ready` 0–2, `Partially ready` 3–6, `Not ready` 7+); a gap list keyed to required sections and high-risk ambiguity categories; either an upgraded AERS (when used as a transformation pass) or recommendations.
+- **Postconditions:** caller (`/kickoff`, `/execute-prd`, `/prd-validate`, `/prd-acceptance`, `/spec-review-adversarial`) acts per the verdict thresholds; the artifact's existing closed decisions are preserved.
+- **Failure modes:** artifact unreadable / not text → return `Not ready` with the file-access error in the gap list; never invent answers to close gaps; never auto-invoke `/prd-validate` from a non-interactive context.

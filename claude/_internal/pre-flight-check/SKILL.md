@@ -3,6 +3,7 @@ name: pre-flight-check
 description: "Reusable pattern for config-dependent skills. Defines how to check for required config, detect placeholders, and halt with actionable messages. Not user-invokable — referenced by other skills."
 user-invocable: false
 internal: true
+kind: reference
 ---
 
 # Pre-flight Required Config Check

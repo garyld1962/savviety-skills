@@ -123,9 +123,18 @@ Check `.test-plan/config.json` `analysts` field for overrides (enabled/disabled)
 For each selected analyst:
 1. Read `test-plan/analysts/{name}/SKILL.md`
 2. Pass the task context, Zod schemas, DB schema, reference implementation, and CLAUDE.md conventions
-3. Analyst produces `TestSpecification[]` (see `foundations/test-case-schema.md`)
+3. Analyst produces `TestSpecification[]` conforming to the canonical
+   schema in `foundations/test-case-schema.md`. Specs that violate the
+   schema are dropped at State 5 with a warning — the analyst is
+   responsible for valid output.
 
 Analysts run conceptually in parallel — each operates on the same context independently.
+
+**Analyst unavailable / disabled:** If `.test-plan/config.json`
+disables a selected analyst, skip it with a logged note in the
+report. The plan is still produced from the remaining analysts; the
+verdict downgrades to `PARTIAL` if the missing analyst would have
+contributed P1 specs.
 
 **For `--validate` mode:** Skip. Specifications already in plan file.
 
@@ -133,7 +142,11 @@ Analysts run conceptually in parallel — each operates on the same context inde
 
 Merge analyst outputs into a unified plan:
 
-1. **Deduplicate**: If two analysts produced specs for the same behavior (same testFile + describeBlock + similar testName), keep the higher-priority one. If same priority, keep the one with more assertions.
+0. **Validate against schema**: drop any spec that violates
+   `foundations/test-case-schema.md`. Record the count and reason in
+   the report; do not silently keep malformed specs.
+
+1. **Deduplicate**: If two analysts produced specs for the same behavior (same testFile + describeBlock + similar testName), keep the higher-priority one. If same priority, keep the one with more assertions. Conflict resolution is fully defined here — analysts do not coordinate.
 
 2. **Assign to test files**: Group specs by `testFile` path. Each unique path becomes one generated file.
 
@@ -245,3 +258,11 @@ The test-plan and code-review skills are complementary:
 | `/code-review` | After implementation | Verifies how the code IS written |
 
 Both must pass before creating a PR. See `foundations/team-agent-protocol.md` for the combined workflow.
+
+## Contract
+
+- **Inputs:** task description and target entity name; optional `.test-plan/config.json` (analyst overrides, team mappings, paths); Zod schemas, DB schema, reference implementation, CLAUDE.md conventions. Calls each `test-plan/analysts/<name>/SKILL.md` selected by State 3 and `test-plan/test-writer/SKILL.md` in State 6. Spec schema canonical at `test-plan/foundations/test-case-schema.md`.
+- **Preconditions:** TypeScript monorepo with a Vitest-shaped test convention; `foundations/*` files readable; `.test-plan/` directory writable; entity exists in repo (DB and Zod schemas locatable).
+- **Outputs:** `.test-plan/plan-latest.json` (conforming to `foundations/plan-schema.md`); markdown report under `docs/test-plans/` (per `foundations/report-template.md`); `.test.ts` files with `it.todo()` stubs from `test-writer` (does not overwrite existing files).
+- **Postconditions:** plan verdict is `READY`, `PARTIAL`, or `BLOCKED`; existing tests are preserved; index `docs/test-plans/index.md` and `latest.md` updated.
+- **Failure modes:** critical context missing (no entity / schemas / layer) → `BLOCKED`; analyst disabled in `.test-plan/config.json` → continue and downgrade to `PARTIAL` if its P1s are missed; spec violating canonical schema → drop at State 5 with a logged note (do not silently keep).

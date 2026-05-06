@@ -7,12 +7,17 @@ private-resource: true
 
 # Test Writer
 
+> **Sub-skill of `/test-plan`.** Invoke this via `/test-plan` (State 6: GENERATE_OUTPUT dispatches it after the orchestrator has consolidated and schema-validated specs). Direct invocation is unsupported — this skill assumes the input has passed State 5 validation against `test-plan/foundations/test-case-schema.md`; calling it with raw, unvalidated specs will produce malformed test files.
+
 Generates actual `.test.ts` files from consolidated TestSpecification objects.
 
 ## Input
 
 From the orchestrator (State 6: GENERATE_OUTPUT):
-- Grouped specifications: `Record<testFile, TestSpecification[]>`
+- Grouped specifications: `Record<testFile, TestSpecification[]>` —
+  every spec MUST conform to the canonical schema in
+  `test-plan/foundations/test-case-schema.md`. Reject the input if a
+  spec is missing a required field; do not silently drop it.
 - Project context: test framework, import conventions, entity name
 - Plan metadata: planId, task description, analysts used
 
@@ -226,3 +231,11 @@ Don't generate test utility files, factories, or shared fixtures. Keep generated
 
 ### 7. Don't Overwrite Existing Tests
 If the target test file already exists, report it in the plan output and do NOT overwrite. The team agent decides how to merge.
+
+## Contract
+
+- **Inputs:** `Record<testFile, TestSpecification[]>` (specs grouped by target file, all conforming to `test-plan/foundations/test-case-schema.md`); project context (test framework, import conventions, entity name); plan metadata (`planId`, task description, analysts used).
+- **Preconditions:** invoked from `/test-plan` State 6 (GENERATE_OUTPUT) only; specs were schema-validated by the orchestrator at State 5.
+- **Outputs:** `.test.ts` files at each `testFile` path with nested `describe()` blocks and `it.todo()` (or full `it()` when `requiresImplementation: false`) ordered by priority then category.
+- **Postconditions:** existing test files are NOT overwritten — collisions are reported back to the orchestrator and listed in the plan output.
+- **Failure modes:** spec missing a required schema field → reject the input (do not silently drop the spec); file collision → skip and report; invalid `testFile` path → reject with a clear error.

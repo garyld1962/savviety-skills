@@ -38,12 +38,21 @@ When the ask is a routine, low-risk, convention-bound edit (single-file change, 
 
 1. **Read the artifact.** Read the exact artifact or files the user supplied. If no path is given and `AERS.md` exists, use it. Prefer reading actual files over guessing content.
 
-2. **Check readiness.** Unless `--skip-readiness`:
-   - If blocking ambiguity remains, do NOT start coding
-   - Ask one question at a time
-   - Produce only the lightest useful additions: gap report, proposed closed decisions, contract examples
-   - For the small change fast path, do not reopen routine defaults already implied by repo conventions
-   - Use `/prd-validate` if a focused readiness review would help
+2. **Check readiness.** Unless `--skip-readiness`, score the artifact
+   with the **Automated readiness check** in
+   `_internal/aers-readiness/SKILL.md`. Behaviour by verdict:
+   - **Ready (0–2 pts)** → proceed to step 3.
+   - **Partially ready (3–6 pts)** → ask gap questions inline (one at
+     a time); record as proposed closed decisions; offer `/prd-validate`
+     for a structured interview. Do not auto-invoke it.
+   - **Not ready (7+ pts)** → halt. Surface the rubric points and
+     suggest `/prd-validate` for the operator to close gaps; do NOT
+     start coding.
+
+   Produce only the lightest useful additions: gap report, proposed
+   closed decisions, contract examples. For the small change fast
+   path, do not reopen routine defaults already implied by repo
+   conventions.
 
 3. **Plan.** Once the artifact is ready enough to build, use `superpowers:writing-plans` or `/plan` for implementation planning. Skip for the small change fast path unless the user asks for a plan or the work expands.
 
@@ -76,3 +85,11 @@ This skill references:
 - Do NOT replace built-in planning/review with a custom prompt workflow.
 - Do NOT claim completion without running the repo's existing validation steps.
 - Do NOT narrate obvious implementation defaults unless they create a user-visible tradeoff.
+
+## Contract
+
+- **Inputs:** path to a requirements artifact (or `AERS.md` by default if it exists); optional `--skip-readiness`. Calls `_internal/aers-readiness` (readiness scoring), `/prd-validate` (only when operator opts in interactively), `superpowers:writing-plans` or `/plan` (planning), `superpowers:requesting-code-review` or `/code-review` (review). Consults `_internal/disposition` and `_internal/repo-delivery`.
+- **Preconditions:** in a git repo; artifact exists and is readable; operator is at the keyboard (kickoff is interactive by design — for autonomous flow, use `/execute-prd`).
+- **Outputs:** code committed for the requested change; review pass recorded; concise progress updates per the output contract above (decision context, edits, validation, blockers).
+- **Postconditions:** repo's existing validation steps (lint/build/test) have actually run; closed decisions added to the artifact when the operator confirms; no audit-grade governed artefacts (those belong to `/execute-prd`).
+- **Failure modes:** readiness `Not ready` (7+ pts) → halt before coding; blocking ambiguity remaining → halt and ask; any closed decision in the artifact reopened → halt and surface the conflict.

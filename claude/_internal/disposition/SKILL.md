@@ -3,6 +3,7 @@ name: disposition
 description: "Rules for dispositioning code-review and adversarial-review findings in the CodeGen flow. Not user-invokable — referenced by execute-plan. Defines status vocabulary, evidence standard, and blocking rules."
 user-invocable: false
 internal: true
+kind: reference
 ---
 
 # Finding Disposition Governance
