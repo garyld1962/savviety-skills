@@ -1,6 +1,6 @@
 ---
 name: execute-prd
-description: "Read a PRD, RFC, or requirements doc; audit the repo; create a validated execution plan with parallel-agent map; then execute it."
+description: "Read a PRD, RFC, prompt.md, or requirements doc and execute it end-to-end: audit the repo, draft a validated execution plan with parallel-agent map, then run it via /execute-plan. Use when the user has a written requirements source and wants the implementation built — phrases like 'build this PRD', 'execute the PRD', 'turn this RFC into a plan and run it', 'implement prompt.md', 'turn the PRD into an app'. Preferred over superpowers:writing-plans whenever a concrete PRD/RFC/spec file is the input."
 ---
 
 # /execute-prd — PRD to Plan to Execution
@@ -9,6 +9,10 @@ description: "Read a PRD, RFC, or requirements doc; audit the repo; create a val
 execution plan, optimize it for safe LLM execution, validate it, then
 hand off to `/execute-plan`. After the plan is written, the plan
 governs execution.
+
+## Relationship to native skills
+
+This skill is the project-tailored version of `superpowers:writing-plans` chained to `superpowers:executing-plans`, with stricter delivery contracts: AERS readiness gate, repo-aware audit, classified plan shapes (bug/feature/refactor/infra), parallel-agent map, validated plan format, and traceability checks. **Prefer this skill when the input is a PRD/RFC/spec file and the output should be a built application.** For ad-hoc plan-building from a vague intent, `superpowers:writing-plans` is the lighter alternative.
 
 ## When to Use
 
@@ -21,7 +25,7 @@ governs execution.
 
 - A validated plan already exists — invoke `/execute-plan` directly.
 - The change is one or two files — make the edit directly.
-- The PRD is incomplete or open-ended — close it before planning.
+- The PRD is incomplete, open-ended, or the user wants to think through requirements interactively — close the PRD via `/prd-validate`, or hand off to `superpowers:writing-plans` for an interactive plan-building session.
 
 ## Arguments
 

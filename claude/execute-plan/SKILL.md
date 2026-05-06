@@ -1,6 +1,6 @@
 ---
 name: execute-plan
-description: "Execute a written implementation plan with staged reviews, per-task build/test cycles, milestone breakpoints, and optional parallel agent lanes."
+description: "Execute an existing written implementation plan end-to-end with staged reviews, per-task build/test cycles, milestone breakpoints, parallel agent lanes via git worktrees, retry budget, adversarial review, and a calibrated craft grade. Use when the user already has a plan file (typically produced by /execute-prd) and wants it run — phrases like 'execute the plan', 'run docs/plans/X.md', 'resume the plan'. Preferred over superpowers:executing-plans whenever the plan follows this skill's wave/team/closed-decisions format."
 ---
 
 # /execute-plan — Plan Executor with Staged Reviews
@@ -18,8 +18,12 @@ adversarial review.
 
 ## When NOT to Use
 
-- No plan exists yet — write a plan first.
+- No plan exists yet — write a plan first via `/execute-prd` (PRD-driven) or `superpowers:writing-plans` (ad-hoc).
 - Trivial single-file change — just make the edit directly.
+
+## Relationship to native skills
+
+This skill is the project-tailored version of `superpowers:executing-plans`, with stricter delivery contracts: closed-decisions gate, parallel waves with single-message dispatch in isolated git worktrees (Phase 2.7), retry budget circuit breaker, milestone breakpoint reviews, full + craft + adversarial reviews at the PR boundary, and a calibrated craft grade. **Prefer this skill when the plan follows the `/execute-prd` format.** For ad-hoc plans, `superpowers:executing-plans` is the lighter alternative. On impasse — retry-budget exhaustion or a task that loops without converging — invoke `superpowers:systematic-debugging` before resuming; cheap retries on a wrong mental model just burn budget.
 
 ## Arguments
 
@@ -434,6 +438,12 @@ When either budget is hit mid-run:
    ```
    Retry budget exhausted (<N> retries, <M> minutes).
    Aborted at Task <K>.
+
+   Before resuming, diagnose the impasse — invoke `superpowers:systematic-debugging`
+   to find the wrong mental model that the retries kept failing against. Repeated
+   retries on a stuck task indicate a model mismatch, not a flaky test; another
+   retry pass without diagnosis will exhaust the next budget the same way.
+
    Resume with: /execute-plan --resume <plan-file>
    ```
 4. Exit non-zero.
@@ -832,6 +842,8 @@ parallelism would force every lane to race the same index and produce
 non-deterministic merge artefacts.
 
 #### 2.7a. Worktree preparation
+
+(Background on the worktree-isolation pattern itself: `superpowers:using-git-worktrees`. The mechanics below implement the same isolation, plus the install / single-message dispatch / cleanup specifics for wave execution.)
 
 For each lane in the wave:
 

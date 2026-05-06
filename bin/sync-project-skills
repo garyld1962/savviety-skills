@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# sync-project-skills — mirror claude/<name>/ → .claude/skills/<name>/
+# for this repo's project-level skills (the meta-tooling skills useful
+# when working IN savviety-skills itself).
+#
+# Convention: project-level skills under .claude/skills/ are plain
+# copies of their canonical source under claude/. This script keeps
+# them in sync without using symlinks. Run it after editing any
+# skill that's also mounted under .claude/skills/.
+#
+# Usage:
+#   bin/sync-project-skills            # mirror all (rsync --delete)
+#   bin/sync-project-skills --dry-run  # show what would change, don't write
+#   bin/sync-project-skills --check    # exit 1 if any skill is out of sync (CI / pre-commit)
+#   bin/sync-project-skills --help
+
+set -euo pipefail
+
+# ---- parse args --------------------------------------------------------------
+DRY_RUN=
+CHECK=
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=1 ;;
+    --check)   CHECK=1 ;;
+    -h|--help) sed -n '2,15p' "$0" | sed 's/^# \?//'; exit 0 ;;
+    *) echo "unknown argument: $arg" >&2; exit 2 ;;
+  esac
+done
+
+# ---- locate repo root --------------------------------------------------------
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+  echo "error: must be run inside a git repository" >&2; exit 1; }
+cd "$ROOT"
+
+[ -d .claude/skills ] || { echo "error: no .claude/skills/ in $ROOT" >&2; exit 1; }
+[ -d claude ]         || { echo "error: no claude/ source tree in $ROOT" >&2; exit 1; }
+
+# ---- iterate -----------------------------------------------------------------
+drift=0
+synced=0
+skipped=0
+
+for d in .claude/skills/*/; do
+  name="$(basename "$d")"
+  src="claude/$name"
+
+  if [ ! -d "$src" ]; then
+    echo "skip:    $name (no source at $src)"
+    skipped=$((skipped + 1))
+    continue
+  fi
+
+  if [ -n "$CHECK" ]; then
+    if ! diff -qr "$src" "$d" >/dev/null 2>&1; then
+      echo "drift:   $name"
+      drift=1
+    else
+      echo "ok:      $name"
+    fi
+  elif [ -n "$DRY_RUN" ]; then
+    out=$(rsync -an --delete --itemize-changes "$src/" "$d" 2>&1 || true)
+    if [ -n "$out" ]; then
+      echo "would update: $name"
+      echo "$out" | sed 's/^/    /'
+    else
+      echo "ok:      $name"
+    fi
+  else
+    rsync -a --delete "$src/" "$d"
+    echo "synced:  $name"
+    synced=$((synced + 1))
+  fi
+done
+
+if [ -n "$CHECK" ]; then
+  exit "$drift"
+fi
+
+if [ -z "$DRY_RUN" ]; then
+  echo "---"
+  echo "$synced synced, $skipped skipped"
+fi

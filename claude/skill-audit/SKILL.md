@@ -206,6 +206,8 @@ For each available-but-not-installed item, score relevance:
 5. **Skill staleness** — skills in source repo newer than the project's shared
    copies
 
+> **Source-repo authors:** for description-level overlap analysis between *custom skills in this repo* and native skills (superpowers, plugins, built-ins), use `/audit-native-overlap` instead. That skill is scoped to the savviety-skills source tree and produces per-skill edit recommendations (tighten / cross-reference / integrate / hand off). `/skill-audit` is for consumer-side ecosystem questions (what's installed, what's stale).
+
 ### Gap Report
 
 ```
