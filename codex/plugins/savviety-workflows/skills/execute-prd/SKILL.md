@@ -20,4 +20,5 @@ This skill is the structured PRD-to-execution path for Savviety workflows. Use i
 3. Draft an implementation plan with acceptance criteria.
 4. Run `parallel-optimization` only when concurrency looks useful.
 5. Run `validate-plan`.
-6. Execute only after the user confirms the plan or has clearly requested autonomous execution.
+6. When executing, apply `execute-plan` including its loop fuse; repeated verification failures must stop with a blocker report.
+7. Execute only after the user confirms the plan or has clearly requested autonomous execution.

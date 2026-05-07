@@ -13,6 +13,7 @@ Load Codex-native references as needed:
 - `references/task-loop.md` for sequential task execution, ambiguity handling, decision records, and retries.
 - `references/parallel-waves.md` for user-authorized subagent lanes.
 - `references/review-gates.md` for milestone and PR-boundary reviews.
+- `references/loop-fuse.md` for stopping repeated verification/tool loops.
 - `references/reporting.md` for final reports and postmortems.
 - `references/agent-prompts/` for default lane prompt templates.
 - `scripts/toolchain_probe.py` for deterministic PATH checks.
@@ -30,7 +31,8 @@ This skill is the structured plan executor for Savviety workflows. It adds plan 
 3. Ask before using subagents for parallel lanes. If not authorized, execute sequentially.
 4. For authorized lanes, use disjoint write scopes and include the multi-agent coordination warning.
 5. Run focused verification after each task and full verification at milestones.
-6. Run review gates at milestones and the PR boundary.
-7. Keep a concise execution log and final report.
+6. Apply the loop fuse before every verification rerun or alternate probe.
+7. Run review gates at milestones and the PR boundary.
+8. Keep a concise execution log and final report.
 
 Never assume worker agents inherit parent environment or durable state.

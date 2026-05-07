@@ -33,3 +33,4 @@ Otherwise, keep the report in the location requested by the user or plan.
 
 Create a postmortem when the run ends in `WARN` or `FAIL`, exhausts retry budget, escalates to the user, or exposes a workflow defect.
 
+If `references/loop-fuse.md` trips, include the failure signature, retry count, commands attempted, and the single recommended next action.

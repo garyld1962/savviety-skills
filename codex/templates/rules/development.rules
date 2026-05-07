@@ -1,0 +1,86 @@
+# Generic development approval policy for commands that are useful during
+# implementation but may mutate dependencies, databases, containers, commits, or
+# background processes.
+#
+# These defaults intentionally prompt instead of allowing broad mutation.
+prefix_rule(
+  pattern = [["npm", "pnpm", "yarn", "bun"], ["install", "add", "remove", "update", "upgrade"]],
+  decision = "prompt",
+  justification = "Dependency changes can modify lockfiles, run lifecycle scripts, or alter the local toolchain.",
+  match = [
+    "npm install",
+    "pnpm add zod",
+    "yarn remove lodash",
+    "bun update",
+  ],
+)
+
+prefix_rule(
+  pattern = [["pip", "pipx", "uv", "poetry"], ["install", "add", "remove", "update", "sync"]],
+  decision = "prompt",
+  justification = "Python dependency changes can mutate the active environment or lockfiles.",
+  match = [
+    "pip install requests",
+    "uv sync",
+    "poetry add pytest",
+    "pipx install ruff",
+  ],
+)
+
+prefix_rule(
+  pattern = [["cargo", "go", "dotnet"], ["install", "add", "remove", "update", "restore"]],
+  decision = "prompt",
+  justification = "Language toolchain and dependency changes can mutate caches, lockfiles, or installed executables.",
+  match = [
+    "cargo install ripgrep",
+    "go install example.com/tool@latest",
+    "dotnet restore",
+    "dotnet add package Newtonsoft.Json",
+  ],
+)
+
+prefix_rule(
+  pattern = [["docker", "docker-compose"], []],
+  decision = "prompt",
+  justification = "Container commands can start services, pull images, allocate ports, or mutate volumes.",
+  match = [
+    "docker compose up",
+    "docker compose down",
+    "docker build .",
+    "docker run postgres",
+  ],
+)
+
+prefix_rule(
+  pattern = [["prisma", "drizzle-kit", "supabase"], ["migrate", "db", "migration", "reset", "push", "pull", "generate"]],
+  decision = "prompt",
+  justification = "Database and schema commands can mutate data, generated code, migrations, or remote project state.",
+  match = [
+    "prisma migrate dev",
+    "drizzle-kit generate",
+    "supabase db reset",
+    "supabase db push",
+  ],
+)
+
+prefix_rule(
+  pattern = ["git", ["commit", "push", "pull", "fetch", "merge", "rebase", "tag"]],
+  decision = "prompt",
+  justification = "Git history, remote synchronization, and tag operations affect shared repository state or local branch topology.",
+  match = [
+    "git commit -m example",
+    "git push",
+    "git pull --rebase",
+    "git tag v1.2.3",
+  ],
+)
+
+prefix_rule(
+  pattern = [["kill", "pkill"], []],
+  decision = "prompt",
+  justification = "Process termination should be scoped to a known dev server started for the current task.",
+  match = [
+    "kill 12345",
+    "pkill -f next",
+  ],
+)

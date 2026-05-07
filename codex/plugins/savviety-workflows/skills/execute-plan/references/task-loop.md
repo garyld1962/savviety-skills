@@ -42,7 +42,18 @@ Avoid records for forced choices, tiny local edits, and direct plan instructions
 
 Track retries globally across implementation, verification, review fixes, and merge conflicts.
 
-Default budget: 20 retries.
+Default budget: 8 retries.
 
 Increment the counter after each failed fix attempt, failed verification rerun, failed review fix, or failed merge repair. When exhausted, stop, preserve work, and report the blocker.
 
+The loop fuse in `references/loop-fuse.md` overrides this budget. If the fuse trips, stop immediately even when retry budget remains.
+
+## Verification Reruns
+
+Before a verification rerun:
+
+1. Record the failure signature.
+2. State the one new piece of evidence or one concrete fix that justifies the rerun.
+3. Run only the narrowest command that can prove the fix.
+
+Do not rerun broad acceptance, restart dev servers, change ports, or switch tools when the previous failure was caused by a malformed verification command. Fix the verification command and rerun that single check.

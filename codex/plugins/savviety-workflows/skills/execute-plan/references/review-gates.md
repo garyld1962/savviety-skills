@@ -11,6 +11,8 @@ At each milestone:
 3. Fix blocking findings before moving to the next milestone.
 4. Record accepted risks explicitly.
 
+Apply `references/loop-fuse.md` to every failed milestone verification. A repeated or malformed verification failure blocks the milestone report; do not continue to broader checks until the exact blocker is reported or fixed.
+
 ## PR Boundary
 
 Before final report:
@@ -43,4 +45,3 @@ Rules:
 - Critical and major findings block unless explicitly accepted by the user.
 - Accepted risk must name the finding and rationale.
 - Re-review fixes with the narrowest command that proves the issue is resolved.
-
