@@ -289,7 +289,7 @@ These work via `.claude/skills/` discovery alone, post-Phase 1 sweep:
 
 ### Need infra wrappers (3 hook bundles)
 
-- `infra/install-scan`, `infra/journal`, `infra/pr-guardrail` — see Phase 4.
+- `install-scan`, `infra/journal`, `infra/pr-guardrail` — see Phase 4. (`install-scan` was promoted out of `infra/` since it's a cross-cutting hook used by every CLI.)
 
 ### Internal-only (8, no port required)
 

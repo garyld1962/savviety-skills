@@ -199,7 +199,7 @@ Actions:
    source-only docs flagged in a manifest (see §6.3).
 3. Copy `claude/_internal/` into `<target>/.claude/skills/_internal/`.
 4. Copy `claude/infra/pr-guardrail/`, `claude/infra/journal/`, and
-   `claude/infra/install-scan/` into their `.claude/<asset>/` hook locations.
+   `claude/install-scan/` into their `.claude/<asset>/` hook locations.
 5. Copy `claude/settings.template.json` to `<target>/.claude/settings.json`.
 6. Create `<target>/.claude/settings.local.json` containing `{}` if absent.
 7. Create `<target>/CLAUDE.md` from `templates/CLAUDE.starter.md` if absent.
@@ -325,7 +325,7 @@ Declares what the script should and should not copy. Avoids hardcoding
     "extras": [
       { "from": "claude/infra/pr-guardrail", "to": ".claude/pr-guardrail" },
       { "from": "claude/infra/journal", "to": ".claude/journal" },
-      { "from": "claude/infra/install-scan", "to": ".claude/install-scan" },
+      { "from": "claude/install-scan", "to": ".claude/install-scan" },
       { "from": "claude/settings.template.json", "to": ".claude/settings.json" }
     ],
     "starters": [

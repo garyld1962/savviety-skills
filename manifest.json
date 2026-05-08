@@ -10,7 +10,8 @@
         "MODEL-POLICY.md",
         "SESSION-CONTEXT.md",
         "settings.template.json",
-        "infra"
+        "infra",
+        "install-scan"
       ],
       "preserve_subdirs": [
         "_project",
@@ -20,7 +21,7 @@
     "extras": [
       { "from": "claude/infra/pr-guardrail",    "to": ".claude/pr-guardrail" },
       { "from": "claude/infra/journal",         "to": ".claude/journal" },
-      { "from": "claude/infra/install-scan",    "to": ".claude/install-scan" },
+      { "from": "claude/install-scan",          "to": ".claude/install-scan" },
       { "from": "claude/settings.template.json", "to": ".claude/settings.json" }
     ],
     "starters": [
@@ -81,7 +82,8 @@
         "MODEL-POLICY.md",
         "SESSION-CONTEXT.md",
         "settings.template.json",
-        "infra"
+        "infra",
+        "install-scan"
       ],
       "preserve_subdirs": [
         "_project",
@@ -93,7 +95,7 @@
       { "from": "kimi/templates", "to": ".kimi/templates" }
     ],
     "extras": [
-      { "from": "claude/infra/install-scan", "to": ".kimi/install-scan" },
+      { "from": "claude/install-scan",       "to": ".kimi/install-scan" },
       { "from": "claude/infra/journal",      "to": ".kimi/journal" },
       { "from": "claude/infra/pr-guardrail", "to": ".kimi/pr-guardrail" }
     ],
