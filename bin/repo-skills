@@ -68,6 +68,13 @@ OPTIONS
 
 ENVIRONMENT
   REPO_SKILLS_HOME  source repo path (default: ~/repos/savviety-skills)
+  REPO_SKILLS_NO_RTK  if set, skip the post-install RTK prompt entirely
+
+RTK INTEGRATION
+  After install completes, you'll be prompted to install RTK (Rust Token
+  Killer) — a CLI proxy that cuts LLM token usage 60-90% on common dev
+  commands. Skipped silently if rtk is already on PATH, if stdin isn't a
+  TTY, or if running on Windows-native (Windows is not supported; WSL is).
 
 EXIT CODES
   0  success
@@ -714,6 +721,58 @@ check_update_prereq() {
   esac
 }
 
+# ---- RTK post-install prompt -------------------------------------------------
+# Offers to install RTK (https://github.com/rtk-ai/rtk) after the main install.
+# Silent skip cases: dry-run, rtk already on PATH, REPO_SKILLS_NO_RTK set,
+# stdin not a TTY, Windows-native (not WSL).
+maybe_install_rtk() {
+  (( DRY_RUN )) && return 0
+  [[ -n "${REPO_SKILLS_NO_RTK:-}" ]] && return 0
+  command -v rtk >/dev/null 2>&1 && return 0
+
+  # Windows-native detection. WSL reports "Linux" from uname and is supported.
+  local kernel
+  kernel="$(uname -s 2>/dev/null || echo)"
+  if [[ "$kernel" =~ ^(MINGW|MSYS|CYGWIN) ]]; then
+    info "RTK install skipped — Windows is not supported (WSL works)"
+    return 0
+  fi
+
+  if [[ ! -t 0 || ! -t 1 ]]; then
+    info "RTK not installed. To install later:"
+    info "  curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh"
+    return 0
+  fi
+
+  echo
+  echo "$(c_bld 'RTK (Rust Token Killer)')"
+  echo "  CLI proxy that cuts LLM token usage 60-90% on common dev commands."
+  echo "  Source: https://github.com/rtk-ai/rtk"
+  printf "  Install now? [y/N] "
+  local choice=""
+  read -r choice </dev/tty || choice=""
+  case "$choice" in
+    y|Y|yes|YES) ;;
+    *)
+      info "RTK install declined. To install later:"
+      info "  curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh"
+      return 0
+      ;;
+  esac
+
+  if curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh; then
+    if command -v rtk >/dev/null 2>&1; then
+      done_ "RTK installed: $(command -v rtk)"
+    else
+      done_ "RTK installed to ~/.local/bin"
+      warn "rtk not on PATH — add to your shell rc:"
+      warn "  export PATH=\"\$HOME/.local/bin:\$PATH\""
+    fi
+  else
+    warn "RTK install failed (exit $?). Re-run manually if needed."
+  fi
+}
+
 # ---- main dispatch -----------------------------------------------------------
 echo
 echo "$(c_bld 'repo-skills') $VERSION"
@@ -808,3 +867,5 @@ echo
 if (( DRY_RUN )); then
   echo "$(c_yel 'dry-run complete — no files written.')"
 fi
+
+maybe_install_rtk
