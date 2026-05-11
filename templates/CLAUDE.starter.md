@@ -50,4 +50,4 @@ Per-skill project config lives under `.claude/skills/_project/`.
 
 - Personal overrides: `CLAUDE.local.md`
 - Project skill config: `.claude/skills/_project/`
-- Shared skills installed via [savviety-skills](https://github.com/garyld1962/savviety-skills) — refresh with `repo-skills --claude --update`.
+- Shared skills installed via [savviety-skills](https://github.com/garyld1962/savviety-skills) — refresh with `cli/skill.sh --claude --update`.

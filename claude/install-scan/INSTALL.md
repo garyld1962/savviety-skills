@@ -47,7 +47,7 @@ Catches every AI tool that spawns a shell, plus manual typing. **One install cov
 
 **macOS / Linux:**
 ```bash
-# 1. Make sure ~/.claude/skills/install-scan/ exists (via repo-skills installer)
+# 1. Make sure ~/.claude/skills/install-scan/ exists (via cli/skill.sh installer)
 # 2. Source the wrapper from your shell rc:
 echo 'source ~/.claude/skills/install-scan/wrapper-shell.sh' >> ~/.zshrc
 source ~/.zshrc

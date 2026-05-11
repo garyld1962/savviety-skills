@@ -39,8 +39,8 @@ If a Kimi-only skill ever needs to ship (e.g., a Kimi-specific flow skill with e
 Use the repo installer:
 
 ```
-repo-skills --kimi --init   <target>
-repo-skills --kimi --update <target>
+cli/skill.sh --kimi --init   <target>
+cli/skill.sh --kimi --update <target>
 ```
 
 Behind the scenes this:

@@ -61,7 +61,7 @@ stay single-sourced under `claude/`. Slash invocation differs from Claude:
 
 ## Deployment
 
-Deployment into a target repository is handled by `bin/repo-skills` using
+Deployment into a target repository is handled by `cli/skill.sh` using
 `manifest.json`. The legacy `deploy.sh` script has been archived.
 
 For Claude Code, user-facing skill directories and `_internal/` map into

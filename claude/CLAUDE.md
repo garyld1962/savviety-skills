@@ -10,8 +10,8 @@ This is the source-of-truth tree for Claude Code skills. **Edit here. Test elsew
 ├── codex/          Codex-native plugin/agents/templates
 ├── copilot/        Copilot Native (.github/) source
 ├── kimi/           Kimi overlay (sources skills from claude/ via manifest)
-├── manifest.json   Install manifest consumed by bin/repo-skills
-└── bin/repo-skills Installer
+├── manifest.json   Install manifest consumed by cli/skill.sh
+└── cli/skill.sh    Installer
 ```
 
 ## Edit vs test
@@ -26,7 +26,7 @@ Tests do not run in this repo. They run in a separate harness:
 The harness was seeded as a copy on 2026-05-05. After editing a skill here, sync into the harness before testing:
 
 ```
-~/repos/savviety-skills/bin/repo-skills --claude --update ~/repos/skills-test-harness/claude-test
+~/repos/savviety-skills/cli/skill.sh --claude --update ~/repos/skills-test-harness/claude-test
 ```
 
 Or, for a one-off, copy the skill dir directly into `~/repos/skills-test-harness/claude-test/.claude/skills/`. The harness also has `codex-test/`, `copilot-test/`, and `kimi-test/` siblings for cross-platform testing.

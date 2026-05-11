@@ -1,4 +1,4 @@
-# `repo-skills` — Design
+# `skill.sh` — Design
 
 > Status: draft, not implemented.
 > Owner: Gary.
@@ -150,14 +150,14 @@ live directly under `.claude/` (for example `.claude/pr-guardrail/` and
 ## 4. Command surface
 
 ```
-repo-skills --claude   --init    [<target-path>] [--force] [--dry-run]
-repo-skills --claude   --update  [<target-path>] [--prune [--yes]] [--dry-run]
-repo-skills --copilot  --init    [<target-path>] [--force] [--dry-run]
-repo-skills --copilot  --update  [<target-path>] [--prune [--yes]] [--dry-run]
-repo-skills --codex    --init    [<target-path>] [--force] [--dry-run]
-repo-skills --codex    --update  [<target-path>] [--dry-run]
-repo-skills --version
-repo-skills --help
+cli/skill.sh --claude   --init    [<target-path>] [--force] [--dry-run]
+cli/skill.sh --claude   --update  [<target-path>] [--prune [--yes]] [--dry-run]
+cli/skill.sh --copilot  --init    [<target-path>] [--force] [--dry-run]
+cli/skill.sh --copilot  --update  [<target-path>] [--prune [--yes]] [--dry-run]
+cli/skill.sh --codex    --init    [<target-path>] [--force] [--dry-run]
+cli/skill.sh --codex    --update  [<target-path>] [--dry-run]
+cli/skill.sh --version
+cli/skill.sh --help
 ```
 
 - `<target-path>` defaults to `.` (current directory).
@@ -363,7 +363,7 @@ updating the manifest, not the script.
 
 ## 7. Implementation notes
 
-- **Language:** bash. Lives in `~/.local/bin/repo-skills`. Mirrors the `run`
+- **Language:** bash. Lives in `~/.local/bin/skill.sh`. Mirrors the `run`
   pattern from your global `CLAUDE.md`.
 - **Dependencies:** `rsync` for copy + delete semantics, `jq` for the manifest.
   Both standard on Linux/macOS dev machines.
@@ -408,7 +408,7 @@ The script should pass these by-hand checks:
 
 - Should the script self-update? (Probably no — it's small enough that
   re-copying it from savviety-skills is fine.)
-- Should there be a `repo-skills doctor` subcommand that reports drift
+- Should there be a `skill.sh doctor` subcommand that reports drift
   between target and source? (Probably yes, in v2.)
 - Should the script know about plugins (superpowers, ba-*, etc.) and warn
   when a target repo lacks one a shared skill depends on? (Maybe — but

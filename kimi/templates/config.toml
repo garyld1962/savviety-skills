@@ -3,7 +3,7 @@
 
 # Skill discovery — keep merge_all_available_skills enabled so .claude/skills/
 # is picked up alongside .kimi/skills/ (both contain the same content via the
-# repo-skills installer).
+# cli/skill.sh installer).
 merge_all_available_skills = true
 
 # Step budget — match Kimi 1.40+ default of 1000 unless the project has a

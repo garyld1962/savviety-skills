@@ -6,7 +6,7 @@
 
 This is a starter. Replace the placeholder sections with real content.
 Personal preferences live in `.github/instructions/personal.instructions.md`
-(already created — edit in place, never overwritten by `repo-skills --update`).
+(already created — edit in place, never overwritten by `cli/skill.sh --update`).
 
 ## Asset locations
 
@@ -59,4 +59,4 @@ Personal preferences live in `.github/instructions/personal.instructions.md`
 ## Pointers
 
 - Personal overrides: `.github/instructions/personal.instructions.md`
-- Shared assets installed via [savviety-skills](https://github.com/garyld1962/savviety-skills) — refresh with `repo-skills --copilot --update`.
+- Shared assets installed via [savviety-skills](https://github.com/garyld1962/savviety-skills) — refresh with `cli/skill.sh --copilot --update`.

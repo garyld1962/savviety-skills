@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# repo-skills — install savviety-skills into a target repo.
+# skill.sh — install savviety-skills into a target repo.
 #
 # Source of truth: docs/repo-skills-design.md and manifest.json in the
 # REPO_SKILLS_HOME directory (defaults to ~/repos/savviety-skills).
 #
 # Usage:
-#   repo-skills --claude  --init   [<target>] [--force] [--dry-run]
-#   repo-skills --claude  --update [<target>] [--prune [--yes]] [--dry-run]
-#   repo-skills --copilot --init   [<target>] [--force] [--dry-run]
-#   repo-skills --copilot --update [<target>] [--prune [--yes]] [--dry-run]
-#   repo-skills --codex   --init   [<target>] [--force] [--dry-run]
-#   repo-skills --codex   --update [<target>] [--dry-run]
-#   repo-skills --kimi    --init   [<target>] [--force] [--dry-run]
-#   repo-skills --kimi    --update [<target>] [--prune [--yes]] [--dry-run]
-#   repo-skills --version | --help
+#   cli/skill.sh --claude  --init   [<target>] [--force] [--dry-run]
+#   cli/skill.sh --claude  --update [<target>] [--prune [--yes]] [--dry-run]
+#   cli/skill.sh --copilot --init   [<target>] [--force] [--dry-run]
+#   cli/skill.sh --copilot --update [<target>] [--prune [--yes]] [--dry-run]
+#   cli/skill.sh --codex   --init   [<target>] [--force] [--dry-run]
+#   cli/skill.sh --codex   --update [<target>] [--dry-run]
+#   cli/skill.sh --kimi    --init   [<target>] [--force] [--dry-run]
+#   cli/skill.sh --kimi    --update [<target>] [--prune [--yes]] [--dry-run]
+#   cli/skill.sh --version | --help
 
 set -euo pipefail
 
@@ -35,17 +35,17 @@ done_()  { echo "$(c_grn '✓')    $*"; }
 # ---- usage -------------------------------------------------------------------
 usage() {
   cat <<'EOF'
-repo-skills — install savviety-skills into a target repo
+skill.sh — install savviety-skills into a target repo
 
 USAGE
-  repo-skills --claude  --init   [<target>] [--force] [--dry-run]
-  repo-skills --claude  --update [<target>] [--prune [--yes]] [--dry-run]
-  repo-skills --copilot --init   [<target>] [--force] [--dry-run]
-  repo-skills --copilot --update [<target>] [--prune [--yes]] [--dry-run]
-  repo-skills --codex   --init   [<target>] [--force] [--dry-run]
-  repo-skills --codex   --update [<target>] [--dry-run]
-  repo-skills --kimi    --init   [<target>] [--force] [--dry-run]
-  repo-skills --kimi    --update [<target>] [--prune [--yes]] [--dry-run]
+  cli/skill.sh --claude  --init   [<target>] [--force] [--dry-run]
+  cli/skill.sh --claude  --update [<target>] [--prune [--yes]] [--dry-run]
+  cli/skill.sh --copilot --init   [<target>] [--force] [--dry-run]
+  cli/skill.sh --copilot --update [<target>] [--prune [--yes]] [--dry-run]
+  cli/skill.sh --codex   --init   [<target>] [--force] [--dry-run]
+  cli/skill.sh --codex   --update [<target>] [--dry-run]
+  cli/skill.sh --kimi    --init   [<target>] [--force] [--dry-run]
+  cli/skill.sh --kimi    --update [<target>] [--prune [--yes]] [--dry-run]
 
 PLATFORM (one required)
   --claude    install Claude Code assets into <target>/.claude
@@ -105,7 +105,7 @@ while [[ $# -gt 0 ]]; do
     --prune)    PRUNE=1 ;;
     --yes|-y)   YES=1 ;;
     --dry-run)  DRY_RUN=1 ;;
-    --version)  echo "repo-skills $VERSION"; exit 0 ;;
+    --version)  echo "skill.sh $VERSION"; exit 0 ;;
     --help|-h)  usage; exit 0 ;;
     -*)         die "unknown flag: $1" 1 ;;
     *)
@@ -775,7 +775,7 @@ maybe_install_rtk() {
 
 # ---- main dispatch -----------------------------------------------------------
 echo
-echo "$(c_bld 'repo-skills') $VERSION"
+echo "$(c_bld 'skill.sh') $VERSION"
 echo "  source:   $REPO_SKILLS_HOME"
 echo "  target:   $TARGET"
 echo "  platform: $PLATFORM"

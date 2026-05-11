@@ -176,10 +176,10 @@ The deploy manifest then ships `claude/` skills into **both** `.claude/skills/` 
     "gitignore": [ ".kimi/journal/*.md", ".kimi/SESSION.md" ]
   }
   ```
-- [ ] Update `bin/repo-skills` to handle the `kimi` block (should be a parallel branch of the existing copilot/codex installer logic).
+- [ ] Update `cli/skill.sh` to handle the `kimi` block (should be a parallel branch of the existing copilot/codex installer logic).
 - [ ] Add `kimi-port-plan.md` (this file) to repo.
 
-**Exit criteria:** `bin/repo-skills install --target kimi` no-ops cleanly; `kimi/README.md` is reviewed.
+**Exit criteria:** `cli/skill.sh install --target kimi` no-ops cleanly; `kimi/README.md` is reviewed.
 
 ---
 
@@ -315,7 +315,7 @@ Land these in `kimi/README.md` so users aren't surprised:
 
 ## 7. Open questions for review
 
-1. **Manifest dual-deploy:** should `bin/repo-skills` deploy `claude/` skills to `.kimi/skills/` *and* `.claude/skills/`, or rely solely on Kimi's `merge_all_available_skills` to read from `.claude/skills/`? Recommend deploying to both — handles users with non-default merge config and is unambiguous for tool-version compatibility.
+1. **Manifest dual-deploy:** should `cli/skill.sh` deploy `claude/` skills to `.kimi/skills/` *and* `.claude/skills/`, or rely solely on Kimi's `merge_all_available_skills` to read from `.claude/skills/`? Recommend deploying to both — handles users with non-default merge config and is unambiguous for tool-version compatibility.
 2. **AGENTS.md ownership:** does Kimi share AGENTS.md with Codex (which already uses it)? They appear to have the same convention; users running both CLIs would benefit from one file. Confirm via Kimi changelog before finalising.
 3. **Flow-skill scope:** how many of the 5 flow candidates (§4 Phase 5) are worth converting upfront vs. wait-and-see? My instinct is convert `kickoff` and `execute-plan` first (they're the highest-value pipelines) and defer the rest.
 4. **`ideate model: opus` and friends:** keep the field for Claude routing benefit, or strip for hygiene? Recommend keep — Kimi ignores it, Claude uses it.
@@ -327,7 +327,7 @@ Land these in `kimi/README.md` so users aren't surprised:
 
 | Phase | Scope | Estimate |
 |---|---|---|
-| 0 — Scaffolding | Tree, manifest, README, repo-skills wiring | 1 session |
+| 0 — Scaffolding | Tree, manifest, README, skill.sh wiring | 1 session |
 | 1 — Skill body cleanups | Frontmatter sweep, Claude-specific phrasing | 1 session |
 | 2 — Subagent port | 3 YAML files + 3 system-prompt files for execute-plan | 0.5 session |
 | 3 — AGENTS.md bridge | Starter file + docs | 0.5 session |

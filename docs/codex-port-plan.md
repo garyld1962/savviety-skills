@@ -15,7 +15,7 @@ Started on 2026-05-05:
 - Codex templates created for `AGENTS.md`, `config.toml`, `hooks.json`, hook scripts, and rules.
 - Thirty-three Codex skill surfaces ported into `codex/plugins/savviety-workflows/skills/`; this includes consolidated `ship`, `execute-prd`, and `skills` wrappers plus legacy references for large workflows.
 - Structural validator added at `codex/scripts/validate_codex_assets.py`.
-- `manifest.json` and `bin/repo-skills` extended with `--codex` install/update support.
+- `manifest.json` and `cli/skill.sh` extended with `--codex` install/update support.
 
 ## Sources Reviewed
 
@@ -368,14 +368,14 @@ Acceptance:
 Update:
 
 - `manifest.json`
-- `bin/repo-skills`
+- `cli/skill.sh`
 - `docs/repo-skills-design.md`
 - root `README.md`
 
 Acceptance:
 
-- `repo-skills --codex --init <target>` installs plugin marketplace, project agents, templates, config, hooks, and rules.
-- `repo-skills --codex --update <target>` is safe and never overwrites user-owned `AGENTS.md` or personal config.
+- `cli/skill.sh --codex --init <target>` installs plugin marketplace, project agents, templates, config, hooks, and rules.
+- `cli/skill.sh --codex --update <target>` is safe and never overwrites user-owned `AGENTS.md` or personal config.
 - Claude and Copilot install/update paths still behave as before.
 
 ### Phase 8: Verification and Regression Tests
@@ -406,7 +406,7 @@ Acceptance:
 
 ## Key Open Questions
 
-1. Should Codex be a first-class platform in `repo-skills` now, or should the first plugin be installed manually until the shape stabilizes?
+1. Should Codex be a first-class platform in `skill.sh` now, or should the first plugin be installed manually until the shape stabilizes?
 2. Should hidden contracts be duplicated into each skill's `references/`, or centralized in a `workflow-foundations` skill?
 3. Should `execute-prd` and `kickoff` merge before Codex port, or should the port create the new consolidated shape directly?
 4. Should `review-adversarial` continue to require external non-Codex model CLIs, or become a configurable optional mode?

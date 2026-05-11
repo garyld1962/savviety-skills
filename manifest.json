@@ -1,5 +1,5 @@
 {
-  "$comment": "Source-of-truth manifest for the repo-skills installer. See docs/repo-skills-design.md.",
+  "$comment": "Source-of-truth manifest for the cli/skill.sh installer. See docs/repo-skills-design.md.",
 
   "claude": {
     "skills": {
