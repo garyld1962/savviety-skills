@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Plan"
+  short_description: "Create TDD-first test specifications"
+  default_prompt: "Use $test-plan to run this Savviety Codex workflow."

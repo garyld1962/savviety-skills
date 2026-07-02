@@ -11,7 +11,7 @@ This is a **pattern document**, not a user-invokable skill. Other skills embed t
 
 ## When to Use
 
-Embed this pattern in any skill that depends on a user-editable config file (listed in `claude/configure/registry.md`). The check runs at the very start of the skill, before any main workflow logic.
+Embed this pattern in any skill that depends on a user-editable config file listed by `configure/references/targets.md`. The check runs at the very start of the skill, before any main workflow logic.
 
 ## The Pattern
 
@@ -30,7 +30,7 @@ Before proceeding, verify:
    >
    > Set it up interactively:
    > ```
-   > /configure <target>
+   > Use $configure for <target>.
    > ```
    >
    > Or copy the template and edit manually:
@@ -49,7 +49,7 @@ Before proceeding, verify:
    > - `field_name_1` (line 12)
    > - `field_name_2` (line 25)
    >
-   > Run `/configure <target> --recheck` to fill them in, or edit the file directly.
+   > Run `configure <target> --recheck` to fill them in, or edit the file directly.
 
 3. **Proceed.** If the file exists and contains no required placeholders, continue to the main workflow. Do not mention the pre-flight check in output — it should be invisible when config is healthy.
 
@@ -61,8 +61,8 @@ When embedding this pattern, fill in:
 
 | Placeholder | What to substitute |
 |---|---|
-| `<config_path>` | The destination path from the registry (e.g., `~/.claude/env.config.md`) |
-| `<template_path>` | The template source path (e.g., `claude/env-check/env.config.template.md`) |
+| `<config_path>` | The destination path from the target registry (for example, `.codex/config.toml`) |
+| `<template_path>` | The template source path (for example, `codex/templates/config.toml`) |
 | `<target>` | The configure target name (e.g., `env`) |
 | Required fields list | The specific `required_fields` or `required_sections` from the registry |
 
@@ -73,7 +73,7 @@ When embedding this pattern, fill in:
 
 For soft pre-flight, replace "halt" with:
 > Config at `<config_path>` is missing. Using argument-provided values.
-> To set defaults, run `/configure <target>`.
+> To set defaults, run `configure <target>`.
 
 ## Placeholder Conventions
 
@@ -93,16 +93,16 @@ All templates shipped with skills use these markers:
 
 Before proceeding, verify:
 
-1. Check `~/.claude/env.config.md` exists.
-   If not: "Run `/configure env` or copy `claude/env-check/env.config.template.md`."
+1. Check `.codex/config.toml` exists.
+   If not: "Use $configure for codex-config or copy `codex/templates/config.toml`."
 
 2. Scan for `<FILL IN>` placeholders in required sections: `shells`, `routing_rules`.
-   If found: list unfilled fields and suggest `/configure env --recheck`.
+   If found: list unfilled fields and suggest `configure codex-config --recheck`.
 
 3. If healthy, proceed silently.
 ```
 
-## Copilot-Native Equivalent
+## Other Platform Equivalents
 
 In Copilot prompts, the same pattern applies but references `.github/` paths:
 - Config destinations under `$HOME/.copilot/` or `.github/instructions/`

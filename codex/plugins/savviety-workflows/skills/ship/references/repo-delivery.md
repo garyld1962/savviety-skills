@@ -7,7 +7,7 @@ internal: true
 
 # Repo Delivery
 
-Required in the repo's `CLAUDE.md`:
+Required in the nearest applicable `AGENTS.md`. A legacy `CLAUDE.md` `## Commands` section may be read only when a repository has not migrated to Codex instructions.
 
 ```
 ## Commands
@@ -34,7 +34,7 @@ runtime_probes:                       # optional; commands that prove native/run
   - node -e "require('sharp')"
 ```
 
-Consumers: `execute-plan` (all), `checkpoint` (lint/build/test/package_manager/runtime_probes), `review-adversarial` (adversarial_triggers). Missing section → consuming skill halts with `Repo missing required CLAUDE.md ## Commands section. See _internal/repo-delivery for the schema.` No heuristic detection, no manifest fallback.
+Consumers: `execute-plan` (all), `checkpoint` (lint/build/test/package_manager/runtime_probes), `review-adversarial` (adversarial_triggers). Missing section -> consuming skill halts with `Repo missing required AGENTS.md ## Commands section. See repo-delivery for the schema.` Use lightweight tool discovery as a fallback only when the user explicitly asks to proceed without a contract.
 
 `runtime_probes` close the typecheck-vs-runtime gap: a build that passes `tsc --noEmit` can still fail at startup when a native binding (`better-sqlite3`, `sharp`, `canvas`), generated client, or driver cannot load against the current Node ABI. Each probe is a one-liner that exits 0 when the dependency loads. Failures are treated as build failures by `checkpoint` and `execute-plan`.
 

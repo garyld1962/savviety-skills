@@ -1,6 +1,6 @@
 {
   "name": "savviety-workflows",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Savviety engineering workflows for Codex: planning, checkpointing, review, delivery, and repo operations.",
   "author": {
     "name": "Savviety",
@@ -18,7 +18,7 @@
   "interface": {
     "displayName": "Savviety Workflows",
     "shortDescription": "Planning, review, checkpoint, and delivery workflows for Codex.",
-    "longDescription": "Reusable Codex-native workflows for planning, modernization, repo status, checkpointing, changelog support, ideation, review, and delivery.",
+    "longDescription": "Reusable Codex-native workflows for planning, modernization, repo status, checkpointing, changelog support, ideation, review, delivery, and skill metadata integration.",
     "developerName": "Savviety",
     "category": "Productivity",
     "capabilities": [

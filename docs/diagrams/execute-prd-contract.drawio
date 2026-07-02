@@ -1,0 +1,47 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram name="execute-prd contract" id="execute-prd-contract">
+    <mxGraphModel dx="1100" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="/execute-prd as a typed contract — a skill workflow IS a function signature" style="text;html=1;fontSize=17;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="14" width="1000" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- pseudo-signature -->
+        <mxCell id="sig" value="execute_prd(source: PRD | RFC | Ticket, opts)&#10;        requires  repoContract&#10;        ensures   validatedPlan ∧ parallelMap&#10;        throws    gate | validation | ambiguity" style="text;html=1;fontFamily=Courier New;fontSize=13;align=left;verticalAlign=middle;spacingLeft=10;fillColor=#f5f5f5;strokeColor=#cccccc;rounded=0;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="120" y="60" width="540" height="92" as="geometry" />
+        </mxCell>
+
+        <!-- the class / contract box -->
+        <mxCell id="cls" value="«skill»  /execute-prd" style="swimlane;fontStyle=1;align=center;verticalAlign=top;horizontal=1;startSize=36;collapsible=0;swimlaneFillColor=#ffffff;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="120" y="180" width="560" height="634" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r1" value="INPUTS  —  parameters&#10;path | --ado id | --linear id   (one-of)&#10;opts: --type, --plan-path, --parallel, --design-it-twice, pass-throughs" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;whiteSpace=wrap;overflow=hidden;fillColor=none;fontSize=12;" vertex="1" parent="cls"><mxGeometry y="36" width="560" height="80" as="geometry" /></mxCell>
+        <mxCell id="sep1" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;strokeColor=#9673a6;" vertex="1" parent="cls"><mxGeometry y="116" width="560" height="8" as="geometry" /></mxCell>
+
+        <mxCell id="r2" value="PRECONDITIONS  —  requires&#10;• CLAUDE.md ## Commands contract present&#10;• docs/plans/ writable&#10;• tracker auth if --ado / --linear&#10;• /audit-existing runnable on this repo" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;whiteSpace=wrap;overflow=hidden;fillColor=none;fontSize=12;" vertex="1" parent="cls"><mxGeometry y="124" width="560" height="104" as="geometry" /></mxCell>
+        <mxCell id="sep2" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;strokeColor=#9673a6;" vertex="1" parent="cls"><mxGeometry y="228" width="560" height="8" as="geometry" /></mxCell>
+
+        <mxCell id="r3" value="CALLS  —  dependencies (imports)&#10;/work-item · /audit-existing · aers-readiness&#10;/prd-validate · /parallel-optimization&#10;/validate-plan · /execute-plan" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;whiteSpace=wrap;overflow=hidden;fillColor=none;fontSize=12;" vertex="1" parent="cls"><mxGeometry y="236" width="560" height="90" as="geometry" /></mxCell>
+        <mxCell id="sep3" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;strokeColor=#9673a6;" vertex="1" parent="cls"><mxGeometry y="326" width="560" height="8" as="geometry" /></mxCell>
+
+        <mxCell id="r4" value="OUTPUTS  —  returns&#10;• PRD artefact → docs/plans/PRD-slug.md&#10;• validated plan → --plan-path&#10;• execution handed to /execute-plan" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;whiteSpace=wrap;overflow=hidden;fillColor=none;fontSize=12;" vertex="1" parent="cls"><mxGeometry y="334" width="560" height="90" as="geometry" /></mxCell>
+        <mxCell id="sep4" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;strokeColor=#9673a6;" vertex="1" parent="cls"><mxGeometry y="424" width="560" height="8" as="geometry" /></mxCell>
+
+        <mxCell id="r5" value="POSTCONDITIONS  —  ensures&#10;• plan passes /validate-plan&#10;• ## Parallel Execution present in plan&#10;• closed decisions captured in frontmatter" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;whiteSpace=wrap;overflow=hidden;fillColor=none;fontSize=12;" vertex="1" parent="cls"><mxGeometry y="432" width="560" height="90" as="geometry" /></mxCell>
+        <mxCell id="sep5" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;strokeColor=#9673a6;" vertex="1" parent="cls"><mxGeometry y="522" width="560" height="8" as="geometry" /></mxCell>
+
+        <mxCell id="r6" value="FAILURE MODES  —  throws&#10;• readiness gate fails → halt&#10;• /validate-plan fails → retry ≤ 3 then escalate&#10;• plan-ambiguity (autonomous) → halt&#10;• never invent product decisions" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;whiteSpace=wrap;overflow=hidden;fillColor=none;fontSize=12;" vertex="1" parent="cls"><mxGeometry y="530" width="560" height="104" as="geometry" /></mxCell>
+
+        <!-- thesis note -->
+        <mxCell id="note" value="Design by contract.&#10;&#10;The ## Contract block is a typed function signature:&#10;&#10;parameters · requires · returns · ensures · throws&#10;&#10;Same constructs a compiler enforces on a function — only here they operate on artefacts (PRDs, plans) instead of bytes.&#10;&#10;Programming, one level up." style="shape=note;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;fillColor=#dae8fc;strokeColor=#6c8ebf;size=18;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="740" y="180" width="340" height="360" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

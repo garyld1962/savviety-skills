@@ -1,0 +1,4 @@
+interface:
+  display_name: "Thesis"
+  short_description: "Find a guiding product thesis"
+  default_prompt: "Use $thesis to run this Savviety Codex workflow."

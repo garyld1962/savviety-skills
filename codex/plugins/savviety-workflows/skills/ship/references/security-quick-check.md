@@ -1,6 +1,6 @@
 ---
 name: security-quick-check
-description: "Reusable 7-point security review for diffs. Embedded by /hotfix, /pr, /ship, /checkpoint, /code-review when a fast security pass is warranted. Not user-invokable."
+description: "Reusable 7-point security review for diffs. Embedded by ship fast mode, ship PR mode, checkpoint, and code-review when a fast security pass is warranted. Not user-invokable."
 user-invocable: false
 internal: true
 ---
@@ -11,11 +11,11 @@ A focused, low-cost security pass over the current diff. Designed to catch the O
 
 ## When to Use
 
-Embed this rubric in any skill that ships code without going through full `/code-review`:
+Embed this rubric in any workflow that ships code without going through full `code-review`:
 
-- `/hotfix` — mandatory; the one review step you never skip on an expedited fix.
-- `/pr`, `/ship` — recommended on diffs that touch auth, input handling, rendering, or persistence.
-- `/checkpoint` — optional gate before opening a PR.
+- `ship --fast` — mandatory; the one review step you never skip on an expedited fix.
+- `ship` PR and release modes — recommended on diffs that touch auth, input handling, rendering, or persistence.
+- `checkpoint` — optional gate before opening a PR.
 
 Skip when the diff is purely cosmetic (formatting, comments, docs, type-only changes with no runtime behavior).
 
@@ -77,4 +77,4 @@ Findings block the calling workflow until resolved. The user may override (`--se
 - **Diff-scoped, not codebase-scoped.** Only review what changed. A pre-existing issue in untouched code is out of scope here — surface it as a separate note.
 - **No false-positive theater.** If a flagged pattern is provably safe in context (constant input, internal-only path, escaped by a verified helper), say so and pass. Do not pad findings.
 - **One screen.** Default output fits on a screen. Cite the rule number so the caller can trace.
-- **Not a replacement for full review.** This is the fast path. Architecturally significant changes still need `/code-review` or `/code-review-professional`.
+- **Not a replacement for full review.** This is the fast path. Architecturally significant changes still need `code-review` or `code-review-professional`.

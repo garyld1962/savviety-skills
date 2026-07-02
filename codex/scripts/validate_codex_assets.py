@@ -83,10 +83,50 @@ def validate_skills() -> list[str]:
         frontmatter = match.group(1)
         if not re.search(r"^name:\s*[\w-]+", frontmatter, re.M):
             failures.append(f"{path}: missing name")
+        else:
+            name = re.search(r"^name:\s*([\w-]+)", frontmatter, re.M).group(1)
+            if name != skill.name:
+                failures.append(f"{path}: name {name!r} does not match directory {skill.name!r}")
         desc = re.search(r"^description:\s*(.+)", frontmatter, re.M)
         if not desc or len(desc.group(1).strip().strip('"')) < 20:
             failures.append(f"{path}: description missing or too short")
+        failures.extend(validate_skill_interface(skill))
     return failures
+
+
+def validate_skill_interface(skill: Path) -> list[str]:
+    failures = []
+    path = skill / "agents" / "openai.yaml"
+    if not path.exists():
+        return [f"{path}: missing skill UI metadata"]
+
+    text = path.read_text(encoding="utf-8")
+    if not re.search(r"^interface:\s*$", text, re.M):
+        failures.append(f"{path}: missing interface block")
+
+    display = yaml_string_field(text, "display_name")
+    short = yaml_string_field(text, "short_description")
+    prompt = yaml_string_field(text, "default_prompt")
+
+    if not display:
+        failures.append(f"{path}: missing interface.display_name")
+    if not short:
+        failures.append(f"{path}: missing interface.short_description")
+    elif not 25 <= len(short) <= 64:
+        failures.append(f"{path}: short_description must be 25-64 chars")
+    if not prompt:
+        failures.append(f"{path}: missing interface.default_prompt")
+    elif f"${skill.name}" not in prompt:
+        failures.append(f"{path}: default_prompt must mention ${skill.name}")
+
+    return failures
+
+
+def yaml_string_field(text: str, key: str) -> str | None:
+    match = re.search(rf"^\s+{re.escape(key)}:\s*\"(.*)\"\s*$", text, re.M)
+    if not match:
+        return None
+    return match.group(1).replace('\\"', '"').replace("\\n", "\n").replace("\\\\", "\\")
 
 
 def validate_agents() -> list[str]:

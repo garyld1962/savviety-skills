@@ -1,0 +1,238 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram name="execute-prd sequence" id="execute-prd-seq">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="/execute-prd — PRD → validated plan → execution (sequence)" style="text;html=1;fontSize=18;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="16" width="900" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Lifelines / participants -->
+        <mxCell id="ll_op" value="Operator" style="shape=umlLifeline;participant=umlActor;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="140" height="840" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_prd" value="/execute-prd&#10;(orchestrator)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="240" y="60" width="140" height="840" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_repo" value="CLAUDE.md /&#10;repo state" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="460" y="60" width="140" height="840" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_wi" value="/work-item&#10;(ADO / Linear)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="680" y="60" width="140" height="840" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_audit" value="/audit-existing" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="900" y="60" width="140" height="840" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_aers" value="aers-readiness&#10;gate" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="60" width="140" height="840" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_design" value="design-it-twice&#10;agents A/B/C" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="60" width="140" height="840" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_popt" value="/parallel-&#10;optimization" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="1560" y="60" width="140" height="840" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_val" value="/validate-plan" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="1780" y="60" width="140" height="840" as="geometry" />
+        </mxCell>
+        <mxCell id="ll_exec" value="/execute-plan" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="2000" y="60" width="140" height="840" as="geometry" />
+        </mxCell>
+
+        <!-- centers: op=110 prd=310 repo=530 wi=750 audit=970 aers=1190 design=1410 popt=1630 val=1850 exec=2070 -->
+
+        <!-- 1: Operator -> execute-prd -->
+        <mxCell id="m1" value="invoke /execute-prd &lt;path&gt; | --ado | --linear" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="140" as="sourcePoint" />
+            <mxPoint x="310" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 2: execute-prd -> repo (step 1) -->
+        <mxCell id="m2" value="1. read CLAUDE.md ## Commands contract" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="174" as="sourcePoint" />
+            <mxPoint x="530" y="174" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- 3: repo -> execute-prd (return) -->
+        <mxCell id="m3" value="contract present (else HALT: missing ## Commands)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="530" y="208" as="sourcePoint" />
+            <mxPoint x="310" y="208" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 4: execute-prd -> work-item (step 2, optional) -->
+        <mxCell id="m4" value="2. [if --ado/--linear] fetch ticket" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="242" as="sourcePoint" />
+            <mxPoint x="750" y="242" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- 5: work-item -> execute-prd (return) -->
+        <mxCell id="m5" value="rendered markdown → persist docs/plans/PRD-&lt;slug&gt;.md" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="750" y="276" as="sourcePoint" />
+            <mxPoint x="310" y="276" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6: self - classify plan type 2.5 -->
+        <mxCell id="m6" value="2.5 classify type (bug/feature/refactor/infra)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="310" as="sourcePoint" />
+            <mxPoint x="310" y="326" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="395" y="310" />
+              <mxPoint x="395" y="326" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 7: execute-prd -> audit (step 3) -->
+        <mxCell id="m7" value="3. /audit-existing — assess current state" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="352" as="sourcePoint" />
+            <mxPoint x="970" y="352" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- 8: audit -> execute-prd (return) -->
+        <mxCell id="m8" value="greenfield / partial / mature + surfaces, dupes, tests" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="970" y="386" as="sourcePoint" />
+            <mxPoint x="310" y="386" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 9: execute-prd -> aers (step 3.5) -->
+        <mxCell id="m9" value="3.5 score readiness (audit as input)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="420" as="sourcePoint" />
+            <mxPoint x="1190" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- 10: aers -> execute-prd (return) -->
+        <mxCell id="m10" value="Ready (0–2) / Partial (3–6) / Not ready (7+)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1190" y="454" as="sourcePoint" />
+            <mxPoint x="310" y="454" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 11: execute-prd -> operator (gap questions / halt) -->
+        <mxCell id="m11" value="[Partial] ask gap questions • [Not ready] HALT → suggest /prd-validate" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="488" as="sourcePoint" />
+            <mxPoint x="110" y="488" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- 12: operator -> execute-prd answers -->
+        <mxCell id="m12" value="answers → recorded as Closed Decisions" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="522" as="sourcePoint" />
+            <mxPoint x="310" y="522" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 13: self extract non-negotiables (4) -->
+        <mxCell id="m13" value="4. extract MUST/SHOULD, invariants, acceptance criteria" style="html=1;verticalAlign=bottom;endArrow=block;rounded=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="556" as="sourcePoint" />
+            <mxPoint x="310" y="572" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="395" y="556" />
+              <mxPoint x="395" y="572" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 14: execute-prd -> design agents (4.5 conditional) -->
+        <mxCell id="m14" value="4.5 [auto: new arch decision] spawn 3 design agents (∥)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="598" as="sourcePoint" />
+            <mxPoint x="1410" y="598" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- 15: design agents -> execute-prd return -->
+        <mxCell id="m15" value="3 interface shapes → pick/synthesize → Closed Decision" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1410" y="632" as="sourcePoint" />
+            <mxPoint x="310" y="632" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 16: self draft plan (5) -->
+        <mxCell id="m16" value="5. draft plan: closed decisions, milestones, tasks, acceptance" style="html=1;verticalAlign=bottom;endArrow=block;rounded=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="666" as="sourcePoint" />
+            <mxPoint x="310" y="682" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="395" y="666" />
+              <mxPoint x="395" y="682" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 17: execute-prd -> parallel-opt (6) -->
+        <mxCell id="m17" value="6. /parallel-optimization" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="708" as="sourcePoint" />
+            <mxPoint x="1630" y="708" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- 18: parallel-opt -> execute-prd return -->
+        <mxCell id="m18" value="## Parallel Execution / ## Waves (≤4 teams, ≥3 tasks each)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1630" y="742" as="sourcePoint" />
+            <mxPoint x="310" y="742" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 19: execute-prd -> validate (7) -->
+        <mxCell id="m19" value="7. /validate-plan" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="776" as="sourcePoint" />
+            <mxPoint x="1850" y="776" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- 20: validate -> execute-prd return -->
+        <mxCell id="m20" value="pass → step 8 • fail → fix &amp; revalidate (loop ≤ 3, then escalate)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1850" y="810" as="sourcePoint" />
+            <mxPoint x="310" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 21: execute-prd -> execute-plan (8) -->
+        <mxCell id="m21" value="8. /execute-plan &lt;plan&gt; (sole execution authority)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="844" as="sourcePoint" />
+            <mxPoint x="2070" y="844" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <!-- 22: execute-plan -> execute-prd return -->
+        <mxCell id="m22" value="implementation built; PRD used only for traceability" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2070" y="878" as="sourcePoint" />
+            <mxPoint x="310" y="878" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Note: readiness gate -->
+        <mxCell id="note1" value="Gate (3.5): refuses a validated plan built on an ambiguous PRD" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;size=14;align=left;verticalAlign=top;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="470" width="200" height="48" as="geometry" />
+        </mxCell>
+        <!-- Note: validate loop bound -->
+        <mxCell id="note2" value="Loop bound: 3 attempts, then surface blocking finding to operator" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;size=14;align=left;verticalAlign=top;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1780" y="826" width="200" height="48" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

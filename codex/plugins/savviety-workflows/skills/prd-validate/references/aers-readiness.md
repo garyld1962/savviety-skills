@@ -1,6 +1,6 @@
 ---
 name: aers-readiness
-description: "Reusable rubric defining the AERS (Agent-Executable Requirements Spec) readiness standard — required sections, closed-decision categories, ambiguity priorities, and interaction rules. Embedded by /prd-validate, /spec-review-adversarial, and /prd-acceptance. Not user-invokable."
+description: "Reusable rubric defining the AERS (Agent-Executable Requirements Spec) readiness standard — required sections, closed-decision categories, ambiguity priorities, and interaction rules. Embedded by prd-validate, spec-review-adversarial, and prd-acceptance. Not user-invokable."
 user-invocable: false
 internal: true
 ---
@@ -14,14 +14,14 @@ Use this skill to evaluate or improve a requirements artifact before implementat
 ## When to Use
 
 - Scoring or shaping a requirements artifact against the readiness rubric
-- Referenced internally by `/prd-validate`, `/kickoff`, and `/execute-prd` for their gates
+- Referenced internally by `prd-validate`, `execute-prd` lightweight kickoff mode, and `execute-prd` full mode for their gates
 - You need the authoritative definition of "implementation-ready"
 
 ## When NOT to Use
 
-- You want an interactive interview to fix gaps — use `/prd-validate`
-- Verifying a finished implementation — use `/prd-acceptance`
-- Drafting a PRD from scratch — use `/ideate` first
+- You want an interactive interview to fix gaps — use `prd-validate`
+- Verifying a finished implementation — use `prd-acceptance`
+- Drafting a PRD from scratch — use `ideate` first
 
 ## Input → Output Model
 
@@ -46,9 +46,9 @@ Reduce execution drift by surfacing settled facts early.
 
 ## Relationship to Other Skills
 
-- Use `/prd-validate` to run this rubric interactively
-- Use `/kickoff` or `/execute-prd` after the artifact is ready
-- Use `/plan` or `superpowers:writing-plans` for implementation planning (not this skill)
+- Use `prd-validate` to run this rubric interactively
+- Use `execute-prd` lightweight kickoff mode or full `execute-prd` after the artifact is ready
+- Use native Codex planning or `execute-prd` for implementation planning, not this rubric alone
 - BA plugin skills (`ba-problem-refiner`, `ba-spec-engineer`) can feed into this rubric
 
 ## Entry Modes

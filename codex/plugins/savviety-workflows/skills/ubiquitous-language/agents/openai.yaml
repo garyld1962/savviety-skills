@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ubiquitous Language"
+  short_description: "Build and maintain a domain glossary"
+  default_prompt: "Use $ubiquitous-language to run this Savviety Codex workflow."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Investigate"
+  short_description: "Produce evidence-backed code reports"
+  default_prompt: "Use $code-investigate to run this Savviety Codex workflow."

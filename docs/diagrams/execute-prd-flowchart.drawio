@@ -1,0 +1,75 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram name="execute-prd control flow" id="execute-prd-flow">
+    <mxGraphModel dx="1200" dy="1400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="/execute-prd as control flow — guards, branches, and a bounded loop: this is an algorithm" style="text;html=1;fontSize=17;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="14" width="1100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- legend -->
+        <mxCell id="leg" value="LEGEND&#10;green = entry / exit&#10;blue = internal step&#10;orange = sub-skill call (function call)&#10;yellow = branch (if / verdict)&#10;red = terminal — early return / throw" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="860" y="60" width="300" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="loopnote" value="Bounded while-loop:&#10;validate → fix → validate&#10;guard: attempts &lt; 3,&#10;else escalate (no infinite loop)" style="shape=note;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;fillColor=#fff2cc;strokeColor=#d6b656;size=14;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="860" y="1430" width="300" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- spine -->
+        <mxCell id="start" value="invoke /execute-prd&#10;path | --ado | --linear" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="240" y="40" width="200" height="50" as="geometry" /></mxCell>
+        <mxCell id="p_contract" value="Read CLAUDE.md&#10;## Commands contract" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="240" y="130" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="d_contract" value="## Commands&#10;present?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="250" y="230" width="180" height="90" as="geometry" /></mxCell>
+        <mxCell id="p_source" value="Resolve + load source;&#10;classify type&#10;(bug/feature/refactor/infra)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="240" y="370" width="200" height="70" as="geometry" /></mxCell>
+        <mxCell id="p_audit" value="/audit-existing" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1"><mxGeometry x="240" y="490" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="p_score" value="Score readiness&#10;(aers gate)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1"><mxGeometry x="240" y="600" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="d_ready" value="Readiness&#10;verdict?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="250" y="710" width="180" height="100" as="geometry" /></mxCell>
+        <mxCell id="p_extract" value="Extract&#10;non-negotiables" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="240" y="870" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="d_design" value="design-it-twice&#10;gate fires?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="250" y="970" width="180" height="100" as="geometry" /></mxCell>
+        <mxCell id="p_draft" value="Draft plan&#10;(closed decisions,&#10;milestones, tasks)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="240" y="1130" width="200" height="70" as="geometry" /></mxCell>
+        <mxCell id="p_popt" value="/parallel-optimization" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1"><mxGeometry x="240" y="1240" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="p_validate" value="/validate-plan" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1"><mxGeometry x="240" y="1340" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="d_valid" value="Plan valid?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="250" y="1440" width="180" height="100" as="geometry" /></mxCell>
+        <mxCell id="p_exec" value="/execute-plan" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1"><mxGeometry x="240" y="1600" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="end" value="Implementation built&#10;(PRD → traceability only)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="240" y="1700" width="200" height="50" as="geometry" /></mxCell>
+
+        <!-- side branches / terminals -->
+        <mxCell id="t_contract" value="HALT: missing&#10;## Commands contract" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="600" y="245" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="t_notready" value="ABORT:&#10;requirements-incomplete" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="600" y="725" width="200" height="60" as="geometry" /></mxCell>
+        <mxCell id="p_gap" value="[Partially ready]&#10;Ask gap questions →&#10;closed decisions" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="10" y="710" width="190" height="80" as="geometry" /></mxCell>
+        <mxCell id="p_design" value="[fires] Spawn 3 design&#10;agents (∥) → choose&#10;shape → closed decision" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1"><mxGeometry x="600" y="975" width="210" height="90" as="geometry" /></mxCell>
+        <mxCell id="d_attempts" value="attempts&#10;&lt; 3 ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="610" y="1440" width="160" height="100" as="geometry" /></mxCell>
+        <mxCell id="p_fix" value="Fix plan&#10;(attempt++)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="610" y="1590" width="160" height="60" as="geometry" /></mxCell>
+        <mxCell id="t_escalate" value="Escalate to operator&#10;(surface blocking finding)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="850" y="1450" width="200" height="80" as="geometry" /></mxCell>
+
+        <!-- edges -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="start" target="p_contract"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p_contract" target="d_contract"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e3" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="d_contract" target="t_contract"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e4" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="d_contract" target="p_source"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p_source" target="p_audit"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p_audit" target="p_score"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p_score" target="d_ready"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e8" value="Not ready" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="d_ready" target="t_notready"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e9" value="Partially&#10;ready" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="d_ready" target="p_gap"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="p_gap" target="p_extract"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e11" value="Ready" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="d_ready" target="p_extract"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p_extract" target="d_design"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e13" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="d_design" target="p_design"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="p_design" target="p_draft"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e15" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="d_design" target="p_draft"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p_draft" target="p_popt"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p_popt" target="p_validate"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p_validate" target="d_valid"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e19" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="d_valid" target="p_exec"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e20" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="d_valid" target="d_attempts"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e21" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="d_attempts" target="p_fix"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e22" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="d_attempts" target="t_escalate"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e23" value="revalidate (loop)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;dashed=1;strokeColor=#b85450;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="p_fix" target="p_validate"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="940" y="1620" /><mxPoint x="940" y="1370" /></Array></mxGeometry></mxCell>
+        <mxCell id="e24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="p_exec" target="end"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

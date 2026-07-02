@@ -1,0 +1,4 @@
+interface:
+  display_name: "Configure"
+  short_description: "Fill workflow configuration safely"
+  default_prompt: "Use $configure to run this Savviety Codex workflow."

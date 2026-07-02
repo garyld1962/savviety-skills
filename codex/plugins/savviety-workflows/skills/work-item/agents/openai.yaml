@@ -1,0 +1,4 @@
+interface:
+  display_name: "Work Item"
+  short_description: "Normalize tracker tickets for planning"
+  default_prompt: "Use $work-item to run this Savviety Codex workflow."

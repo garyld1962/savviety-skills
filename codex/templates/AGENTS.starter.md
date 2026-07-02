@@ -7,6 +7,30 @@
 - Keep project-specific decisions in this file or nearby `AGENTS.md` files close to the code they govern.
 - Put personal preferences in your Codex user configuration, not in shared repository instructions.
 
+## Commands
+
+lint: <cmd>
+build: <cmd>
+test: <cmd>
+default_branch: main
+package_manager: <npm|pnpm|yarn|bun|pip|poetry|cargo|go|dotnet|...>
+
+Optional fields:
+
+adversarial_triggers:
+  - src/auth/**
+  - migrations/**
+retry_budget:
+  max_total_retries: 20
+  max_wall_clock_minutes: 60
+auto_accept_deviations:
+  - lockfile
+  - formatter
+auto_generated_paths:
+  - "**/generated/**"
+runtime_probes:
+  - node -e "require('sharp')"
+
 ## Savviety Workflows
 
 - Use `repo-status` before delivery or after a long break.

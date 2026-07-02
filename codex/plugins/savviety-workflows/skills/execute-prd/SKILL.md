@@ -1,6 +1,6 @@
 ---
 name: execute-prd
-description: "Convert a PRD, RFC, prompt, story, work item, or rough requirement into an executable plan, validate it, optimize safe parallel lanes, then execute when approved. Use for phrases like 'build this PRD', 'execute the PRD', 'turn this RFC into a plan and run it', 'implement prompt.md', or 'turn these requirements into an app'. Prefer this over generic planning when a concrete requirement source exists and the user wants implementation, not just brainstorming."
+description: "Convert a PRD, RFC, prompt, story, work item, or rough requirement into an executable plan, validate it, optimize safe parallel lanes, then execute when approved. Use for phrases like 'build this PRD', 'execute the PRD', 'turn this RFC into a plan and run it', 'implement prompt.md', 'turn these requirements into an app', 'kickoff this feature', or 'start this story'. Prefer this over generic planning when a concrete requirement source exists and the user wants implementation, not just brainstorming."
 ---
 
 # Execute PRD
