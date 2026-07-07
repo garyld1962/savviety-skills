@@ -18,6 +18,7 @@ description: "Full PR lifecycle: branch, commit, checkpoint, push, create PR, an
 - Repo has project-specific release steps beyond a PR — use `/ship`
 - You only need the quality gate — use `/checkpoint`
 - Work isn't ready — finish implementation and tests first
+- You're unsure whether this work should merge, become a PR, or be discarded — use `superpowers:finishing-a-development-branch` for the decision, then come back here for the mechanics
 
 ## Arguments
 

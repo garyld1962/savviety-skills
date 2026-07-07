@@ -21,6 +21,7 @@ description: "Audit a codebase against current AI toolchain capability and produ
 - You suspect the project wants a fundamentally different stack — that's a human decision; this skill stays inside the current platform.
 - Single-file polish — use `/simplify`.
 - Dependency-driven modernization (CVEs, package upgrades) — use `/dep-audit` + `/dep-migrate`.
+- Generic legacy-codebase modernization (old language versions, EOL frameworks) with the official plugin installed — `code-modernization@claude-plugins-official` covers that; `/modernize` is specifically the AI-time refresh that hands off to `/execute-prd --type=refactor`.
 
 ## Scope Boundaries
 

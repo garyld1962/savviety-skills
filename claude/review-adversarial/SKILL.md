@@ -1,19 +1,20 @@
 ---
 name: review-adversarial
-description: "Cross-model adversarial code review via Codex/Gemini. Use for high-stakes diffs (auth, payments, migrations) or diffs over 200 lines after code-review passes."
+description: "Cross-model adversarial code review via Codex/Gemini. Use for high-stakes diffs (auth, payments, migrations) or diffs over 200 lines after domain-review passes."
 ---
 
 ## When to Use
 
-- /code-review has passed and diff is 200+ lines
+- /domain-review has passed and diff is 200+ lines
 - Changes touch auth, payments, data migrations, or architectural boundaries
 - User explicitly requests "adversarial review" or invokes `/review-adversarial`
 
 ## When NOT to Use
 
-- Small, low-risk diffs — `/code-review` is sufficient
+- Small, low-risk diffs — `/domain-review` is sufficient
 - BA deliverables or specs — use `/spec-review-adversarial`
 - Reviewing an existing code review — use `/review-gauntlet`
+- You want same-model multi-agent scale in Anthropic cloud rather than cross-model challenge — use the built-in `/code-review ultra`
 
 # /review-adversarial — Cross-Model Adversarial Review
 
@@ -237,9 +238,9 @@ Append to the verdict:
 This is an **optional step** in the development workflow. The typical flow:
 
 ```
-working  → /code-review --quick     (periodic mid-development check)
+working  → /domain-review --quick     (periodic mid-development check)
 "done"   → /simplify                (auto-refactor: reuse, quality, efficiency)
-clean    → /code-review             (full review — REQUIRED)
+clean    → /domain-review             (full review — REQUIRED)
 passing  → /review-adversarial      (cross-model review — OPTIONAL)
 reviewed → create PR
 ```

@@ -21,6 +21,7 @@ model: opus
 - Patch/minor updates — just update and run tests
 - Adding a new dependency — not a migration
 - Removing a dependency — just delete it
+- Next.js version upgrades in a project with the Vercel plugin available — `vercel:next-upgrade` runs the official codemods and migration guides directly
 
 ## Usage
 

@@ -12,7 +12,7 @@ description: "Sync current branch with main: fetch, rebase, resolve conflicts. U
 - Before creating a PR (ensure no merge conflicts)
 - When main has moved ahead and you need the latest changes
 - After another PR was merged and you need its changes
-- Before running /checkpoint or /code-review (ensure you're testing against current main)
+- Before running /checkpoint or /domain-review (ensure you're testing against current main)
 
 ## When NOT to Use
 

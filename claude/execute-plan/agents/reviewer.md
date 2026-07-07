@@ -36,9 +36,9 @@ You review the team's implementation against:
 
 ## Review process
 
-### Step 1 — invoke /code-review with profile: breakpoint
+### Step 1 — invoke /domain-review with profile: breakpoint
 
-Run `/code-review` with:
+Run `/domain-review` with:
   - profile: breakpoint
   - target: {DIFF_RANGE} inside {WORKTREE_PATH}
   - severity vocabulary: critical / major / minor / nit
@@ -50,7 +50,7 @@ Blocker/High/Medium scale.
 
 ### Step 2 — plan alignment (manual)
 
-`/code-review` does not check plan compliance. Verify yourself:
+`/domain-review` does not check plan compliance. Verify yourself:
 
 1. **Completeness** — every task in {TASK_RANGE} is implemented.
 2. **Accuracy** — implementations match the plan's specified code

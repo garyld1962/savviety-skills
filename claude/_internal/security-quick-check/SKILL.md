@@ -1,6 +1,6 @@
 ---
 name: security-quick-check
-description: "Reusable 7-point security review for diffs. Embedded by /hotfix (mandatory), /pr, /ship, /code-review (conditional, per canonical trigger criteria). Not user-invokable."
+description: "Reusable 7-point security review for diffs. Embedded by /hotfix (mandatory), /pr, /ship, /domain-review (conditional, per canonical trigger criteria). Not user-invokable."
 user-invocable: false
 internal: true
 kind: embedded
@@ -12,7 +12,7 @@ A focused, low-cost security pass over the current diff. Designed to catch the O
 
 ## When to Use
 
-Embed this rubric in any skill that ships code without going through full `/code-review`.
+Embed this rubric in any skill that ships code without going through full `/domain-review`.
 
 ### Per-skill invocation policy
 
@@ -20,7 +20,7 @@ Embed this rubric in any skill that ships code without going through full `/code
 |---|---|---|
 | `/hotfix` | **mandatory** | The one review step you never skip on an expedited fix. |
 | `/pr`, `/ship` | **conditional** | Apply when the diff matches the canonical trigger criteria below. |
-| `/code-review` | **conditional** | When a fast security pass is warranted (e.g. `breakpoint` profile on sensitive paths). |
+| `/domain-review` | **conditional** | When a fast security pass is warranted (e.g. `breakpoint` profile on sensitive paths). |
 
 ### Canonical trigger criteria
 
@@ -113,7 +113,7 @@ Findings block the calling workflow until resolved. The user may override (`--se
 - **Diff-scoped, not codebase-scoped.** Only review what changed. A pre-existing issue in untouched code is out of scope here — surface it as a separate note.
 - **No false-positive theater.** If a flagged pattern is provably safe in context (constant input, internal-only path, escaped by a verified helper), say so and pass. Do not pad findings.
 - **One screen.** Default output fits on a screen. Cite the rule number so the caller can trace.
-- **Not a replacement for full review.** This is the fast path. Architecturally significant changes still need `/code-review` or `/code-review-professional`.
+- **Not a replacement for full review.** This is the fast path. Architecturally significant changes still need `/domain-review` or `/code-review-professional`.
 
 ## Contract
 

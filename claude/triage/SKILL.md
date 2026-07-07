@@ -1,6 +1,6 @@
 ---
 name: triage
-description: "Investigate a bug from reproduction through root cause analysis. Produces a structured triage report with classification, risk assessment, and recommended next step. Does NOT write fixes."
+description: "Investigate a bug from reproduction through root cause analysis. Produces a structured triage report with classification, risk assessment, and recommended next step. Does NOT write fixes. Preferred over superpowers:systematic-debugging when you want an investigation report and a handoff (to /hotfix or /plan) without fixing anything in the same session."
 model: opus
 ---
 
@@ -18,6 +18,7 @@ model: opus
 ## When NOT to Use
 
 - You already know the root cause and just need to fix it -- use /hotfix or /plan
+- You intend to investigate AND fix in one session -- use superpowers:systematic-debugging, which drives through to a verified fix
 - The issue is a feature request, not a bug
 - The issue is purely cosmetic with no functional impact -- just fix it directly
 

@@ -1,11 +1,11 @@
 ---
 name: checkpoint
-description: "Quality gate: discovers project tooling, runs linter, typecheck/build, and tests for changed packages. Use before pushing or creating PRs."
+description: "Quality gate: discovers project tooling, runs linter, typecheck/build, and tests for changed packages. Use before pushing or creating PRs. Static gates only — for runtime proof that a change works end-to-end, follow with the built-in /verify."
 ---
 
 # /checkpoint — Quality Gate
 
-**Purpose:** Fast quality gate that runs lint, build, and tests for changed packages. Does NOT run code review — use `/code-review` separately for that.
+**Purpose:** Fast quality gate that runs lint, build, and tests for changed packages. Does NOT run code review — use `/domain-review` separately for that.
 
 ## When to Use
 
@@ -15,9 +15,10 @@ description: "Quality gate: discovers project tooling, runs linter, typecheck/bu
 
 ## When NOT to Use
 
-- You want review feedback, not just green tests — use `/code-review`
+- You want review feedback, not just green tests — use `/domain-review`
 - No changes staged or tooling not yet configured — run `/configure` first
 - Full delivery flow needed — use `/pr` or `/ship`, which call checkpoint internally
+- You need proof the change behaves correctly at runtime, not just green gates — run the built-in `/verify` (or `superpowers:verification-before-completion`) after checkpoint passes
 
 Execute these steps in order. Report results at the end.
 
@@ -140,7 +141,7 @@ Output a summary:
 
 ## Notes
 
-- This is the fast gate. It does NOT run `/code-review`.
+- This is the fast gate. It does NOT run `/domain-review`.
 - `/pr` and `/ship` call this skill as a prerequisite.
 - Known pre-existing test failures (documented in CLAUDE.md or auto-memory) should be noted but not block the verdict unless they are new regressions.
 

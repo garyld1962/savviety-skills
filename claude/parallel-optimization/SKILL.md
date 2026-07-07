@@ -129,6 +129,13 @@ Add this section to the generated or optimized plan:
 Keep the table concrete. Avoid vague scopes such as "backend files"
 when a package path can be named.
 
+**Workflow-tool mapping:** when the executing harness has the native
+Workflow orchestrator, this section translates mechanically — each lane
+becomes an `agent()` call with `isolation: 'worktree'`, each barrier a
+`parallel()` join, and wave ordering a `pipeline()` stage sequence. The
+tables above are the source of truth; the Workflow script is a rendering
+of them, not a replacement.
+
 ## Output Rules
 
 - Preserve the PRD's product requirements; optimization may reorder

@@ -1,6 +1,6 @@
 ---
 name: code-review-professional
-description: "Seniority-calibrated craft grade (junior/mid/senior/staff) across 7 axes with line-cited reasoning. Use at the PR boundary after code-review."
+description: "Seniority-calibrated craft grade (junior/mid/senior/staff) across 7 axes with line-cited reasoning. Use at the PR boundary after domain-review."
 ---
 
 # /code-review-professional — Seniority Grading
@@ -9,20 +9,20 @@ description: "Seniority-calibrated craft grade (junior/mid/senior/staff) across 
 scale. Output a grade per identifiable component, each with
 evidence.
 
-This skill does **not** find defects. That's `code-review`'s job. If you
-find a bug, note it as a question for the code-review skill — do not
+This skill does **not** find defects. That's `domain-review`'s job. If you
+find a bug, note it as a question for the domain-review skill — do not
 record it as a grading finding.
 
 ## When to Use
 
-- At the PR boundary in the CodeGen flow, after `code-review` with `profile: full`.
+- At the PR boundary in the CodeGen flow, after `domain-review` with `profile: full`.
 - When a reviewer wants an external judgment on "what level of engineer wrote this."
 - When onboarding feedback on a team member's work is useful.
 
 ## When NOT to Use
 
-- Mid-flow / at milestones — use `code-review` with `profile: breakpoint`.
-- When you want a defect list — use `code-review`.
+- Mid-flow / at milestones — use `domain-review` with `profile: breakpoint`.
+- When you want a defect list — use `domain-review`.
 - When the change is <10 lines — grading is noise.
 
 ## Inputs
@@ -30,7 +30,7 @@ record it as a grading finding.
 - **`diff`** — the set of changed files. Prefer `git diff $EXECUTE_PLAN_BASE_SHA..HEAD` at the PR boundary when invoked from `/execute-plan`.
 - **`pr_description`** — optional. If absent, note it and proceed.
 - **`requirements_source`** — optional prompt, PRD, RFC, issue, or plan text containing explicit non-negotiables. When present, use it for the Contract Compliance section below.
-- **`diff_manifest`** — optional pre-computed triage object (provided by `/execute-plan` at the Phase 3 preamble). Schema, field reference, and consumer contract live in `_internal/diff-manifest/SKILL.md` — read it before consuming. When present and `schema_version` is recognised, use its `clusters` as the component boundaries for step 1 (Identify components); do **not** re-cluster the diff. This guarantees you and `/code-review` report on the same components. When `schema_version` is unknown, log a warning and fall back to clustering from the diff yourself. When absent (e.g., direct invocation), fall back to clustering from the diff yourself.
+- **`diff_manifest`** — optional pre-computed triage object (provided by `/execute-plan` at the Phase 3 preamble). Schema, field reference, and consumer contract live in `_internal/diff-manifest/SKILL.md` — read it before consuming. When present and `schema_version` is recognised, use its `clusters` as the component boundaries for step 1 (Identify components); do **not** re-cluster the diff. This guarantees you and `/domain-review` report on the same components. When `schema_version` is unknown, log a warning and fall back to clustering from the diff yourself. When absent (e.g., direct invocation), fall back to clustering from the diff yourself.
 
 ## Grade scale
 
@@ -78,7 +78,7 @@ overall grade when the evidence points different ways.
 
 **If `diff_manifest` was provided, use its `clusters` array as your
 components verbatim — do not re-cluster.** This keeps your reports
-aligned with `/code-review`'s. Absent the manifest, scan the diff
+aligned with `/domain-review`'s. Absent the manifest, scan the diff
 and cluster files into components. State the clusters up front:
 
 ```
@@ -150,7 +150,7 @@ compliance table after the craft grading:
 | <requirement> | `<file:line>` and test/command evidence | pass/fail/unclear |
 ```
 
-This addendum is not a defect list and must not replace `/code-review`.
+This addendum is not a defect list and must not replace `/domain-review`.
 Its job is to keep craft grading from ignoring hard product or prompt
 requirements.
 
@@ -230,7 +230,7 @@ If a structural issue surfaces: re-cluster, re-grade, or add a note in the Overa
 ### Pragmatist — usefulness of the grade
 
 - Is the grade actionable? "Junior on Forethought" with one weak edge case is not useful — it just labels the author. Either point to a concrete pattern they could learn, or drop the axis to "insufficient evidence."
-- Are you punishing defects? Defects belong in `code-review`. If a low grade rests on a bug, move the bug to "Notes for code-review" and re-grade the axis on craft alone.
+- Are you punishing defects? Defects belong in `domain-review`. If a low grade rests on a bug, move the bug to "Notes for domain-review" and re-grade the axis on craft alone.
 - Does the overall read point to something the team can act on (pair on the UI before merge, ask for a follow-up on edge cases), or does it just label?
 
 If the grade fails the pragmatist test: revise the reasoning to be actionable, or drop to "insufficient evidence."
@@ -244,7 +244,7 @@ The report does not ship until:
 
 ## Things you must not do
 
-- Do not report defects. That's `code-review`'s job. If you see a bug, list it under a final "Notes for code-review" section — do not inflate axis grades to punish defects.
+- Do not report defects. That's `domain-review`'s job. If you see a bug, list it under a final "Notes for domain-review" section — do not inflate axis grades to punish defects.
 - Do not grade axes without diff-line citations. No citation = skip the axis and note it.
 - Do not force a single overall grade when components clearly differ. Split decisions are the expected output, not the exception.
 - Do not use the grade to judge the author as a person. Grade the code in this diff, not the human.
@@ -254,6 +254,6 @@ The report does not ship until:
 
 - **Inputs:** `diff` (prefer `git diff $EXECUTE_PLAN_BASE_SHA..HEAD` when invoked from `/execute-plan`); optional `pr_description`; optional `requirements_source`; optional `diff_manifest` (schema in `_internal/diff-manifest`).
 - **Preconditions:** diff is at least ~10 lines (otherwise grading is noise — refuse). Rubric in `_internal/professional-rubric/SKILL.md` is current. If `diff_manifest` provided, its `schema_version` is recognised (else fall back).
-- **Outputs:** per-component grades on the 7 axes (junior/mid/senior/staff) with **2–3 diff-line citations per axis**; "Overall Read" with actionable takeaways per component; defects (if seen) listed under "Notes for code-review", not folded into axis grades.
-- **Postconditions:** caller (typically `/execute-plan` Phase 3e or a human reviewer) has a graded report; no code edits; component boundaries match `/code-review` when `diff_manifest` was shared.
+- **Outputs:** per-component grades on the 7 axes (junior/mid/senior/staff) with **2–3 diff-line citations per axis**; "Overall Read" with actionable takeaways per component; defects (if seen) listed under "Notes for domain-review", not folded into axis grades.
+- **Postconditions:** caller (typically `/execute-plan` Phase 3e or a human reviewer) has a graded report; no code edits; component boundaries match `/domain-review` when `diff_manifest` was shared.
 - **Failure modes:** axis with no citations → skip the axis and note it; components with materially different grades → split decision (do not force a single overall grade); unknown `diff_manifest` schema_version → log warning and fall back to internal clustering.

@@ -1,6 +1,6 @@
 ---
 name: grill-me
-description: "Use when user says 'grill me', wants to stress-test a plan, or validate assumptions. Walks the decision tree one question at a time, exploring the codebase when it can."
+description: "Use when user says 'grill me', wants to stress-test a plan, or validate assumptions. Walks the decision tree one question at a time, exploring the codebase when it can. Preferred over superpowers:brainstorming when a draft plan, PRD, or decision already exists and needs adversarial challenge rather than open-ended exploration."
 model: opus
 ---
 
@@ -14,6 +14,11 @@ model: opus
 - After drafting a PRD or design doc — to find the gaps
 - When a plan "feels right" but hasn't been challenged
 - When the user explicitly wants their thinking stress-tested
+
+## When NOT to Use
+
+- Nothing is drafted yet and the solution space is still open — use `superpowers:brainstorming`
+- The rough ask needs framing before any decision exists — use `/ideate`
 
 ## Arguments
 

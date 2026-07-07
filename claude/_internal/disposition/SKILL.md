@@ -1,6 +1,6 @@
 ---
 name: disposition
-description: "Rules for dispositioning code-review and adversarial-review findings in the CodeGen flow. Not user-invokable — referenced by execute-plan. Defines status vocabulary, evidence standard, and blocking rules."
+description: "Rules for dispositioning domain-review and adversarial-review findings in the CodeGen flow. Not user-invokable — referenced by execute-plan. Defines status vocabulary, evidence standard, and blocking rules."
 user-invocable: false
 internal: true
 kind: reference
@@ -8,7 +8,7 @@ kind: reference
 
 # Finding Disposition Governance
 
-Use this rubric when `execute-plan` processes findings from `code-review`,
+Use this rubric when `execute-plan` processes findings from `domain-review`,
 `code-review-professional`, or `review-adversarial`.
 
 ## Core Principle
@@ -44,7 +44,7 @@ Every meaningful finding gets exactly one of:
 ## Disposition Loop
 
 ### Step 1 — Reviewer raises findings
-`code-review` workers write high-signal findings. The controller merges them.
+`domain-review` workers write high-signal findings. The controller merges them.
 
 ### Step 2 — `execute-plan` auto-fixes
 For `critical` and `major` findings, `execute-plan` attempts up to 3 auto-fix cycles (rebuild, retest, re-review after each).
@@ -83,7 +83,7 @@ counter-evidence.
 Escalate to the human when:
 - unresolved `critical` findings remain after 3 auto-fix cycles
 - `major` findings remain disputed after the reviewer and coder cannot converge on evidence
-- the `review-adversarial` output directly contradicts `code-review` on the same line
+- the `review-adversarial` output directly contradicts `domain-review` on the same line
 
 Document the human decision in the final execution report.
 

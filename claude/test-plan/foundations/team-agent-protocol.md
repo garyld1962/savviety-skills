@@ -14,8 +14,8 @@ Task received
   → Review plan, copy test files
   → Implement feature code           ← Code to make tests pass
   → /test-plan --validate            ← Verify tests pass
-  → /code-review --quick             ← Quick quality check
-  → /code-review                     ← Full quality review
+  → /domain-review --quick             ← Quick quality check
+  → /domain-review                     ← Full quality review
   → Create PR
 ```
 
@@ -55,7 +55,7 @@ Runs the generated test files and reports results:
 
 | Verdict | Action |
 |---------|--------|
-| ALL_PASS | All implemented tests pass. Proceed to `/code-review`. |
+| ALL_PASS | All implemented tests pass. Proceed to `/domain-review`. |
 | PARTIAL_PASS | Some tests fail. Fix implementation, re-validate. |
 | FAILING | >50% tests fail. Major implementation issues — review the plan. |
 
@@ -128,16 +128,16 @@ A feature is considered "done" when all P1 and P2 tests pass.
 
 ## Integration with Code Review
 
-The test-plan and code-review skills complement each other:
+The test-plan and domain-review skills complement each other:
 
 - **test-plan**: Defines what the code SHOULD do (before implementation)
-- **code-review**: Verifies how the code IS written (after implementation)
+- **domain-review**: Verifies how the code IS written (after implementation)
 
 Both must pass before creating a PR:
 
 ```
 /test-plan --validate     → ALL_PASS or PARTIAL_PASS with no P1 failures
-/code-review              → PASS or WARN with no Blockers
+/domain-review              → PASS or WARN with no Blockers
 ```
 
 ## Example Lifecycle
@@ -163,9 +163,9 @@ Both must pass before creating a PR:
 # → ALL_PASS
 
 # Quality phase — code review
-/code-review --quick
+/domain-review --quick
 # → PASS
-/code-review
+/domain-review
 # → PASS
 [create PR]
 ```

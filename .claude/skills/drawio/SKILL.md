@@ -1,6 +1,6 @@
 ---
 name: drawio
-description: Generate native .drawio diagram files (flowcharts, ER, sequence, class, architecture diagrams) as draw.io XML, with optional export to PNG/SVG/PDF or a browser URL that opens in app.diagrams.net. No MCP setup required. Triggers on "/drawio", "create a diagram", "draw.io", "flowchart", "sequence/ER/class diagram". When NOT to use: for Azure resource-group / cloud-architecture diagrams, use create-diagram instead.
+description: 'Generate native .drawio diagram files (flowcharts, ER, sequence, class, architecture diagrams) as draw.io XML, with optional export to PNG/SVG/PDF or a browser URL that opens in app.diagrams.net. No MCP setup required. Triggers on "/drawio", "create a diagram", "draw.io", "flowchart", "sequence/ER/class diagram". When NOT to use: for Azure resource-group / cloud-architecture diagrams, use create-diagram instead.'
 ---
 
 # Draw.io Skill for Claude Code

@@ -1,11 +1,11 @@
 ---
 name: new-domain
-description: "Scaffold a new code-review domain (concept, dialect, or platform) with correct frontmatter, and update the relevant profiles."
+description: "Scaffold a new domain-review domain (concept, dialect, or platform) with correct frontmatter, and update the relevant profiles."
 ---
 
 # /new-domain — Scaffold a Code Review Domain
 
-**Purpose:** Create a new domain file for the code-review system with correct frontmatter and structure, then update the profile YAML files that should include it.
+**Purpose:** Create a new domain file for the domain-review system with correct frontmatter and structure, then update the profile YAML files that should include it.
 
 ## Arguments
 
@@ -40,7 +40,7 @@ Ask one at a time:
 
 ### 3. Scaffold the file
 
-**Concept** → `claude/code-review/concept/<name>.md`:
+**Concept** → `claude/domain-review/concept/<name>.md`:
 
 ```markdown
 ---
@@ -91,7 +91,7 @@ Actively hunt for:
 - **nit** — style or taste. Mention once, don't belabor.
 ```
 
-**Dialect** → `claude/code-review/dialect/<name>.md`:
+**Dialect** → `claude/domain-review/dialect/<name>.md`:
 
 ```markdown
 ---
@@ -116,7 +116,7 @@ Extends `concept/<parent>` with <language>-specific smells.
 - **<Smell 1>.** <Description>
 ```
 
-**Platform** → `claude/code-review/platform/<name>.md` (same structure as dialect but `type: platform`).
+**Platform** → `claude/domain-review/platform/<name>.md` (same structure as dialect but `type: platform`).
 
 ### 4. Update profiles
 
@@ -128,19 +128,19 @@ Show the diff and ask for confirmation before writing.
 
 ### 5. Update README
 
-Add the new domain to the "Current domains" list in `claude/code-review/README.md` under the appropriate section.
+Add the new domain to the "Current domains" list in `claude/domain-review/README.md` under the appropriate section.
 
 ### 6. Run validation
 
-Run `bash claude/code-review/tests/validate-structure.sh` and report the result. All tests should pass with the new domain included.
+Run `bash claude/domain-review/tests/validate-structure.sh` and report the result. All tests should pass with the new domain included.
 
 ### 7. Confirm
 
 Print:
 ```
-Created: claude/code-review/<axis>/<name>.md
+Created: claude/domain-review/<axis>/<name>.md
 Updated profiles: <list>
-Updated: claude/code-review/README.md
+Updated: claude/domain-review/README.md
 Validation: PASSED (N tests)
 
 Next: fill in the "Actively hunt for" section with domain-specific smells.

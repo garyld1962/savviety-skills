@@ -9,14 +9,15 @@ description: "Use when a code review's conclusions need scrutiny. Reviews THE RE
 
 ## When to Use
 
-- After /code-review produces its report and you want a quality check on the review itself
+- After /domain-review produces its report and you want a quality check on the review itself
 - When a review has many findings and you want to separate signal from noise
 - When findings feel wrong but you are not sure which ones
 - Before acting on a review that would trigger significant rework
 
 ## When NOT to Use
 
-- You need a code review -- use /code-review
+- You need a code review -- use /domain-review
+- You're deciding whether to implement feedback from a human or external reviewer -- use superpowers:receiving-code-review; the gauntlet audits a full structured review report
 - You need to review specs / BA deliverables -- use /spec-review-adversarial
 - The review is short (< 5 findings) and clearly correct -- just act on it
 
@@ -25,7 +26,7 @@ description: "Use when a code review's conclusions need scrutiny. Reviews THE RE
 ```
 /review-gauntlet <review-file>
 /review-gauntlet .code-review/review-latest.json
-/review-gauntlet docs/code-reviews/2026-03-15-review.md
+/review-gauntlet docs/domain-reviews/2026-03-15-review.md
 ```
 
 ## Arguments
@@ -47,6 +48,8 @@ For each finding, read the actual source file at the referenced location. You ne
 Do NOT rely solely on the review's description of the code. Read the code yourself.
 
 ## Step 3: Apply Three Lenses
+
+Run the three lenses as independent parallel subagents when the harness supports it (single-message Agent dispatch, or a Workflow `parallel()` of three agents feeding the Step 4 synthesis). Each lens must form its judgment without seeing the other lenses' output. Apply the lenses sequentially yourself only as a fallback.
 
 ### Skeptic Lens -- Accuracy
 

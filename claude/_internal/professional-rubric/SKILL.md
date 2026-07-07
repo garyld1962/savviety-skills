@@ -150,6 +150,6 @@ is a valid, useful result — do not force a single grade.
 ## Not defect review
 
 This rubric does NOT drive a defect list. If the review identifies a bug,
-that bug belongs in the `code-review` output, not here. A component can be
+that bug belongs in the `domain-review` output, not here. A component can be
 graded `senior` and still have bugs; a component can be `junior` and be
 bug-free.

@@ -16,7 +16,7 @@ description: "Validate implementation against PRD acceptance criteria. Reads a P
 ## When NOT to Use
 
 - PRD is still a draft — use `/prd-validate` first
-- You need a general code review — use `/code-review`
+- You need a general code review — use `/domain-review`
 - No PRD/acceptance criteria exist — there's nothing to verify against
 
 **Arguments:**
@@ -74,7 +74,7 @@ For each criterion, determine the verification method. Do NOT guess — read the
 | `ui` | Code inspection | Read component code, verify elements/handlers exist |
 | `data` | Schema + code check | Read schema, verify constraints, check mutation logic |
 | `test` | Run tests | Execute test suite, check for specific test files |
-| `behavior` | Combined | May need multiple methods — run code + inspect output |
+| `behavior` | Combined | May need multiple methods — run code + inspect output. For criteria with a runtime surface, prefer invoking the built-in `/verify` skill: it drives the affected flow end-to-end and its observed behavior is the evidence. |
 
 ### Detection Phase (MANDATORY before any execution)
 
@@ -233,7 +233,7 @@ Next steps:
 
 ## Contract
 
-- **Inputs:** path to the PRD/AERS to verify against; the built / running application. Calls `/prd-validate` if the artifact is incomplete and `/code-review` when defects warrant a structured list.
+- **Inputs:** path to the PRD/AERS to verify against; the built / running application. Calls `/prd-validate` if the artifact is incomplete and `/domain-review` when defects warrant a structured list.
 - **Preconditions:** project compiles; required services (DB, queue, etc.) are reachable; ports/paths detected from the actual implementation, not assumed from the PRD.
 - **Outputs:** acceptance report with PASS/FAIL per criterion plus evidence (exit code, response body, code snippet, screenshot reference); list of mismatches between PRD and implementation.
 - **Postconditions:** all background processes started during verification are killed before exit; report attached to the PRD or the run report; no code edits are made.
