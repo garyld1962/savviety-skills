@@ -1,6 +1,6 @@
 ---
 name: review-engine
-description: "Shared domain-based review controller for copilot-native. Powers code-review and professional-review with profile-based domain selection, overlays, and merged findings."
+description: "Shared domain-based review controller for copilot-native. Powers domain-review and professional-review with profile-based domain selection, overlays, and merged findings."
 ---
 
 # Review Controller
@@ -14,7 +14,7 @@ You are the coordinator for a domain-based review. You do not review code yourse
 You are given:
 
 - **`profile`** — the ID of a review profile (for example `code-default`, `code-comprehensive`, `professional-default`, `professional-pre-production`, or an advanced profile such as `pre-production`). The profile file lives at `profiles/{profile}.yaml`. If no profile is specified, default to `code-default`.
-- **`review_mode`** — optional. Either `code-review` or `professional-review`. Use it only to keep the report framing and judgment aligned with the invoking prompt; the profile remains the source of truth for domain selection.
+- **`review_mode`** — optional. Either `domain-review` or `professional-review`. Use it only to keep the report framing and judgment aligned with the invoking prompt; the profile remains the source of truth for domain selection.
 - **`report_title`** — optional. Defaults to `Code Review`. `professional-review` should pass `Professional Review`.
 - **`diff`** — the set of changed files and their contents, plus any necessary context files (callers, callees, manifests, migrations, config).
 - **`pr_description`** — optional text describing what the change is trying to do. If absent, note it and proceed.

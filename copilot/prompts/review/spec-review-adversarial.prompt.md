@@ -3,7 +3,7 @@ description: >-
   Adversarially reviews PRDs, requirements, user stories, or acceptance
   criteria using 1–3 lens reviewers (Skeptic, Coherence, Devil's Advocate);
   returns PASS/CONTESTED/REJECT verdict. Use before planning or sprint start,
-  not for code review. For code, use code-review instead.
+  not for code review. For code, use domain-review instead.
 argument-hint: '[path/to/spec.md or paste spec]'
 agent: agent
 ---
@@ -17,7 +17,7 @@ acceptance criteria, process flows, PRDs) by applying adversarial reviewer
 lenses. Finds gaps, contradictions, and ambiguities BEFORE they become code
 defects.
 
-**This prompt reviews BA deliverables, not code.** For code, use `code-review`.
+**This prompt reviews BA deliverables, not code.** For code, use `domain-review`.
 
 ## When to Use
 
@@ -28,9 +28,9 @@ defects.
 
 ## When NOT to Use
 
-- Reviewing code — use `code-review`
+- Reviewing code — use `domain-review`
 - Reviewing a code review — use `review-gauntlet`
-- Purely technical deliverable (architecture doc, API spec) — use `code-review` or a technical review
+- Purely technical deliverable (architecture doc, API spec) — use `domain-review` or a technical review
 
 ## Workflow
 
@@ -199,7 +199,7 @@ Tracking: <ADO/Linear reference if provided>
 
 ## Hard Rules
 
-1. **BA deliverables, not code.** This prompt reviews requirements, stories, and criteria. For code, use `code-review`.
+1. **BA deliverables, not code.** This prompt reviews requirements, stories, and criteria. For code, use `domain-review`.
 2. **Specific, evidence-based findings.** Every finding must cite a specific section, quote the relevant text, and explain the issue concretely. "This could be clearer" is not a finding.
 3. **Lead judgment is mandatory.** Raw adversarial output is noisy. The filtering step separates signal from pedantry.
 4. **"I would have written it differently" is NOT a finding.** Style preferences are not defects. Only flag issues that would cause implementation problems.

@@ -43,7 +43,7 @@ report.
 ## Positioning
 
 - Built-in `/review` = quick/default
-- `code-review` = deeper evidence-based defect review
+- `domain-review` = deeper evidence-based defect review
 - `professional-review` = senior engineering judgment about whether the choices
   are professional-grade, even if the code "works"
 

@@ -81,7 +81,7 @@ Produce, when applicable:
 - Use the small change fast path for routine edits that do not merit governed artifacts, formal review loops, or phase-by-phase status updates.
 - Use `/plan` for planning.
 - Use built-in review where it helps, but do not skip the required governed artifacts.
-- When the default review path is not enough, use the structured `code-review`
+- When the default review path is not enough, use the structured `domain-review`
   lane for direct defects and `professional-review` for senior-bar engineering
   judgment, then reconcile the important conclusions into the governed review
   and disposition artifacts.

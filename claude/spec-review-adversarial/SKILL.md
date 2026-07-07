@@ -6,7 +6,7 @@ model: opus
 
 # /spec-review-adversarial — Adversarial Review of Specifications
 
-**Purpose:** Stress-test business analysis work products (requirements, user stories, acceptance criteria, process flows) by applying adversarial reviewer lenses. Finds gaps, contradictions, and ambiguities BEFORE they become code defects. This skill reviews BA deliverables, not code -- use /code-review for code.
+**Purpose:** Stress-test business analysis work products (requirements, user stories, acceptance criteria, process flows) by applying adversarial reviewer lenses. Finds gaps, contradictions, and ambiguities BEFORE they become code defects. This skill reviews BA deliverables, not code -- use /domain-review for code.
 
 ## When to Use
 
@@ -17,9 +17,9 @@ model: opus
 
 ## When NOT to Use
 
-- You need to review code -- use /code-review
+- You need to review code -- use /domain-review
 - You need to review a code review -- use /review-gauntlet
-- The deliverable is purely technical (architecture doc, API spec) -- use /code-review or a technical review
+- The deliverable is purely technical (architecture doc, API spec) -- use /domain-review or a technical review
 
 ## Usage
 
@@ -191,7 +191,7 @@ Tracking: <ADO/Linear reference if provided>
 
 ## Key Rules
 
-1. **BA deliverables, not code.** This skill reviews requirements, stories, and criteria. For code, use /code-review.
+1. **BA deliverables, not code.** This skill reviews requirements, stories, and criteria. For code, use /domain-review.
 2. **Specific, evidence-based findings.** Every finding must cite a specific section, quote the relevant text, and explain the issue concretely. "This could be clearer" is not a finding.
 3. **Lead judgment is mandatory.** Raw adversarial output is noisy. The filtering step separates signal from pedantry.
 4. **"I would have written it differently" is NOT a finding.** Style preferences are not defects. Only flag issues that would cause implementation problems.

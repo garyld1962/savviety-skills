@@ -17,6 +17,7 @@ description: "Ship completed work through the repo's actual delivery flow: check
 
 - No ship config exists — use `/pr` for the standard PR flow
 - You only need the quality gate — use `/checkpoint`
+- You want to be walked through integration options (merge vs PR vs discard) rather than the automated delivery flow — use superpowers:finishing-a-development-branch
 - Work is mid-implementation — finish first
 
 ## Pre-flight Required Config

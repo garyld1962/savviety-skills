@@ -94,7 +94,7 @@ After planning, implement autonomously:
 After implementation, choose the review depth that fits the risk:
 
 - Use built-in `/review` for the quick/default path
-- Use `prompts/review/code-review.prompt.md` for a deeper defect-focused pass
+- Use `prompts/review/domain-review.prompt.md` for a deeper defect-focused pass
 - Use `prompts/review/professional-review.prompt.md` when the code may work but the engineering choices need a senior-bar review
 - If deeper skepticism is needed after that, use `prompts/dev/adversarial-review.prompt.md`
 

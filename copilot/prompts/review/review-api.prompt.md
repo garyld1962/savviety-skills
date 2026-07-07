@@ -22,7 +22,7 @@ Follow the skills:
 
 ## Routing
 
-- Start from the `code-review` lane with `profile: code-comprehensive`.
+- Start from the `domain-review` lane with `profile: code-comprehensive`.
 - Emphasize API contract, validation, auth, logging, async behavior, and service
   integration risks from `api-patterns`.
 - If the main concern is broader engineering-choice quality rather than a direct

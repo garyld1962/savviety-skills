@@ -117,7 +117,7 @@ Write the markdown report at `--report-path`. Structure:
 - "Add a closed decision at
   `closed-decisions/auth/session-cookie-name.md` with the value the
   last three plans re-debated."
-- "Tighten code-review profile `breakpoint` to also run the
+- "Tighten domain-review profile `breakpoint` to also run the
   `tests-cover-changed-paths` check.">
 
 **Risk of acting:** <one line — what could go wrong if applied>

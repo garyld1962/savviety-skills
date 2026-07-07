@@ -12,7 +12,7 @@ description: "Lint and validate all skill files in this repo: check frontmatter,
 - _(none)_ — validate everything
 - `claude` — validate only `claude/` skills
 - `copilot-native` — validate only `copilot-native/` assets
-- `code-review` — validate only `claude/code-review/` domains and profiles
+- `domain-review` — validate only `claude/domain-review/` domains and profiles
 - `<path>` — validate a specific file or directory
 
 ## Checks
@@ -33,9 +33,9 @@ For each top-level skill directory (not `_rubrics/`, not nested specialists):
 2. **Frontmatter** has `name:` and `description:`
 3. **Not user-invokable** — rubrics should not appear in skill-help categories
 
-### Code review domains (`claude/code-review/concept/*.md`)
+### Code review domains (`claude/domain-review/concept/*.md`)
 
-Run the existing validation script: `bash claude/code-review/tests/validate-structure.sh`
+Run the existing validation script: `bash claude/domain-review/tests/validate-structure.sh`
 
 Report the result. If it fails, surface the specific failures.
 
@@ -59,7 +59,7 @@ Report the result. If it fails, surface the specific failures.
 ### Cross-platform checks
 
 1. **Asset catalog** — if `copilot-native/asset-catalog.md` exists, verify every file listed in it actually exists
-2. **README references** — if `claude/code-review/README.md` lists domains, verify they exist
+2. **README references** — if `claude/domain-review/README.md` lists domains, verify they exist
 3. **Profile references** — every domain ID in a profile YAML resolves to a file
 
 ## Output

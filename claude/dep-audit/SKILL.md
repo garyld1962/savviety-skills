@@ -207,6 +207,10 @@ pnpm -r build # Verify build still works
 [CRITICAL: has critical vulns or AGPL/GPL deps in production]
 ```
 
+## When to Escalate
+
+For takeover/maintainer-risk analysis beyond CVEs (dependencies at heightened risk of exploitation or hostile takeover — abandoned maintainers, suspicious ownership transfers, install-script risk), run supply-chain-risk-auditor:supply-chain-risk-auditor and merge its findings into the report under Security.
+
 ## Key Rules
 
 1. **Read-only by default.** Only `--fix` makes changes, and only patch-level security fixes.

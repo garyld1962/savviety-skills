@@ -1,6 +1,6 @@
 ---
 name: triage
-description: "Investigate a bug from reproduction through root cause analysis. Produces a structured triage report with classification, risk assessment, and recommended next step. Does NOT write fixes."
+description: "Investigate a bug from reproduction through root cause analysis and produce a structured triage report (classification, risk, recommended next step) — the deliverable is the report, not a fix. Preferred over superpowers:systematic-debugging when the goal is a handoff document for /hotfix, /plan, or a human decision rather than an in-session fix."
 model: opus
 ---
 

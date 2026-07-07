@@ -153,7 +153,7 @@ is a valid, useful result — do not force a single grade.
 ## Not defect review
 
 This rubric does NOT drive a defect list. If the review identifies a bug,
-that bug belongs in the `code-review` output, not here. A component can be
+that bug belongs in the `domain-review` output, not here. A component can be
 graded `senior` and still have bugs; a component can be `junior` and be
 bug-free.
 
@@ -165,4 +165,4 @@ bug-free.
 4. Apply the overcomplication cap on Judgment before finalising: re-read the PR scope, ask whether the solution size matches the problem size.
 5. Check for split decisions: if the PR touches multiple components (e.g. API layer + UI), score each separately.
 6. Derive the overall component grade: the lowest axis score sets the ceiling, except that `staff` requires evidence on all 7 axes at `senior` or above.
-7. Separate any bugs or defects found during review into the `code-review` output — do not let defect severity influence axis grades.
+7. Separate any bugs or defects found during review into the `domain-review` output — do not let defect severity influence axis grades.

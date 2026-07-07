@@ -31,7 +31,7 @@ stay single-sourced under `claude/`. Slash invocation differs from Claude:
 	skills/
 	├── claude/                # Claude Code skills
 	│   ├── execute-plan/      #   User-invokable skill directories
-	│   ├── code-review/       #   Composite skill with private resources
+	│   ├── domain-review/     #   Composite skill with private resources
 	│   ├── configure/         #   Template-filling skill + registry
 	│   ├── _internal/         #   Internal callable contracts and rubrics
 	│   ├── infra/             #   Hook and utility script sources

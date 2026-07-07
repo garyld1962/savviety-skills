@@ -126,8 +126,8 @@ filters them out automatically.
 ## Proliferation guard
 
 The primary defence is the filter rule above. The backstop is in
-`/code-review`: if a single task produces more than 5 records,
-`/code-review` emits a `[minor] too-many-decisions` finding pointing
+`/domain-review`: if a single task produces more than 5 records,
+`/domain-review` emits a `[minor] too-many-decisions` finding pointing
 the reviewer at the consolidation question.
 
 ## Producers and consumers
@@ -136,7 +136,7 @@ the reviewer at the consolidation question.
   above).
 - **Consumer (read trigger):** `/execute-plan` (Phase 2b worker
   dispatch).
-- **Consumer (proliferation guard):** `/code-review` (counts records
+- **Consumer (proliferation guard):** `/domain-review` (counts records
   per task).
 - **Consumer (postmortem):** `/postmortem` and `/process-tune` may
   reference records when analysing process drift.

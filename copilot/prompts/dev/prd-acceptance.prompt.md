@@ -5,7 +5,7 @@ description: >-
   with concrete evidence (exit codes, response bodies, code snippets), and
   produces a pass/fail scorecard written to docs/prd-acceptance/. Use after
   implementation is complete, not during development. Do not use for code
-  quality review — use code-review for that. Do not use on draft PRDs — use
+  quality review — use domain-review for that. Do not use on draft PRDs — use
   prd-validate first.
 argument-hint: '[path/to/prd.md] [--recheck] [--dry-run]'
 agent: agent
@@ -278,5 +278,5 @@ Next steps:
   how criteria should be interpreted.
 - Use `prompts/dev/checkpoint.prompt.md` for a general quality gate that is not
   tied to a PRD.
-- Use `prompts/review/code-review.prompt.md` when code quality (not PRD
+- Use `prompts/review/domain-review.prompt.md` when code quality (not PRD
   compliance) is the concern.

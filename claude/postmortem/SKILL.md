@@ -30,7 +30,7 @@ skill defers to that section — do not duplicate the rules here.
 
 - The run hasn't completed yet — `/execute-plan`'s Phase 5 will fire
   if the trigger rules match. Don't pre-empt it.
-- You want to re-review code quality — use `/code-review` or
+- You want to re-review code quality — use `/domain-review` or
   `/review-adversarial`.
 - Production-incident retrospective — this skill is for
   workflow runs, not outages. Use a different format (e.g. five-whys)

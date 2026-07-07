@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Structural validation tests for the domain-based code review system.
-# Run from the repo root: bash claude/code-review/tests/validate-structure.sh
+# Run from the repo root: bash claude/domain-review/tests/validate-structure.sh
 
 set -uo pipefail
 
-REVIEW_DIR="claude/code-review"
+REVIEW_DIR="claude/domain-review"
 PASS=0
 FAIL=0
 

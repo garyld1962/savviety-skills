@@ -9,22 +9,26 @@ description: "Use when a code review's conclusions need scrutiny. Reviews THE RE
 
 ## When to Use
 
-- After /code-review produces its report and you want a quality check on the review itself
+- After /domain-review produces its report and you want a quality check on the review itself
 - When a review has many findings and you want to separate signal from noise
 - When findings feel wrong but you are not sure which ones
 - Before acting on a review that would trigger significant rework
 
 ## When NOT to Use
 
-- You need a code review -- use /code-review
+- You need a code review -- use /domain-review
 - You need to review specs / BA deliverables -- use /spec-review-adversarial
 - The review is short (< 5 findings) and clearly correct -- just act on it
+
+## Relationship to native skills
+
+For a lightweight verify-before-implementing discipline, superpowers:receiving-code-review suffices; use this skill when the review is large (5+ findings) or would trigger significant rework and you want a formal SOLID/MIXED/UNRELIABLE verdict.
 
 ## Usage
 
 ```
 /review-gauntlet <review-file>
-/review-gauntlet .code-review/review-latest.json
+/review-gauntlet .domain-review/review-latest.json
 /review-gauntlet docs/code-reviews/2026-03-15-review.md
 ```
 

@@ -23,7 +23,7 @@ Follow the skills:
 
 ## Routing
 
-- Start from the `code-review` lane and emphasize correctness, tests, async, and
+- Start from the `domain-review` lane and emphasize correctness, tests, async, and
   isolation concerns from `test-quality`.
 - Only elevate to `professional-review` when the real issue is broader
   engineering judgment (for example, a test strategy that makes the system

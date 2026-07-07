@@ -22,7 +22,7 @@ Follow the skills:
 
 ## Routing
 
-- Start from the `code-review` lane and emphasize `ui-design` concerns plus the
+- Start from the `domain-review` lane and emphasize `ui-design` concerns plus the
   local design-system rules from `ui-design-compliance`.
 - Escalate to `professional-review` only when the issue is architectural or
   lifecycle-related rather than a direct UI defect.

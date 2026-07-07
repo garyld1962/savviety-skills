@@ -15,7 +15,7 @@ This skill exists as a compatibility bridge for older specialist prompts such as
 For new work, prefer:
 
 - built-in `/review` for the quick/default path
-- `code-review` for deeper defect-focused review
+- `domain-review` for deeper defect-focused review
 - `professional-review` for senior engineering judgment
 - `.github/skills/review-engine/SKILL.md` as the shared domain engine
 

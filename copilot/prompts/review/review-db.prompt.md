@@ -25,7 +25,7 @@ Follow the skills:
 
 - Use `professional-review` when the main question is whether the schema,
   migration, indexing, or data-access choices are professional-grade.
-- Use the `code-review` lane when the main question is a direct defect in SQL,
+- Use the `domain-review` lane when the main question is a direct defect in SQL,
   migration safety, transaction handling, or query behavior.
 - In either case, anchor the findings in `db-schema-review`.
 

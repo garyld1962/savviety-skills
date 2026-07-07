@@ -43,7 +43,6 @@ lookup. No deep reasoning needed; speed and cost matter more than capability.
 
 Currently pinned to `haiku`:
 
-- `find-skills`
 - `skill-help`
 - `repo-status`
 - `configure`
@@ -66,7 +65,7 @@ Currently unpinned:
 - `audit-existing`, `checkpoint`, `changelog`, `execute-plan`, `execute-prd`,
   `hotfix`, `parallel-optimization`, `pr`, `process-tune`, `ship`, `sync-main`,
   `test-plan`, `validate-plan`
-- `code-review`, `review-adversarial`, `review-gauntlet`
+- `domain-review`, `review-adversarial`, `review-gauntlet`
 - `code-review-professional`, `postmortem`, `prd-acceptance`,
   `ubiquitous-language`, `what-is-it-about`, `work-item`, `k8s-verify`,
   `dep-audit`, `skill-audit`

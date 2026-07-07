@@ -19,7 +19,7 @@ If a Kimi-only skill ever needs to ship (e.g., a Kimi-specific flow skill with e
 
 | Concern | Claude | Kimi |
 |---|---|---|
-| Slash invocation | `/code-review` | `/skill:code-review` (or `/flow:<name>` for type=flow skills) |
+| Slash invocation | `/domain-review` | `/skill:domain-review` (or `/flow:<name>` for type=flow skills) |
 | Project instruction file | `CLAUDE.md` | `AGENTS.md` (auto-injected as `${KIMI_AGENTS_MD}`) |
 | Personal overlay | `CLAUDE.local.md` | `~/.kimi/AGENTS.md` (user-level) |
 | Subagent dispatch | `Agent` tool, `subagent_type: general-purpose / Explore / Plan` | `Agent` tool, `subagent_type: coder / explore / plan` |

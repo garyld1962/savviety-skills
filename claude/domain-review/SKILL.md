@@ -1,8 +1,10 @@
 ---
-name: code-review
+name: domain-review
 description: >
-  Domain-based PR review controller. Use when you need a structured, multi-lens
-  review of a pull request or code change. Supports two profiles: 'breakpoint'
+  Domain-based PR review controller (formerly code-review). Preferred over the
+  built-in /code-review when you need the 11-domain controller/worker review
+  with per-domain findings; use the built-in for a fast single-pass diff review
+  or the ultra cloud review. Supports two profiles: 'breakpoint'
   (light mid-flow review covering security, correctness, and tests only) and
   'full' (comprehensive PR-boundary review covering all 11 domains). Conditional
   domains fire only when triggers match: data-integrity fires when the diff
@@ -11,8 +13,10 @@ description: >
   controllers, handlers, .proto files, OpenAPI/Swagger specs, library surface,
   message schema, CLI, or SDK). Do NOT use for trivial changes (typo fixes,
   mechanical refactors, dependency bumps with no logic changes). Do NOT use
-  when you want professional craft grading or seniority assessment — use the
-  code-review-professional skill instead.
+  for reviewing a GitHub PR by number where a standard pass suffices — the
+  built-in /review handles that. Do NOT use when you want professional craft
+  grading or seniority assessment — use the code-review-professional skill
+  instead.
 ---
 
 # Review Controller
@@ -28,7 +32,7 @@ You are given:
 - **`profile`** — the ID of a review profile: `breakpoint` (light, run at milestones) or `full` (all 11 domains, run at PR boundary). The profile file lives at `profiles/{profile}.yaml`. If no profile is specified, default to `full`.
 - **`diff`** — the set of changed files and their contents, plus any necessary context files (callers, callees, manifests, migrations, config).
 - **`pr_description`** — optional text describing what the change is trying to do. If absent, note it and proceed.
-- **`diff_manifest`** — optional pre-computed triage object (provided by `/execute-plan` at the Phase 3 preamble). Schema, field reference, and consumer contract live in `_internal/diff-manifest/SKILL.md` — read it before consuming. When present and `schema_version` is recognised, use it and **skip step 2 (Triage the diff)** — the manifest already supplies the clusters, per-file language tagging, and the `touches` flags. When `schema_version` is unknown, log a warning and fall back to internal triage. When absent (e.g., direct invocation of `/code-review`), fall back to step 2's internal triage.
+- **`diff_manifest`** — optional pre-computed triage object (provided by `/execute-plan` at the Phase 3 preamble). Schema, field reference, and consumer contract live in `_internal/diff-manifest/SKILL.md` — read it before consuming. When present and `schema_version` is recognised, use it and **skip step 2 (Triage the diff)** — the manifest already supplies the clusters, per-file language tagging, and the `touches` flags. When `schema_version` is unknown, log a warning and fall back to internal triage. When absent (e.g., direct invocation of `/domain-review`), fall back to step 2's internal triage.
 
 ## Your job, in order
 

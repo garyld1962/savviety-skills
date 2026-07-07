@@ -24,6 +24,8 @@ embedded in the execution plan that later governs `/execute-plan`.
 - The plan already has a `## Parallel Execution` section and you are
   not changing it — `/execute-plan` reads it as-is.
 
+Related: superpowers:dispatching-parallel-agents governs *running* independent parallel tasks; this skill produces the map those runs consume.
+
 ## Who calls this
 
 This skill is **not standalone** — its output is a section embedded in

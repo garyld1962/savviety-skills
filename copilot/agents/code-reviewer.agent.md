@@ -1,5 +1,5 @@
 ---
-description: Perform the defect-focused code-review lane for a run, focusing on correctness, validation gaps, API risks, test gaps, and direct implementation issues, then write the result to review-code.md.
+description: Perform the defect-focused domain-review lane for a run, focusing on correctness, validation gaps, API risks, test gaps, and direct implementation issues, then write the result to review-code.md.
 tools:
   - read
   - search

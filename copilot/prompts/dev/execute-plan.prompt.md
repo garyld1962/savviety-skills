@@ -310,7 +310,7 @@ Stop execution.
 
 ### Phase 2.5: Breakpoint Review (at each milestone)
 
-Use `prompts/review/code-review.prompt.md` with `profile: breakpoint` against the diff
+Use `prompts/review/domain-review.prompt.md` with `profile: breakpoint` against the diff
 accumulated since the last milestone (or since `$EXECUTE_PLAN_BASE_SHA` for the first
 milestone).
 
@@ -378,7 +378,7 @@ The effective diff is what all Phase 3 reviews operate on.
 }
 ```
 
-Pass the same manifest to both `code-review` (3b) and `professional-review` (3c)
+Pass the same manifest to both `domain-review` (3b) and `professional-review` (3c)
 so they use the same component clusters and skip redundant triage work.
 
 **Intent synthesis.** Synthesise a `pr_description` from the plan's `intent:` frontmatter
@@ -388,7 +388,7 @@ stated goal.
 
 #### 3b. Full code review
 
-Use `prompts/review/code-review.prompt.md` with `profile: full` against the cumulative
+Use `prompts/review/domain-review.prompt.md` with `profile: full` against the cumulative
 diff, passing the shared `diff_manifest` and `pr_description`.
 
 Apply the same disposition vocabulary as Phase 2.5:
@@ -607,7 +607,7 @@ files. Pass matching records to the implementing worker.
 - Use the built-in `/plan` first if the work is not already planned.
 - Follow the plan literally unless the user explicitly authorizes a deviation.
 - Stop cleanly on blockers instead of skipping ahead.
-- Use `prompts/review/code-review.prompt.md` for breakpoint and full reviews.
+- Use `prompts/review/domain-review.prompt.md` for breakpoint and full reviews.
 - Use `prompts/review/code-review-professional.prompt.md` for craft grading at the PR boundary.
 - Use `prompts/review/review-adversarial.prompt.md` at the PR boundary when the adversarial trigger fires.
 - Use `prompts/dev/postmortem.prompt.md` for Phase 5 postmortem invocation.

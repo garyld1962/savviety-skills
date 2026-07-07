@@ -90,7 +90,7 @@ To discover all installed custom prompts (including any added after this prompt 
 
 | Prompt | Description |
 |--------|-------------|
-| `code-review` | Structured defect-focused review for correctness, tests, async, API contract, and data integrity |
+| `domain-review` | Structured defect-focused review for correctness, tests, async, API contract, and data integrity |
 | `code-review-professional` | Senior-bar engineering review for design and implementation quality at realistic scale |
 | `review-adversarial` | Cross-model code review via skeptic, architect, and minimalist lenses — produces a persisted report |
 | `review-api` | Targeted API and service review: validation, auth, async, and contract focus |

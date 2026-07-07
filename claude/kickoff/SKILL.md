@@ -63,7 +63,7 @@ When the ask is a routine, low-risk, convention-bound edit (single-file change, 
    - Use background tasks or parallel agents when helpful
    - Continue until the change is verified or a real blocker is reached
 
-5. **Review.** After implementation, use `superpowers:requesting-code-review` or `/code-review` for a review pass.
+5. **Review.** After implementation, use `superpowers:requesting-code-review` or `/domain-review` for a review pass.
 
 ## Output Contract
 
@@ -88,7 +88,7 @@ This skill references:
 
 ## Contract
 
-- **Inputs:** path to a requirements artifact (or `AERS.md` by default if it exists); optional `--skip-readiness`. Calls `_internal/aers-readiness` (readiness scoring), `/prd-validate` (only when operator opts in interactively), `superpowers:writing-plans` or `/plan` (planning), `superpowers:requesting-code-review` or `/code-review` (review). Consults `_internal/disposition` and `_internal/repo-delivery`.
+- **Inputs:** path to a requirements artifact (or `AERS.md` by default if it exists); optional `--skip-readiness`. Calls `_internal/aers-readiness` (readiness scoring), `/prd-validate` (only when operator opts in interactively), `superpowers:writing-plans` or `/plan` (planning), `superpowers:requesting-code-review` or `/domain-review` (review). Consults `_internal/disposition` and `_internal/repo-delivery`.
 - **Preconditions:** in a git repo; artifact exists and is readable; operator is at the keyboard (kickoff is interactive by design — for autonomous flow, use `/execute-prd`).
 - **Outputs:** code committed for the requested change; review pass recorded; concise progress updates per the output contract above (decision context, edits, validation, blockers).
 - **Postconditions:** repo's existing validation steps (lint/build/test) have actually run; closed decisions added to the artifact when the operator confirms; no audit-grade governed artefacts (those belong to `/execute-prd`).

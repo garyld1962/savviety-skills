@@ -54,7 +54,7 @@ want an explicit senior-engineering judgment pass.
 ## Positioning
 
 - Built-in `/review` = quick/default
-- `code-review` = direct implementation defects
+- `domain-review` = direct implementation defects
 - `professional-review` = professional-grade engineering judgment
 
 ## Hard rules

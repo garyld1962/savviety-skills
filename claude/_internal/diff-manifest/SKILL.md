@@ -1,6 +1,6 @@
 ---
 name: diff-manifest
-description: "Canonical schema for the `diff_manifest` object passed by `/execute-plan` to `/code-review` and `/code-review-professional`. Defines clusters, language tagging, and `touches` flags so the producer and all consumers agree on shape. Not user-invokable."
+description: "Canonical schema for the `diff_manifest` object passed by `/execute-plan` to `/domain-review` and `/code-review-professional`. Defines clusters, language tagging, and `touches` flags so the producer and all consumers agree on shape. Not user-invokable."
 user-invocable: false
 internal: true
 kind: reference
@@ -9,7 +9,7 @@ kind: reference
 # diff_manifest schema
 
 Canonical definition of the `diff_manifest` object. The producer
-(`/execute-plan` Phase 3 preamble) and the consumers (`/code-review`,
+(`/execute-plan` Phase 3 preamble) and the consumers (`/domain-review`,
 `/code-review-professional`, `/review-adversarial`) all reference this
 schema so changes stay in lockstep.
 
@@ -78,7 +78,7 @@ Excluded from `files[]`:
 ## Producer contract
 
 `/execute-plan` Phase 3 preamble produces one manifest per review
-cycle. It is passed identically to `/code-review` and
+cycle. It is passed identically to `/domain-review` and
 `/code-review-professional`. `/review-adversarial` does not currently
 consume `diff_manifest` (it receives the diff and `pr_description`
 only); if a future change makes it a consumer, list it here and bump
@@ -111,7 +111,7 @@ bump but should be documented here.
 ## Where this schema is referenced
 
 - `/execute-plan` — producer (Phase 3 preamble)
-- `/code-review` — consumer
+- `/domain-review` — consumer
 - `/code-review-professional` — consumer
 
 ## Contract

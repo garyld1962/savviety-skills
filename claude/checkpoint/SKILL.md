@@ -5,7 +5,7 @@ description: "Quality gate: discovers project tooling, runs linter, typecheck/bu
 
 # /checkpoint — Quality Gate
 
-**Purpose:** Fast quality gate that runs lint, build, and tests for changed packages. Does NOT run code review — use `/code-review` separately for that.
+**Purpose:** Fast quality gate that runs lint, build, and tests for changed packages. Does NOT run code review — use `/domain-review` separately for that.
 
 ## When to Use
 
@@ -15,7 +15,7 @@ description: "Quality gate: discovers project tooling, runs linter, typecheck/bu
 
 ## When NOT to Use
 
-- You want review feedback, not just green tests — use `/code-review`
+- You want review feedback, not just green tests — use `/domain-review`
 - No changes staged or tooling not yet configured — run `/configure` first
 - Full delivery flow needed — use `/pr` or `/ship`, which call checkpoint internally
 
@@ -115,6 +115,15 @@ pnpm --filter <package-name> test -- --run
 - If a package has no test script, skip it and note "No tests for <package>."
 - If tests fail, record the output.
 
+### Step 6a: End-to-End Verification (conditional)
+
+If the diff touches product source (not just tests/docs/config), invoke the
+built-in `/verify` to exercise the changed flow before reporting green. Tests
+prove the code compiles and passes assertions; `/verify` proves the change
+actually works when the affected flow is driven end-to-end. Record the outcome
+as an additional check in the report. If the built-in `/verify` is unavailable
+in the session, skip and note "Verify: SKIP (not available)."
+
 ### Step 7: Report
 
 Output a summary:
@@ -131,6 +140,7 @@ Output a summary:
 | Build      | PASS/FAIL | [summary]       |
 | Probes     | PASS/FAIL/SKIP | [summary]  |
 | Tests      | PASS/FAIL/SKIP | [summary]  |
+| Verify     | PASS/FAIL/SKIP | [summary]  |
 
 **Verdict: PASS / FAIL**
 ```
@@ -140,8 +150,9 @@ Output a summary:
 
 ## Notes
 
-- This is the fast gate. It does NOT run `/code-review`.
+- This is the fast gate. It does NOT run `/domain-review`.
 - `/pr` and `/ship` call this skill as a prerequisite.
+- Relationship to native skills: checkpoint is the concrete command-runner that satisfies superpowers:verification-before-completion's evidence requirement; the two compose rather than compete.
 - Known pre-existing test failures (documented in CLAUDE.md or auto-memory) should be noted but not block the verdict unless they are new regressions.
 
 ## Contract

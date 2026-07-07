@@ -17,7 +17,7 @@ that produced the review, to ensure genuine cross-model scrutiny.
 ## Step 1 - Read the Review
 
 1. Read the supplied review report or reports. These may come from built-in `/review`,
-   `code-review`, or `professional-review`.
+   `domain-review`, or `professional-review`.
 2. If a review index file is provided, use it to discover the underlying reports.
 3. Read supporting project context files only as needed to verify the review.
 4. Count total findings and note severity distribution.
@@ -96,5 +96,5 @@ domain names, and actual source code. Rate each meta-finding:
 - "I would have said it differently" is not a finding. "This finding is factually wrong" IS.
 - Consider total effort: 60 findings is noise. Which 10 matter?
 - Do NOT suggest code fixes. Review quality assessment only.
-- This prompt can examine review output from built-in `/review`, `code-review`, or
+- This prompt can examine review output from built-in `/review`, `domain-review`, or
   `professional-review`.

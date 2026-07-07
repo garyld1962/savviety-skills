@@ -11,7 +11,7 @@ description: "Apply an expedited fix for a critical production issue: branch fro
 
 - Production is broken and needs an immediate fix
 - A critical bug was found right after a release
-- The normal /plan, /code-review, /checkpoint pipeline is too slow
+- The normal /plan, /domain-review, /checkpoint pipeline is too slow
 
 ## When NOT to Use
 
@@ -190,7 +190,7 @@ Follow-up:
 
 ## Key Rules
 
-1. **Speed over ceremony.** Skip full /code-review and multi-specialist analysis. Keep the security check.
+1. **Speed over ceremony.** Skip full /domain-review and multi-specialist analysis. Keep the security check.
 2. **Minimal scope.** The smallest correct change. Nothing more.
 3. **Always add a test.** The one thing you do not skip is the regression test.
 4. **Document for follow-up.** If the root cause needs a deeper fix, note it in the PR and report.

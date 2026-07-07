@@ -106,7 +106,7 @@ The goal here is to build a thinner, more native layer that:
 - `prompts/dev/ado-item.prompt.md`
 - `prompts/dev/skill-help.prompt.md`
 - `prompts/review/adversarial-review-gauntlet.prompt.md`
-- `prompts/review/code-review.prompt.md`
+- `prompts/review/domain-review.prompt.md`
 - `prompts/review/professional-review.prompt.md`
 - `prompts/review/review-api.prompt.md`
 - `prompts/review/review-db.prompt.md`
@@ -171,10 +171,10 @@ The goal here is to build a thinner, more native layer that:
 - Use built-in `/env` for a quick environment snapshot, and use `environment-check` only when command routing still needs repo-specific guidance.
 - Use built-in `/diff` as the default changed-scope view before `checkpoint`, `ship`, or deeper review flows.
 - Use built-in `/review` for the quick/default code review path.
-- Use `code-review` when you want a deeper defect-focused review with explicit domain selection and merged findings.
+- Use `domain-review` when you want a deeper defect-focused review with explicit domain selection and merged findings.
 - Use `professional-review` when the code may work but you need a senior-bar judgment about scalability, failure behavior, operability, and engineering choice quality.
 - Use built-in `/fleet` plus `/tasks` when structured review or investigation benefits from multiple specialist workers in parallel.
-- Use built-in `/model` and then `adversarial-review` when you want a deliberate second-opinion challenge after `/review`, `code-review`, or `professional-review`.
+- Use built-in `/model` and then `adversarial-review` when you want a deliberate second-opinion challenge after `/review`, `domain-review`, or `professional-review`.
 - Use `adversarial-review-gauntlet` when the thing you need to challenge is the review output itself, not the code.
 - Use `autonomous-development-kickoff` when you want a thin built-in-first path from requirements readiness into `/plan`, implementation, and `/review`.
 - Use `execute-workflow` when the work needs governed execution artifacts, required review gates, and explicit disposition handling.

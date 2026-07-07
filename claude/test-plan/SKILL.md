@@ -226,7 +226,7 @@ Results: {passed} passed, {failed} failed, {todo} todo
 Plan updated: .test-plan/plan-latest.json
 
 Next steps:
-  {ALL_PASS: "Proceed to /code-review"}
+  {ALL_PASS: "Proceed to /domain-review"}
   {PARTIAL_PASS: "Fix failing tests, then re-validate"}
   {FAILING: "Major implementation issues — review failing tests"}
 ```
@@ -242,7 +242,7 @@ task received → /test-plan --task="..."    (generate specs)
 implementing  → fill in it.todo() stubs   (TDD)
 "done"        → /test-plan --validate      (verify tests pass)
 refactored    → /test-plan --refresh       (update specs)
-passing       → /code-review               (quality check)
+passing       → /domain-review               (quality check)
 clean         → create PR
 ```
 
@@ -250,14 +250,18 @@ See `foundations/team-agent-protocol.md` for the complete workflow.
 
 ## Integration with Code Review
 
-The test-plan and code-review skills are complementary:
+The test-plan and domain-review skills are complementary:
 
 | Skill | When | What |
 |-------|------|------|
 | `/test-plan` | Before implementation | Defines what the code SHOULD do |
-| `/code-review` | After implementation | Verifies how the code IS written |
+| `/domain-review` | After implementation | Verifies how the code IS written |
 
 Both must pass before creating a PR. See `foundations/team-agent-protocol.md` for the combined workflow.
+
+## Relationship to native skills
+
+This skill generates the stubs that superpowers:test-driven-development's red phase consumes; invoke it from within that process, not instead of it.
 
 ## Contract
 

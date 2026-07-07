@@ -62,7 +62,7 @@ project-local `.claude/skills/_project/` content.
 
 | Skill | Invocation | Purpose |
 |-------|------------|---------|
-| code-review | `/code-review` | Domain-based review controller with profiles and overlays |
+| domain-review | `/domain-review` | Domain-based review controller with profiles and overlays |
 | code-review-professional | `/code-review-professional` | Seniority-calibrated craft grading for a code change |
 | review-adversarial | `/review-adversarial` | Cross-model adversarial review |
 | review-gauntlet | `/review-gauntlet` | Meta-review that challenges review output itself |
@@ -79,14 +79,14 @@ Several review skills overlap with Claude Code built-ins. Use this matrix to pic
 |---|---|---|
 | Standard PR review on a small/medium diff | `/review` (built-in) | Fastest path; no project-specific setup needed |
 | Security-focused pass on pending changes | `/security-review` (built-in) | Purpose-built for vulnerability classes |
-| Domain-aware review (frontend, DB, API, design tokens) | `/code-review` | Orchestrates specialist lenses per changed file |
+| Domain-aware review (frontend, DB, API, design tokens) | `/domain-review` | Orchestrates specialist lenses per changed file |
 | High-stakes diff (200+ lines, auth/payments/migrations) | `/review-adversarial` | Runs on a **different model** to challenge assumptions |
 | Challenging an existing review's conclusions | `/review-gauntlet` | Meta-review — attacks the review itself, not the code |
 | Specs / requirements / acceptance criteria — not code | `/spec-review-adversarial` | Targets ambiguity in specs before they become defects |
 | Test suite coverage & quality audit | `review-tests` (superpowers) | Behavior-focused test review |
 | Workflow retrospective after a governed run | `/postmortem` | Reviews the process, not the code |
 
-**Compose, don't duplicate:** `/pr` and `/ship` already call `/checkpoint` internally; don't run both. `/review-adversarial` is an *optional* follow-up after `/code-review` passes, not a replacement.
+**Compose, don't duplicate:** `/pr` and `/ship` already call `/checkpoint` internally; don't run both. `/review-adversarial` is an *optional* follow-up after `/domain-review` passes, not a replacement.
 
 ### Operations, Environment & Configuration
 
@@ -106,7 +106,6 @@ Several review skills overlap with Claude Code built-ins. Use this matrix to pic
 |-------|------------|---------|
 | skill-help | `/skill-help` | Discover available shared and local Claude skills |
 | skill-audit | `/skill-audit` | Audit skill and plugin ecosystem coverage |
-| find-skills | `/find-skills` | Discover installable ecosystem skills for a given need |
 
 ### Utilities (not slash commands)
 
@@ -156,7 +155,7 @@ Some shared Claude workflows therefore have sub-files for specialists,
 analysts, worker prompts, or foundations:
 
 ```
-code-review/
+domain-review/
 ├── SKILL.md                           # Orchestrator
 ├── concept/                            # Base review lenses
 ├── dialect/                            # Language-specific overlays

@@ -288,7 +288,7 @@ non-superseded records whose `files` glob matches the task's target
 set. Workers who silently reverse a non-superseded decision must
 raise a `plan-ambiguity` finding citing the decision's `id`.
 
-`/code-review` enforces the proliferation guard (>5 records per task
+`/domain-review` enforces the proliferation guard (>5 records per task
 → `[minor] too-many-decisions`).
 
 ### Retry budget (global circuit breaker)
@@ -490,7 +490,7 @@ Decisions set to the implementing worker with this directive, verbatim:
 > These are tablestakes. Do not propose alternatives, do not deliberate,
 > do not surface them as ambiguity. Execute as stated. If a task's own
 > spec contradicts a closed decision, raise a `plan-deviation` finding
-> (see code-review/references/controller-guide.md) and halt — do not attempt to reconcile.
+> (see domain-review/references/controller-guide.md) and halt — do not attempt to reconcile.
 
 Closed decisions pre-empt Phase 1.5 ambiguity categories 2
 (existing-state) and 3 (scope-boundary). If an ambiguity would have
@@ -909,9 +909,20 @@ Stop execution.
 
 ### Phase 2.5: Breakpoint Review (at each milestone)
 
-Invoke the `code-review` skill with `profile: breakpoint` against the diff
+Invoke the `domain-review` skill with `profile: breakpoint` against the diff
 accumulated since the last milestone (or since `$EXECUTE_PLAN_BASE_SHA`
 for the first milestone).
+
+Breakpoint-grade alternative: when the milestone diff is small or
+low-risk and the operator prefers speed, the built-in `/code-review` at
+`medium` effort covers the same mid-flow territory more cheaply —
+reserve the domain controller's `breakpoint` profile for milestones
+touching sensitive or multi-domain surfaces, and always use the domain
+controller (`profile: full`) at the PR boundary (Phase 3b).
+
+Additionally, if the milestone's diff touches product source (not just
+tests/docs/config), offer the built-in `/verify` on the wave's diff to
+exercise the changed flow end-to-end before crossing the milestone.
 
 ```
 Milestone K/M: <name> — running breakpoint review
@@ -966,7 +977,7 @@ raw `git diff $EXECUTE_PLAN_BASE_SHA..HEAD`:
    explain choices; reviewers should not be asked to review them as
    if they were product code.
 
-The effective diff is what `/checkpoint`, `/code-review`,
+The effective diff is what `/checkpoint`, `/domain-review`,
 `/code-review-professional`, and `/review-adversarial` operate on.
 
 Phase 3d (Plan alignment check) still reads the original plan
@@ -982,7 +993,7 @@ manifest.
 Always set `schema_version: 1`. Bump only on breaking changes (and
 update the canonical schema doc in the same commit).
 
-Pass the same manifest to `code-review` (in 3b) and
+Pass the same manifest to `domain-review` (in 3b) and
 `code-review-professional` (in 3c). Both accept `diff_manifest` and,
 when provided, skip their own internal clustering step — they use the
 clusters, languages, and `touches` flags already computed. This
@@ -997,7 +1008,7 @@ internal triage — no behavioural change for external users.
 
 ##### Intent / `pr_description` synthesis
 
-Three downstream review skills (`code-review`,
+Three downstream review skills (`domain-review`,
 `code-review-professional`, `review-adversarial`) accept an optional
 `pr_description` input. The Phase 3 preamble synthesises one and
 passes it to all three, so reviewers have a consistent framing of
@@ -1023,7 +1034,7 @@ Pass the resulting `pr_description` string identically to 3b, 3c, and
 that's already resolved.
 
 #### 3b. Full code review
-Invoke `code-review` with `profile: full` against the cumulative diff
+Invoke `domain-review` with `profile: full` against the cumulative diff
 (`git diff $EXECUTE_PLAN_BASE_SHA..HEAD`) **and the shared
 `diff_manifest`** from the Phase 3 preamble.
 
@@ -1057,7 +1068,7 @@ Grades go straight to the report.
 3. Verify: all tasks implemented, implementation matches spec, no
    unplanned additions.
 4. Record gaps as **`plan-deviation`** findings (not `major`) — see
-   `code-review/references/controller-guide.md` for the severity definition. Plan-deviations
+   `domain-review/references/controller-guide.md` for the severity definition. Plan-deviations
    are not auto-fixed; each requires a terminal disposition.
 
 ##### Proof accounting
@@ -1265,7 +1276,7 @@ blocks from human-decision blocks. CI and automation should route on
 | `completed` | All findings terminally dispositioned, no accepted risk | PASS |
 | `completed-with-accepted-risk` | One or more `accepted-risk` dispositions present | PASS or WARN |
 | `blocked` | Run halted on retry budget, persistent failure, or `open` critical/major after auto-fix exhaustion | FAIL |
-| `awaiting-human-decision` | Run completed but a finding requires explicit human arbitration (e.g. adversarial vs. code-review contradiction on the same line) | FAIL |
+| `awaiting-human-decision` | Run completed but a finding requires explicit human arbitration (e.g. adversarial vs. domain-review contradiction on the same line) | FAIL |
 
 #### JSON schema
 
@@ -1609,7 +1620,7 @@ use a fixed vocabulary so cross-run aggregation works.
 | `aers-readiness` | The AERS readiness rubric |
 | `execute-plan-skill` | This skill's own behaviour (gates, phases, defaults) |
 | `execute-prd-skill` | The `/execute-prd` skill's behaviour |
-| `code-review-profile` | A `code-review` profile (`breakpoint` or `full`) |
+| `domain-review-profile` | A `domain-review` profile (`breakpoint` or `full`) |
 | `process-doc/<name>` | Any project-level process doc not covered above |
 
 If a recommendation genuinely doesn't fit, use `target: other` and put
@@ -1754,7 +1765,7 @@ The postmortem is the only artefact in the flow whose audience is the
 
 ## Contract
 
-- **Inputs:** path to a plan file, plus optional flags (`--force`, `--adversarial=<auto|always|never|ask>`, `--run-folder`, `--postmortem`, `--postmortem-mode`, etc.). Calls `/validate-plan` (mandatory, Phase 0b), `/checkpoint` (mandatory, final task), `/code-review` (breakpoint and full), `/code-review-professional` (PR boundary), `/review-adversarial` (per `--adversarial`), `_internal/repo-delivery`, `_internal/disposition`, `_internal/diff-manifest` (producer), `_internal/security-quick-check` (per its trigger criteria).
+- **Inputs:** path to a plan file, plus optional flags (`--force`, `--adversarial=<auto|always|never|ask>`, `--run-folder`, `--postmortem`, `--postmortem-mode`, etc.). Calls `/validate-plan` (mandatory, Phase 0b), `/checkpoint` (mandatory, final task), `/domain-review` (breakpoint and full), `/code-review-professional` (PR boundary), `/review-adversarial` (per `--adversarial`), `_internal/repo-delivery`, `_internal/disposition`, `_internal/diff-manifest` (producer), `_internal/security-quick-check` (per its trigger criteria).
 - **Preconditions:** plan file exists; CLAUDE.md `## Commands` section per `_internal/repo-delivery`; toolchain on PATH; not on default branch (Phase 0b.5); when `--adversarial=always`, an opposite-model CLI is reachable.
 - **Outputs:** completed-task markers per task, decision records under `docs/decisions/<plan-slug>/` (schema in `_internal/decision-record`), `diff_manifest` produced at Phase 3 preamble (schema in `_internal/diff-manifest`), execution report (`execution-report.md`/`.json`), optional `postmortem.md`, optional run folder bundle.
 - **Postconditions:** all plan tasks have completed-markers OR explicit unproved/blocked entries; `Plan-SHA` and `Base-SHA` appear on every commit; on failure, branch preserved and tagged `execute-plan/abort/...`; never destructive on failure.

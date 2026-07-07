@@ -17,6 +17,7 @@ description: "Full PR lifecycle: branch, commit, checkpoint, push, create PR, an
 
 - Repo has project-specific release steps beyond a PR — use `/ship`
 - You only need the quality gate — use `/checkpoint`
+- You want to be walked through integration options (merge vs PR vs discard) rather than the automated PR flow — use superpowers:finishing-a-development-branch
 - Work isn't ready — finish implementation and tests first
 
 ## Arguments
@@ -76,6 +77,11 @@ do not restate them here.
 
 - If the rubric reports findings: stop and address them before push.
 - If clean: continue.
+
+If the diff touches auth, secrets, payments, or input parsing, also run the
+built-in `/security-review` (full review of pending changes on the current
+branch) before pushing — the quick-check rubric is the fast path, not a
+substitute for a real security review on sensitive surfaces.
 
 ### Step 4: Push
 

@@ -38,7 +38,7 @@ model: haiku
    |----------|--------|
 	   | **Planning & Design** | grill-me, ideate, thesis, ubiquitous-language, what-is-it-about |
 	   | **Development** | audit-existing, execute-prd, execute-plan, kickoff, validate-plan, test-plan, hotfix, triage, parallel-optimization, process-tune |
-	   | **Quality** | code-review, code-review-professional, review-gauntlet, review-adversarial, checkpoint |
+	   | **Quality** | domain-review, code-review-professional, review-gauntlet, review-adversarial, checkpoint |
    | **Specs & Requirements** | spec-review-adversarial, prd-acceptance, prd-validate (rubric: aers-readiness) |
    | **Investigation** | code-investigate, postmortem |
    | **Source Control** | pr, ship, sync-main, changelog |
@@ -46,7 +46,7 @@ model: haiku
 	   | **Team & Workflow** | work-item |
 	   | **Session** | repo-status |
    | **Configuration** | configure |
-   | **Meta** | skill-help, skill-audit, find-skills |
+   | **Meta** | skill-help, skill-audit |
 
    This table is a suggested default. **Always read the filesystem first** — any skill not in the table goes to an "Other" category. If a project has skills in `.claude/skills/_project/`, include them under "Project-Specific". Non-skill assets (e.g. `pr-guardrail/` — a hook utility with no SKILL.md) should be excluded, not categorized.
 
