@@ -1,6 +1,19 @@
 {
   "permissions": {
-    "allow": []
+    "allow": [],
+    "deny": [
+      "Bash(git reset --hard*)",
+      "Bash(git push --force *)",
+      "Bash(git push --force)",
+      "Bash(git push -f*)",
+      "Bash(git clean -f*)",
+      "Bash(git branch -D*)",
+      "Bash(rtk git reset --hard*)",
+      "Bash(rtk git push --force*)",
+      "Bash(rtk git push -f*)",
+      "Bash(rtk git clean -f*)",
+      "Bash(rtk git branch -D*)"
+    ]
   },
   "hooks": {
     "SessionStart": [
@@ -45,6 +58,17 @@
             "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/pr-guardrail/pr-guardrail.sh",
             "timeout": 15,
             "statusMessage": "Checking for existing PRs..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "if": "Bash(git commit*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/default-branch-guard.sh",
+            "timeout": 10
           }
         ]
       }

@@ -220,7 +220,7 @@ Most BA discipline skills (problem-thesis, stakeholder, requirements, etc.) live
   from `claude/settings.template.json` if you need a neutral baseline
 - Skills can reference sub-files using relative paths
 - Claude worker roles may be nested under a skill (for example
-  `execute-plan/agents/*.md`) or represented as private resources such as
+  `teams/agents/*.md`) or represented as private resources such as
   analysts and writers under the owning skill
 - Internal callable contracts live under `_internal/` and should not be listed
   in normal user help

@@ -22,10 +22,10 @@ Two additional severity tags are defined by `execute-plan` for its
 plan-alignment and ambiguity-handling phases (not concept-lens
 findings):
 
-- **plan-ambiguity** — see `/execute-plan` Phase 1.5. Requires
-  terminal disposition.
-- **plan-deviation** — see `/execute-plan` Phase 3d. Requires terminal
-  disposition.
+- **plan-ambiguity** — see `/execute-plan` preflight gate 4
+  (pre-execution clarification). Requires terminal disposition.
+- **plan-deviation** — see `/execute-plan`'s plan-alignment check
+  (`run-plan.mjs`, after Review Gates). Requires terminal disposition.
 
 Full disposition vocabulary and status lifecycle live in
 `_internal/disposition/SKILL.md`.

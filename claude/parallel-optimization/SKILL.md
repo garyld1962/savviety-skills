@@ -158,5 +158,5 @@ when a package path can be named.
 - **Inputs:** the PRD or draft execution plan; CLAUDE.md `## Commands`; existing package/module layout if present; existing tests and manifests if present.
 - **Preconditions:** caller is a plan-writer (typically `/execute-prd` step 6); plan tasks have file/scope information sufficient to compute write scopes and dependencies.
 - **Outputs:** a `## Parallel Execution` section (Mode + Rationale + Shared Context Packet + Ownership table + Barriers + Single-Owner Files + Parallel Safety Checks); optionally a `## Waves` section when foundation→fan-out structure exists. Output is embedded in the plan, not written to a separate file.
-- **Postconditions:** `/execute-plan` Phase 0b.25 / Phase 1 / Phase 1.1 consume the section as authoritative metadata; the section is the single source of truth for parallelism.
+- **Postconditions:** `/execute-plan` consumes the section as authoritative metadata during its Tasks phase; the section is the single source of truth for parallelism.
 - **Failure modes:** safe-parallel conditions cannot be met → emit `Mode: sequential` with rationale (do not silently fall back to unsafe parallelism); ≥5 parallel lanes per wave → refuse and require the operator to split the wave.

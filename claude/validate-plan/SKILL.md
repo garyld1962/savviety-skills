@@ -98,11 +98,21 @@ verifies `/plan`-authored plans pass this check without modification.
 
 ### 5. Milestones are marked (or plan is flat)
 
-A plan may either:
-- Mark milestones explicitly with `## Milestone:` or `### Milestone:` headings, or a `milestones:` list in frontmatter.
-- Be flat — every top-level `##` section is treated as an implicit milestone by execute-plan.
+A plan may mark milestones in any of these forms:
+- `## Milestone:` or `### Milestone:` headings, or a `milestones:` list in
+  frontmatter (old wave/lane format).
+- A `milestone_end: true` field in a task's YAML metadata block, per the
+  `_internal/plan-format` contract (new dependency-driven format). If no
+  task sets it, execute-plan treats the final task as the only milestone
+  — that is also acceptable, not a failure.
+- Flat — every top-level `##` section is treated as an implicit milestone
+  by execute-plan (old format only; the new contract always uses
+  `milestone_end` or the final-task default above).
 
-Both are acceptable. Only fail if the plan **mixes** explicit milestones with orphaned tasks that aren't under any milestone.
+A plan uses exactly one convention — don't mix `## Milestone:` headings
+with `milestone_end:` fields. Only fail if the plan mixes explicit
+`## Milestone:`/`### Milestone:` headings with orphaned tasks that aren't
+under any milestone section.
 - **Fail:** `Plan uses explicit milestones but tasks N, M are outside any milestone section.`
 
 ### 6. No forbidden placeholders
@@ -147,7 +157,7 @@ remain stable.
 ### 9. Closed Decisions are well-formed (if present)
 
 If the plan has a `## Closed Decisions` section, each entry must be one
-of the two permitted forms:
+of the three permitted forms:
 
 - **Inline decision:** `**Key:** one-line value. Source: <source>.`
   The bullet starts with a bold key, contains a single sentence value,
@@ -160,9 +170,20 @@ of the two permitted forms:
   `validate-plan/` skill — **not** a path in the consumer repo.
   The library is part of the skill package; consumer repos do not
   ship their own `closed-decisions/` trees.
+- **Plain bullet (new `_internal/plan-format` contract):**
+  `<Label>: <one-line value>.` A single-sentence bullet, optionally
+  prefixed with a short label ending in `:` (e.g. `Chunking: 500-token /
+  50-overlap sliding window fallback.`). No bold key and no inline
+  `Source:` clause required — the plan's frontmatter `source_prd:` field
+  (the new contract's marker, in place of the old format's `source:`
+  field) is the attribution for the whole section. **Only valid when the
+  plan's frontmatter declares `source_prd:`** — old-format plans
+  (`source:` frontmatter) must still use one of the two forms above.
 
-Prose paragraphs, multi-sentence values, or bullets without a bold key
-or source fail the check.
+Prose paragraphs and multi-sentence values always fail the check. A
+bullet with neither a bold key+`Source:` clause, nor a `@closed-decisions/`
+reference, nor (in a `source_prd:` plan) the plain single-sentence form
+also fails.
 
 Additionally:
 
@@ -174,7 +195,8 @@ Additionally:
   (see Refuse contract) with both locations cited.
 
 **Fail (format):** `Closed Decision on line N is prose, not the bullet
-format. Rewrite as "**Key:** value. Source: ...".`
+format. Rewrite as "**Key:** value. Source: ..." (or, in a source_prd:
+plan, "Key: value.").`
 
 **Fail (reference):** `Closed Decision references
 @closed-decisions/<path> but fragment file does not exist at
@@ -272,12 +294,12 @@ VERDICT: FAIL
 
 ## Refuse contract
 
-A `VERDICT: FAIL` from this skill causes `/execute-plan` Phase 0b to
-**refuse to execute**. This refusal is non-negotiable except via the
-explicit human-only `--force` override (see
-`execute-plan/SKILL.md` Phase 0b). The contract is the teeth behind
-the guiding principle that bad plans are refused up front, not guessed
-through at execution time.
+A `VERDICT: FAIL` from this skill causes `/execute-plan` preflight
+gate 2 to **refuse to execute**. This refusal is non-negotiable except
+via the explicit human-only `--force` override (see
+`execute-plan/SKILL.md`, preflight gate 2). The contract is the teeth
+behind the guiding principle that bad plans are refused up front, not
+guessed through at execution time.
 
 ## Emitting `plan-ambiguity` findings
 
@@ -299,8 +321,8 @@ from structural issues:
   "Testing" names Vitest only. Reconcile before re-running.
 ```
 
-See the ambiguity taxonomy in `execute-plan/SKILL.md` Phase 1.5 for the
-three ambiguity categories.
+See the ambiguity taxonomy in `execute-plan/SKILL.md`, preflight gate 4
+(pre-execution clarification), for the three ambiguity categories.
 
 ## What this skill does NOT do
 
@@ -317,5 +339,5 @@ structurally ready for `execute-plan` to consume?*
 - **Inputs:** path to a plan file (markdown with YAML frontmatter).
 - **Preconditions:** plan file exists and is readable.
 - **Outputs:** `VERDICT: PASS | WARN | FAIL` with a check-by-check breakdown (frontmatter shape, task discreteness, acceptance criteria, milestones, forbidden placeholders, parallel-execution shape if present, etc.); structured findings caller can act on.
-- **Postconditions:** caller (`/execute-plan` Phase 0b, `/execute-prd` step 7) decides whether to proceed (`PASS`), warn (`WARN`), or fix (`FAIL`).
+- **Postconditions:** caller (`/execute-plan` preflight gate 2, `/execute-prd` step 7) decides whether to proceed (`PASS`), warn (`WARN`), or fix (`FAIL`).
 - **Failure modes:** plan file unreadable → `FAIL` with a file-access finding; plan present but parses inconsistently → `FAIL` with a `plan-ambiguity` finding; this skill never edits the plan — it only reports.

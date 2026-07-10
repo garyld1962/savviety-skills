@@ -21,6 +21,7 @@
     "extras": [
       { "from": "claude/infra/pr-guardrail",    "to": ".claude/pr-guardrail" },
       { "from": "claude/infra/journal",         "to": ".claude/journal" },
+      { "from": "claude/infra/hooks",           "to": ".claude/hooks" },
       { "from": "claude/install-scan",          "to": ".claude/install-scan" },
       { "from": "claude/settings.template.json", "to": ".claude/settings.json" }
     ],

@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Grep",
+      "Glob",
+      "Bash(git *)",
+      "Bash(rtk git *)",
+      "Bash(gh pr *)",
+      "Bash(gh issue view *)",
+      "Bash(rg *)",
+      "Bash(rtk rg *)",
+      "Bash(fd *)",
+      "Bash(rtk fd *)",
+      "Bash(jq *)",
+      "Bash(node *)",
+      "Bash(find *)",
+      "Bash(xargs *)",
+      "Bash(bin/check-workflow-syntax *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(rtk cat *)",
+      "Bash(mkdir *)",
+      "Bash(mv *)"
+    ],
+    "deny": [
+      "Bash(git reset --hard*)",
+      "Bash(git push --force *)",
+      "Bash(git push --force)",
+      "Bash(git push -f*)",
+      "Bash(git clean -f*)",
+      "Bash(git branch -D*)",
+      "Bash(rtk git reset --hard*)",
+      "Bash(rtk git push --force*)",
+      "Bash(rtk git push -f*)",
+      "Bash(rtk git clean -f*)",
+      "Bash(rtk git branch -D*)"
+    ]
+  }
+}
