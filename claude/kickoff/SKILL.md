@@ -36,6 +36,8 @@ When the ask is a routine, low-risk, convention-bound edit (single-file change, 
 
 ### Standard Path
 
+0. **Load project memory.** Check `~/.claude/agent-memory/<repo-slug>/` for a `kickoff-context.md` file, where `<repo-slug>` is the current repo's directory name. If it exists, read it — it contains architectural decisions, patterns, and constraints from prior sessions. Surface any relevant entries as "Loaded from project memory: ..." before proceeding. If the directory doesn't exist, skip silently.
+
 1. **Read the artifact.** Read the exact artifact or files the user supplied. If no path is given and `AERS.md` exists, use it. Prefer reading actual files over guessing content.
 
 2. **Check readiness.** Unless `--skip-readiness`, score the artifact
@@ -64,6 +66,21 @@ When the ask is a routine, low-risk, convention-bound edit (single-file change, 
    - Continue until the change is verified or a real blocker is reached
 
 5. **Review.** After implementation, use `superpowers:requesting-code-review` or `/domain-review` for a review pass.
+
+6. **Save project memory.** After a successful review, append to `~/.claude/agent-memory/<repo-slug>/kickoff-context.md` (create if absent):
+   - Architectural decisions made or confirmed during this session
+   - Patterns adopted or rejected (with brief rationale)
+   - Constraints discovered (e.g. "do not use X because Y")
+   - Anything a future session should know before starting
+
+   Use this format:
+   ```markdown
+   ## Session: <YYYY-MM-DD> — <artifact slug>
+   - Decision: <what was decided and why>
+   - Pattern: <what pattern was adopted or rejected>
+   - Constraint: <what to avoid and why>
+   ```
+   Only write entries that aren't already captured in CLAUDE.md or the artifact itself.
 
 ## Output Contract
 

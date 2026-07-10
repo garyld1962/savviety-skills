@@ -1,6 +1,7 @@
 ---
 name: review-gauntlet
 description: "Use when a code review's conclusions need scrutiny. Reviews THE REVIEW via 3 lenses (Skeptic, Architect, Pragmatist). Returns SOLID / MIXED / UNRELIABLE."
+model: opus
 ---
 
 # /review-gauntlet -- Meta-Review of Code Reviews
@@ -111,6 +112,14 @@ Finding format:
 ```
 
 ## Step 4: Synthesize Verdict
+
+Before tallying, engage extended thinking to reason privately:
+- Are there findings where two lenses reached opposite conclusions about the same issue? Which lens is right?
+- Did any lens produce findings that look accurate in isolation but collectively overstate the review's flaws?
+- Is there a pattern the three lenses collectively missed — e.g., the review is locally accurate but the aggregate verdict still misleads?
+- Is the Gauntlet's own assessment at risk of false positives? Calling a finding "inaccurate" incorrectly would suppress a real issue from the original review.
+
+Use that reasoning to calibrate the verdict before counting.
 
 Count the assessment results across all three lenses:
 

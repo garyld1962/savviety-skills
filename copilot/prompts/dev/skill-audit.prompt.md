@@ -2,8 +2,10 @@
 description: >-
   Audit a Copilot asset set (prompts, agents, skills, instructions, and repo
   instructions) against GitHub Copilot platform capabilities. Identify
-  duplication with built-ins, missing structure, and a modernization path.
-argument-hint: "[path to .github folder or source repo folder]"
+  duplication with built-ins, missing structure, and a modernization path. In
+  `--native-overlap` mode, audit this source repo's custom Copilot prompts for
+  description overlap with Copilot built-ins and installed skills.
+argument-hint: "[path to .github folder or source repo folder] [--native-overlap [prompt-name]]"
 agent: "agent"
 tools:
   - read
@@ -16,6 +18,63 @@ tools:
 Review an existing Copilot asset set and recommend how to make it more Copilot-native.
 
 Follow the skill: `.github/skills/copilot-platform-playbook/SKILL.md`
+
+## Modes
+
+- Default mode: portfolio audit of prompts, agents, skills, instructions, and
+  repo-level guidance.
+- `--native-overlap [prompt-name]`: source-repo maintenance mode for checking
+  whether custom Copilot prompts compete with Copilot built-ins or installed
+  skills at the description level.
+
+## Native-overlap mode
+
+Use `--native-overlap` only in the savviety-skills source repo, where the
+custom Copilot prompt library lives under `copilot/prompts/`.
+
+### Purpose
+
+Find custom prompts whose descriptions are too broad, duplicate a built-in, or
+would benefit from an explicit built-in handoff or cross-reference.
+
+### Catalog rule
+
+Use the current session's available built-ins and skills as the native catalog.
+Do not invent native capabilities that are not visible in the session.
+
+### Scope
+
+Audit user-invokable prompt files under `copilot/prompts/**/*.prompt.md`.
+Ignore agents and internal knowledge skills for overlap scoring unless a prompt
+explicitly delegates to them.
+
+If `[prompt-name]` is supplied, restrict the audit to that one prompt.
+
+### Verdicts
+
+For each non-trivial overlap, assign exactly one verdict:
+
+| Verdict | When | Recommended action |
+|---|---|---|
+| Tighten | The custom prompt is too broad and loses its trigger surface to a native | Sharpen the `description:` and trigger phrasing |
+| Cross-reference | The prompt is a stricter repo-tailored version of a native capability | Add a built-in comparison block and say when to prefer the custom prompt |
+| Integrate | The prompt should hand a specific step to a built-in | Add the built-in at the right workflow seam |
+| Hand off | The built-in is better for part of the described territory | Expand `When NOT to Use` with the deferring condition |
+| Redundant | The prompt adds no meaningful value over the native | Recommend retirement or consolidation |
+
+### Output
+
+Produce a short report with:
+
+- prompt name
+- current description
+- overlapping native built-in or skill
+- verdict
+- concrete edit recommendation
+
+Default to report-only. If the user asks for edits, update descriptions,
+relationship text, and `When NOT to Use` sections narrowly rather than rewriting
+the whole prompt.
 
 ## Audit scope
 
@@ -50,6 +109,11 @@ what the project actually needs against what the current asset set covers.
 2. **Duplicate coverage** — multiple assets that do the same thing (e.g., two review prompts, two planning agents). Keep the one with more Copilot-native leverage; simplify or remove the other.
 3. **Built-in duplicates** — assets that replicate behavior Copilot already provides natively (e.g., a "write unit tests" prompt when Copilot's built-in `/tests` covers it). Flag for simplification, not deletion — only remove if the custom asset adds no domain-specific value.
 4. **Stale assets** — prompts or agents referencing old model names, deprecated tool calls, or workflows the team no longer uses.
+
+> **Source-repo authors:** use `--native-overlap` when the question is
+> description-level overlap between this repo's custom prompts and Copilot
+> built-ins or installed skills. Default mode is for broader portfolio and
+> architecture audits.
 
 ### Gap report format
 

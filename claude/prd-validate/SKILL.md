@@ -1,6 +1,6 @@
 ---
 name: prd-validate
-description: "Turn a rough story, BRD, AERS draft, or idea into an implementation-ready AERS. Interviews the author, closes ambiguity, generates missing sections. Use before planning, /kickoff, or /execute-prd."
+description: "Turn a rough story, BRD, AERS draft, or idea into an implementation-ready AERS. Interviews the author, closes ambiguity, generates missing sections. Use before planning, /kickoff, or /execute-prd. When NOT to Use: vague intent without a problem statement yet (use /goal first to validate the outcome before writing requirements)."
 model: opus
 ---
 
@@ -54,6 +54,16 @@ Present: Problem Summary, Scope, Functional Requirements
 Missing: Closed Decisions, Data Models, Verification Matrix, Execution Preflight
 Ambiguous: scope boundary (is X in or out?), delete semantics
 ```
+
+### Step 2.5: Risk-Rank the Gaps (Extended Thinking)
+
+Before asking any questions, engage extended thinking to reason privately:
+- Which gaps, if left unresolved, would cause the most expensive implementation mistake?
+- Are there ambiguities that look small but hide a load-bearing architectural decision?
+- What is the most likely way this artifact gets misinterpreted by an engineer who doesn't ask questions?
+- If implementation started today from this artifact, what would break first?
+
+Use this to order the Step 3 interview by actual risk, not by section order. Ask the most dangerous gap first.
 
 ### Step 3: Interview
 

@@ -4,8 +4,8 @@ description: >-
   detailed help for a specific prompt. Covers the full prompt library across
   ba/, dev/, review/, and common/ — and clarifies when to use a custom prompt
   vs. a Copilot built-in (/plan, /review, /research, /fleet, /tasks, /diff,
-  /pr). Run with no argument to get the full catalogue; pass a prompt name to
-  see usage, arguments, and when to reach for it.
+  /pr, /skills). Run with no argument to get the full catalogue; pass a prompt
+  name to see usage, arguments, and when to reach for it.
 argument-hint: '[prompt-name]'
 ---
 
@@ -26,6 +26,7 @@ Copilot ships built-in slash commands. Prefer them for their native purposes:
 | `/tasks` | Breaking down work into tracked subtasks |
 | `/diff` | Summarising and explaining a diff |
 | `/pr` | Inspecting an open PR's state, checks, and comments |
+| `/skills` | Inspecting installed skills and skill metadata |
 
 Use a custom prompt when you need **governed, reproducible workflows** that go beyond what a built-in provides — e.g. adversarial review lenses, BA specification pipelines, dependency audits, or postmortem generation.
 
@@ -73,12 +74,13 @@ To discover all installed custom prompts (including any added after this prompt 
 | `hotfix` | Apply a minimal, fast-tracked production fix with targeted verification |
 | `k8s-verify` | Verify a Kubernetes deployment: namespace, rollouts, pod health, endpoints, events |
 | `kickoff` | Start autonomous development from a PRD, story, or repo ask following the repo's full governed flow |
+| `modernize` | Audit an older codebase and produce a within-stack refactor plan for `execute-prd --type=refactor` |
 | `postmortem` | Run a governed postmortem over a completed execution run and write a structured postmortem.md |
 | `pr` | Governed PR lifecycle — branch, commit, checkpoint, push, create PR, optionally squash-merge |
 | `prd-acceptance` | Validate a finished implementation against PRD acceptance criteria with concrete evidence |
 | `repo-status` | Concise snapshot of repo state — branch, working tree, unpushed commits, stashes, open PRs |
 | `ship` | Ship completed work through the repo's actual delivery flow: checkpoint, commit, push, PR, CI |
-| `skill-audit` | Audit a Copilot asset set against GitHub Copilot platform capabilities; identify duplication with built-ins |
+| `skill-audit` | Audit a Copilot asset set against platform capabilities, or run `--native-overlap` for source-repo prompt overlap with built-ins |
 | `skill-help` | This prompt — list or detail custom prompts in the library |
 | `sync-main` | Sync current branch with main via fetch and rebase, with conflict resolution guidance |
 | `test-plan` | Create or refresh a TDD-first test plan matching the repo's real test framework |

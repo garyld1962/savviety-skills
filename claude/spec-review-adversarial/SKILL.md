@@ -141,7 +141,16 @@ Each finding is classified:
 
 ## Step 5: Lead Judgment (Filter False Positives)
 
-After all lenses run, apply lead judgment to filter results:
+Before filtering, engage extended thinking to reason privately:
+- Which findings would concretely cause wrong code to be written if left unresolved?
+- Which Blockers can be safely downgraded without any implementation risk?
+- Did the lenses miss anything by focusing on individual sections rather than the whole artifact?
+- Do the Medium findings form a pattern that collectively deserves a High?
+- Is the current Blocker count calibrated to genuine implementation risk, or to adversarial thoroughness?
+
+Use that reasoning to guide the filter pass.
+
+After thinking, apply lead judgment to filter results:
 
 1. **Remove pedantic findings.** If a finding is technically correct but practically irrelevant (e.g., "you said 'fast' but in context the SLA is clearly defined elsewhere"), discard it.
 2. **Merge duplicates.** If the Skeptic and Coherence lenses flag the same issue, keep the one with the better explanation.

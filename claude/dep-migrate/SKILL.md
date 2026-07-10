@@ -39,6 +39,7 @@ model: opus
 - `<to-version>` — target version (required)
 - `--scope <path>` — limit analysis to a specific package/directory
 - `--dry-run` — analyze only, don't write a plan file
+- `--batch` — for large migrations (21+ files affected), execute the plan via `/batch` instead of `/execute-plan`, running each migration phase in an isolated worktree with per-phase PRs
 
 ## Step 1: Gather Breaking Changes
 
@@ -201,7 +202,9 @@ Migration Analysis: <package> <from> → <to>
   1. <highest risk change>
   2. <next risk>
 
-  Next: review the plan, then run /execute-plan to implement.
+  Next: review the plan, then:
+    - Small/Medium (≤20 files): /execute-plan <plan-path>
+    - Large (21+ files) or --batch: /batch <plan-path>   ← isolated worktree per phase, per-phase PRs
 ```
 
 ## Key Rules

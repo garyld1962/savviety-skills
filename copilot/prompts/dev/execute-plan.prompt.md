@@ -5,7 +5,7 @@ description: >-
   lanes, per-task TDD build/test cycles, milestone breakpoint reviews, diff
   manifest scoped dispatch, PR-boundary code review + professional review, and
   auto-fired postmortem on WARN/FAIL.
-argument-hint: '[path/to/plan.md] [--interactive=yes|no|auto] [--force] [--resume] [--create-branch] [--adversarial=auto|always|never] [--max-retries=N] [--max-minutes=N]'
+argument-hint: '[path/to/plan.md] [--interactive=yes|no|auto] [--force] [--resume] [--create-branch] [--accept-risk=id] [--adversarial=auto|always|never] [--run-folder=auto|off|path] [--max-retries=N] [--max-minutes=N] [--postmortem=auto|always|never] [--postmortem-mode=auto|full|lightweight]'
 agent: 'agent'
 tools:
   - execute
@@ -48,10 +48,13 @@ Follow the skills:
 | `--force` | Bypass the refuse-on-FAIL contract (Phase 0b). Plan validation returning FAIL still runs anyway. **For humans only — never set by automation.** Use is logged prominently in the execution report. |
 | `--resume` | Resume a previously aborted run. Scans commits on the current branch for `Task N from <plan-file>` footers; verifies all prior task commits share the same `Plan-SHA`; re-runs the last milestone's breakpoint review, then proceeds at the next task. |
 | `--create-branch` | Create a feature branch even if HEAD is already on a non-default branch. Branch named `execute-plan/<plan-slug>-<YYYYMMDD-HHMM>` off the default branch. |
+| `--accept-risk=<finding-id>` | Explicitly accept a critical or major finding. Repeatable. Human-only override; record every use in the final report. |
 | `--adversarial=auto\|always\|never` | When to run adversarial review (Phase 3e). `auto` (default) = fires when cumulative diff ≥ 200 lines or touches a security-sensitive path. `always` = unconditional. `never` = skip. |
+| `--run-folder=<auto\|off\|path>` | Where to write run artefacts such as `execution-report.md`, `execution-report.json`, `disposition-log.md`, and optional `postmortem.md`. Default: `auto` (use repo-configured `runs_root` when declared; otherwise current working directory). |
 | `--max-retries=N` | Override the global retry budget (default: 20). |
 | `--max-minutes=N` | Override the wall-clock budget (default: 60). |
 | `--postmortem=auto\|always\|never` | When to run Phase 5 postmortem. `auto` (default) = fires on WARN, FAIL, retry-budget exhaustion, or unproved coverage. |
+| `--postmortem-mode=<auto\|full\|lightweight>` | How deep the Phase 5 postmortem goes. `auto` chooses `lightweight` for fragile PASS cases and `full` for WARN/FAIL/blocked runs. |
 
 ## Workflow
 
@@ -111,15 +114,21 @@ command -v "<package_manager>"
 command -v "<lint_cmd first token>"
 command -v "<build_cmd first token>"
 command -v "<test_cmd first token>"
+# JavaScript / TypeScript repos:
+command -v node
 ```
 
-If any probe fails, halt with a message naming the missing tools, the likely cause
-(version manager not on PATH), and three remediation options:
+If any probe fails, halt with a message naming the missing tools, the likely
+cause (version manager not on PATH), and three remediation options:
 1. Activate the toolchain version before re-invoking.
 2. Add the absolute toolchain path to `copilot-instructions.md ## Commands`.
 3. Install the tool system-wide.
 
 When probes pass, confirm: `Toolchain probe OK: <pm> <pm-version>, <test-runner>.`
+
+Any worker or agent shell launched after this probe must use the same
+environment-routing strategy validated here. Do not assume a bare subshell will
+inherit the right PATH or version-manager initialization.
 
 **0c. Prepare workspace.** After 0a, 0b, and 0b.5 succeed:
 

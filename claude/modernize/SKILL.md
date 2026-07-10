@@ -41,7 +41,8 @@ If a "this whole thing wants a different framework" signal is overwhelming, the 
 | `--out=<path>` | Plan output path. Default: `docs/plans/modernization-<YYYYMMDD>.md`. |
 | `--max-moves=<N>` | Cap the number of primary-plan moves. Default: 10. Findings beyond the cap go to an appendix. |
 | `--theme=<name>` | Restrict to a single theme. Repeatable. Themes: `abstraction`, `separation`, `types`, `errors`, `tests`, `infra`. |
-| `--pass-through` | Any unrecognized flag is forwarded to `/execute-prd` (e.g. `--interactive=no`, `--adversarial=always`). |
+| `--batch` | Execute moves via `/batch` instead of `/execute-prd`. Spawns one isolated worktree agent per move, runs tests per unit, opens per-move PRs. Recommended when move count > 5 or blast radius is large. |
+| `--pass-through` | Any unrecognized flag is forwarded to `/execute-prd` or `/batch` (e.g. `--interactive=no`, `--adversarial=always`). |
 
 ## Workflow
 
@@ -173,20 +174,28 @@ type: refactor
 
 ### Phase 8: Handoff
 
-If `--handoff` (default), invoke:
+If `--report-only`, stop after Phase 7 with:
+
+```
+Modernization plan written to <path>.
+Run `/execute-prd --type=refactor <path>` or `/batch <path>` when ready.
+```
+
+If `--batch` (or `--handoff` with move count > 5 or any blast-radius > 15 files), use `/batch`:
+
+```
+/batch <plan-path> [pass-through flags]
+```
+
+`/batch` spawns one isolated git worktree agent per move, runs tests per unit, and opens individual PRs. This distributes risk: a failing move doesn't block the others, and each PR is reviewable independently. Requires all moves in the plan to be independently executable (no shared mutable state between moves).
+
+Otherwise, if `--handoff` (default), invoke:
 
 ```
 /execute-prd --type=refactor <plan-path> [pass-through flags]
 ```
 
 `/execute-prd` then runs its readiness gate, audit, validation, and execution against the modernization plan. The refactor plan-shape rules (characterization tests first) apply.
-
-If `--report-only`, stop after Phase 7 with:
-
-```
-Modernization plan written to <path>.
-Run `/execute-prd --type=refactor <path>` when ready.
-```
 
 ## Relationship to native skills
 

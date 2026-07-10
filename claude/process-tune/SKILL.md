@@ -43,6 +43,7 @@ follow-on `/execute-plan` run) makes the actual changes.
 | `--type=<value>` | Filter to one taxonomy `type` (e.g. `tune-threshold`). Repeatable. Default: all. |
 | `--report-path=<path>` | Where to write the tuning report. Default: `docs/postmortems/tuning-<YYYYMMDD-HHMMSS>.md`. |
 | `--apply` | **Off by default.** When set, generate a `/plan` artefact at `docs/plans/process-tune-<slug>.md` that captures each high-confidence proposal as a task. Does NOT execute it; that's still the operator's call. |
+| `--schedule <cron>` | Register a recurring `/schedule` job to run `process-tune` automatically. Example: `--schedule "0 9 * * 1"` runs every Monday at 09:00. Requires `/schedule` to be available. Outputs the registered routine name and next run time. |
 
 ## Workflow
 
@@ -149,8 +150,11 @@ groups.
 ```
 Tuning report: <report-path>
 Surfaced groups: <K>  (<H> high-confidence, <M> medium, <L> low)
-[--apply]  Plan emitted: <plan-path>  Run /execute-plan to apply.
+[--apply]    Plan emitted: <plan-path>  Run /execute-plan to apply.
+[--schedule] Routine registered: process-tune-<slug>  Next run: <datetime>
 ```
+
+**Scheduling guidance:** If the project has an active execution pipeline (running `/execute-prd` or `/kickoff` regularly), `--schedule "0 9 * * 1"` establishes a weekly Monday morning tuning pass. The Dreaming feature (Claude Code's background session review) can surface raw signal automatically between runs; `process-tune` then acts on that accumulated signal in a structured way. At minimum one `--min-runs=3` cycle is needed before a scheduled run produces useful output.
 
 ## Hard rules
 

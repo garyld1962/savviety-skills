@@ -68,9 +68,14 @@ For multi-repo scope, dispatch parallel searches using the Agent tool with one a
 
 ### Step 3: Search
 
+**Context-aware reading strategy:** With 1M token context available, calibrate read depth to repo size:
+- **Small repos (<200 files):** read all source files directly before grepping — comprehensive reads surface semantic matches that keyword search misses.
+- **Medium repos (200–2000 files):** full read of entry points, public surfaces, and files matching structure cues; grep for anchors elsewhere.
+- **Large repos (2000+ files):** layered approach below; sample by signal category rather than exhaustive read.
+
 For each repo in scope, search using a layered approach:
 1. Grep/Glob for exact anchors
-2. Read files matching framework/structure cues
+2. Read files matching framework/structure cues (full read for small/medium per above)
 3. Scan for behavioral matches in promising files
 4. Rate each match with a confidence score
 

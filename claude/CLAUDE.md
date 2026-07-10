@@ -64,8 +64,10 @@ The skill is almost always installed; it loses the description match. Workflow:
 For a typical "I have a PRD, build the app" flow, the correct chain is:
 
 ```
-PRD/spec → execute-prd (or writing-plans) → execute-plan (or executing-plans) → checkpoint → security-review/review
+vague intent → goal → prd-validate → execute-prd (or writing-plans) → execute-plan (or executing-plans) → checkpoint → security-review/review
 ```
+
+`/goal` sits before PRD work: it validates that the intent is outcome-shaped (not solution-shaped) before requirements are written. Skip it when the problem statement is already clear.
 
 The custom skills here cluster at the quality-gate end of that chain (`checkpoint`, `review-*`, `simplify`). The `ba-*` family is a parallel, non-dev workflow that produces specs; it does not consume them.
 

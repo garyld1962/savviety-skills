@@ -18,9 +18,9 @@ This document is a file-by-file guide to the `copilot-native/` workspace. It cov
 
 | Group | Count | Notes |
 |---|---:|---|
-| Prompts | 33 | 8 BA, 2 common, 16 dev, 7 review |
+| Prompts | 47 | 8 BA, 2 common, 28 dev, 9 review |
 | Agents | 12 | Mostly bounded review, ideation, execution, and investigation roles |
-| Skills | 23 | Reusable knowledge used by prompts and agents |
+| Skills | 27 | Reusable knowledge used by prompts and agents |
 | Instructions | 3 | Passive authoring, environment, and personal rule layers |
 | Templates | 1 | Blank config template currently shipped for Copilot-side environment routing |
 
@@ -51,7 +51,7 @@ The BA set also includes `ubiquitous-language`, a glossary-building prompt for l
 
 The governed-delivery path combines:
 
-- prompts such as `autonomous-development-kickoff`, `execute-plan`, `execute-workflow`, `checkpoint`, `ship`, `hotfix`, and `postmortem`
+- prompts such as `autonomous-development-kickoff`, `execute-plan`, `execute-workflow`, `modernize`, `checkpoint`, `ship`, `hotfix`, and `postmortem`
 - agents such as `execute-orchestrator`, `plan-reviewer`, `code-reviewer`, `adversarial-reviewer`, `disposition-coordinator`, and `postmortem-analyst`
 - skills such as `repo-delivery`, `review-disposition-governance`, `execution-environment`, and `copilot-platform-playbook`
 
@@ -121,6 +121,7 @@ The specialist review path is intentionally thinner than a general `/review`:
 | `investigate-code` | [prompts/dev/investigate-code.prompt.md](prompts/dev/investigate-code.prompt.md) | Search one or more repos for a behavior or pattern and write a Markdown report. | `code-investigation-orchestrator`, `code-investigation-search`, `investigation-report-writer`, investigation agents |
 | `k8s-deploy-verify` | [prompts/dev/k8s-deploy-verify.prompt.md](prompts/dev/k8s-deploy-verify.prompt.md) | Verify Kubernetes rollouts, pod health, endpoints, events, and optional logs. | `k8s-verification`, `execution-environment` |
 | `migration-guide` | [prompts/dev/migration-guide.prompt.md](prompts/dev/migration-guide.prompt.md) | Produce a repo-specific major-version migration guide. | `dependency-change-management` |
+| `modernize` | [prompts/dev/modernize.prompt.md](prompts/dev/modernize.prompt.md) | Audit an older codebase and emit a within-stack refactor plan shaped for `execute-prd --type=refactor`. | `modernization-rubric`, `copilot-platform-playbook` |
 | `postmortem` | [prompts/dev/postmortem.prompt.md](prompts/dev/postmortem.prompt.md) | Run a governed postmortem over a completed execution run. | `copilot-platform-playbook`, `review-disposition-governance`, `postmortem-analyst.agent.md`, workflow docs/templates |
 | `ship` | [prompts/dev/ship.prompt.md](prompts/dev/ship.prompt.md) | Move completed work through the repo's actual delivery flow. | `repo-delivery`, `execution-environment` |
 | `skill-help` | [prompts/dev/skill-help.prompt.md](prompts/dev/skill-help.prompt.md) | Discover available prompts and show concise help for one prompt by name. | prompt discovery ergonomics |
@@ -172,6 +173,7 @@ The specialist review path is intentionally thinner than a general `/review`:
 | `execution-environment` | [skills/execution-environment/SKILL.md](skills/execution-environment/SKILL.md) | Shell and environment detection guidance for PowerShell, WSL, and Linux repos. |
 | `investigation-report-writer` | [skills/investigation-report-writer/SKILL.md](skills/investigation-report-writer/SKILL.md) | Formatting and file rules for versioned code-investigation reports. |
 | `k8s-verification` | [skills/k8s-verification/SKILL.md](skills/k8s-verification/SKILL.md) | Post-deploy Kubernetes verification checklist. |
+| `modernization-rubric` | [skills/modernization-rubric/SKILL.md](skills/modernization-rubric/SKILL.md) | Calibration rubric for modernization audits: project shape, sample-read strategy, admissible moves, and cull criteria. |
 | `prd-readiness` | [skills/prd-readiness/SKILL.md](skills/prd-readiness/SKILL.md) | Interactive checklist for turning a story, BRD, or draft AERS into an implementation-ready artifact. |
 | `project-context` | [skills/project-context/SKILL.md](skills/project-context/SKILL.md) | Structured interview and output shape for reusable BA project context documents. |
 | `repo-delivery` | [skills/repo-delivery/SKILL.md](skills/repo-delivery/SKILL.md) | Delivery playbook for execution, checkpointing, shipping, and hotfixes. |
