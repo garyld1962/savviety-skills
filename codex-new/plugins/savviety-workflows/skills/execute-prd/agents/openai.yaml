@@ -1,0 +1,4 @@
+interface:
+  display_name: "Execute Prd"
+  short_description: "Turn requirements into executed plans"
+  default_prompt: "Use $execute-prd to run this Savviety Codex workflow."

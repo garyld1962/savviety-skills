@@ -1,0 +1,20 @@
+{
+  "name": "savviety-local",
+  "interface": {
+    "displayName": "Savviety Local"
+  },
+  "plugins": [
+    {
+      "name": "codex-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/codex-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

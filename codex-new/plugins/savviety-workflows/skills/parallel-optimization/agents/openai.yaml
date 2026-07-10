@@ -1,0 +1,4 @@
+interface:
+  display_name: "Parallel Optimization"
+  short_description: "Design safe parallel execution lanes"
+  default_prompt: "Use $parallel-optimization to run this Savviety Codex workflow."

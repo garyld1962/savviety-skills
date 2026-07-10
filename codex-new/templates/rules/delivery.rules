@@ -1,0 +1,19 @@
+# Prompt before running GitHub PR and release commands outside the sandbox.
+prefix_rule(
+  pattern = ["gh", "pr", ["create", "merge"]],
+  decision = "prompt",
+  justification = "PR creation and merge affect shared repository state.",
+  match = [
+    "gh pr create --title example",
+    "gh pr merge 123 --squash --delete-branch",
+  ],
+)
+
+prefix_rule(
+  pattern = ["gh", "release", "create"],
+  decision = "prompt",
+  justification = "Release creation publishes artifacts or tags.",
+  match = [
+    "gh release create v1.2.3",
+  ],
+)

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prd Acceptance"
+  short_description: "Verify delivery against acceptance"
+  default_prompt: "Use $prd-acceptance to run this Savviety Codex workflow."
