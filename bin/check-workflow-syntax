@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# check-workflow-syntax — syntax-check Workflow tool scripts (claude-new/**/workflows/*.mjs)
+#
+# Workflow scripts are not standalone ES modules: the Workflow tool wraps
+# the script body in an async function at execution time, which is why a
+# top-level `return` and top-level `await` are valid at runtime even
+# though plain `node --check` on the raw .mjs file rejects both (ESM
+# disallows top-level `return`; a bare script disallows top-level `await`).
+#
+# This reproduces that wrapper for syntax-checking purposes: strip the
+# leading `export ` off the `meta` declaration (the only top-level export
+# these scripts use) and wrap the whole body in `async function(){ ... }`,
+# then let node --check parse that.
+#
+# Usage: bin/check-workflow-syntax <file.mjs> [more files...]
+
+set -euo pipefail
+
+status=0
+for f in "$@"; do
+  if ! { printf 'async function __workflow_syntax_check(){\n'; sed 's/^export const meta/const meta/' "$f"; printf '\n}\n'; } | node --check 2>&1; then
+    echo "SYNTAX ERROR: $f" >&2
+    status=1
+  fi
+done
+exit "$status"

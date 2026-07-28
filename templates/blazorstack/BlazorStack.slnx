@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BlazorStack.Shared/BlazorStack.Shared.csproj" />
+    <Project Path="src/BlazorStack.Data/BlazorStack.Data.csproj" />
+    <Project Path="src/BlazorStack.Api/BlazorStack.Api.csproj" />
+    <Project Path="src/BlazorStack.Web/BlazorStack.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BlazorStack.Shared.Tests/BlazorStack.Shared.Tests.csproj" />
+  </Folder>
+</Solution>

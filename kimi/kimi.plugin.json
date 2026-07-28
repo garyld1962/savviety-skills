@@ -1,0 +1,19 @@
+{
+  "name": "savviety-workflows",
+  "version": "0.2.0",
+  "description": "Savviety delivery workflows for Kimi Code CLI: planning, execution, review, checkpoint, and ship skills.",
+  "keywords": ["workflow", "planning", "review", "delivery", "savviety"],
+  "homepage": "https://github.com/garyld1962/savviety-skills",
+  "license": "MIT",
+  "interface": {
+    "displayName": "Savviety Workflows",
+    "shortDescription": "Planning, execution, review, and delivery skills",
+    "longDescription": "A unified workflow layer for Kimi Code CLI. Provides skills for PRD validation, plan execution, domain-based code review, quality checkpoints, and shipping pull requests. For project-level lifecycle hooks (install scanning, journaling, PR guardrails), run cli/skill.sh --kimi --init after installing the plugin."
+  },
+  "skills": "./skills/",
+  "commands": "./commands/",
+  "sessionStart": {
+    "skill": "skill-help"
+  },
+  "skillInstructions": "These skills are part of the Savviety Workflows plugin. Prefer plugin slash commands (/savviety-workflows:<command>) for the most common manual invocations; use /skill:<name> for the full skill body. Project-level lifecycle hooks are configured separately via cli/skill.sh --kimi --init."
+}

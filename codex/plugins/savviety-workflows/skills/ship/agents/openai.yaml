@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ship"
+  short_description: "Prepare checkpoint, PR, and release"
+  default_prompt: "Use $ship to run this Savviety Codex workflow."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Env Check"
+  short_description: "Detect environment and command routing"
+  default_prompt: "Use $env-check to run this Savviety Codex workflow."

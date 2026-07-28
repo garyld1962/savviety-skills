@@ -1,0 +1,41 @@
+---
+id: professional-default
+title: Professional Review
+description: >
+  Senior-engineering judgment pass. Use when the question is not only "does it
+  work?" but "were the right engineering choices made for scale, failure,
+  operations, maintenance, and lifecycle cost?" This profile is meant to catch
+  amateur-but-functional solutions.
+
+domains:
+  - id: concept/performance
+    mode: always
+  - id: concept/resilience
+    mode: always
+  - id: concept/concurrency
+    mode: always
+  - id: concept/operability
+    mode: always
+  - id: concept/maintainability
+    mode: always
+  - id: concept/architecture
+    mode: always
+  - id: concept/requirements
+    mode: always
+  - id: concept/async
+    mode: conditional
+  - id: concept/data-integrity
+    mode: conditional
+  - id: concept/api-contract
+    mode: conditional
+  - id: concept/dependencies
+    mode: conditional
+
+overlays:
+  - dialect/csharp-async
+  - dialect/typescript-async
+  - dialect/python-async
+  - dialect/typescript-types
+  - platform/azure-service-bus
+  - platform/nats-jetstream
+  - platform/postgres

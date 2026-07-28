@@ -1,0 +1,10 @@
+{
+  "$comment": "Go toolchain.",
+  "permissions": {
+    "allow": [
+      "Bash(go:*)",
+      "Bash(gofmt:*)",
+      "Bash(golangci-lint:*)"
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+# Kimi Code CLI configuration
+# https://moonshotai.github.io/kimi-cli/en/
+
+# Skill discovery — keep merge_all_available_skills enabled so .claude/skills/
+# (Claude Code assets) are merged with .kimi/skills/ (native Kimi assets from
+# the savviety-workflows plugin). Priority: kimi > claude > codex.
+merge_all_available_skills = true
+
+# Step budget — match Kimi 1.40+ default of 1000 unless the project has a
+# strong reason to clamp it.
+max_steps_per_turn = 1000
+
+# Extra skill dirs (optional). Uncomment and adjust to layer team-shared
+# skills on top of project + user discovery.
+# extra_skill_dirs = []
+
+# ---------------------------------------------------------------------------
+# Hooks
+#
+# Hooks are inline TOML arrays (not a separate hooks.json). Each hook fires
+# on a Kimi lifecycle event with optional matcher regex.
+#
+# Event types: PreToolUse, PostToolUse, PostToolUseFailure, UserPromptSubmit,
+#   Stop, StopFailure, SessionStart, SessionEnd, SubagentStart, SubagentStop,
+#   PreCompact, PostCompact, Notification.
+#
+# Exit code semantics:
+#   0  = allow; non-empty stdout is added to context
+#   2  = block; stderr fed back to the model
+#   *  = allow; stderr logged only
+#
+# The scripts below are Kimi-aware adapters in .kimi/hooks/. They read Kimi's
+# JSON stdin (cwd, session_id, hook_event_name, tool_input.command) and are
+# installed by cli/skill.sh --kimi. Test in a scratch repo before enabling.
+# ---------------------------------------------------------------------------
+
+# install-scan: post-Shell hook that detects package install commands and
+# scans named packages against OSV.dev. Detect-and-report only; never blocks.
+# [[hooks]]
+# event   = "PostToolUse"
+# matcher = "Shell"
+# command = "bash ./.kimi/hooks/install-scan-adapter.sh"
+# timeout = 30
+
+# gh-auth-guard: pre-Shell hook that blocks gh pr/issue/release create when
+# the GitHub CLI is missing or not authenticated.
+# [[hooks]]
+# event   = "PreToolUse"
+# matcher = "Shell"
+# command = "bash ./.kimi/hooks/gh-auth-guard.sh"
+# timeout = 10
+
+# pr-guardrail: pre-Shell hook that intercepts `gh pr create` and checks for
+# existing open PRs before allowing the command.
+# [[hooks]]
+# event   = "PreToolUse"
+# matcher = "Shell"
+# command = "bash ./.kimi/hooks/pr-guardrail.sh"
+# timeout = 15
+
+# journal: session lifecycle journaling. Append-only.
+# [[hooks]]
+# event   = "SessionStart"
+# command = "bash ./.kimi/hooks/journal-append.sh start"
+# timeout = 5
+#
+# [[hooks]]
+# event   = "SessionEnd"
+# command = "bash ./.kimi/hooks/journal-append.sh end"
+# timeout = 5
+
+# Hooks are commented out by default. Uncomment after verifying the script
+# behaves correctly under Kimi's hook stdin format. Test with `kimi --dry-run`
+# or in a scratch directory before enabling globally.

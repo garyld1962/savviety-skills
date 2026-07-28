@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pyyaml
+      # There is no test suite — these assets are prose. Verification is
+      # structural: every Workflow script must parse, the JSON files that gate
+      # installation must be valid, every shell entrypoint must parse, and the
+      # generated Kimi tree must match its claude/ source.
+      - run: find claude -name "*.mjs" -print0 | xargs -0 bin/check-workflow-syntax
+      - run: jq empty manifest.json
+      - run: jq empty claude/settings.template.json
+      - run: jq empty kimi/kimi.plugin.json
+      - run: bash -n cli/skill.sh
+      - run: for f in kimi/hooks/*.sh; do bash -n "$f"; done
+      - run: bin/build-kimi-plugin --check

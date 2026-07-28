@@ -1,0 +1,4 @@
+interface:
+  display_name: "Changelog"
+  short_description: "Generate release notes from commits"
+  default_prompt: "Use $changelog to run this Savviety Codex workflow."

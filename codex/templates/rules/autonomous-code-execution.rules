@@ -1,0 +1,88 @@
+# Allow local, non-publishing commands commonly needed for autonomous code
+# implementation and verification.
+#
+# Keep this set generic: no repository-specific paths, ports, package names, or
+# deployment commands. Destructive cleanup, remote publishing, releases, and
+# dependency mutation should be governed by stricter rules.
+prefix_rule(
+  pattern = [["npm", "pnpm", "yarn", "bun"], ["test", "build", "lint", "typecheck", "check"]],
+  decision = "allow",
+  justification = "Allow standard local package-manager verification commands during implementation.",
+  match = [
+    "npm test",
+    "pnpm build",
+    "yarn lint",
+    "bun test",
+  ],
+)
+
+prefix_rule(
+  pattern = [["npm", "pnpm", "yarn", "bun"], "run", ["test", "build", "lint", "typecheck", "check", "format", "format:check"]],
+  decision = "allow",
+  justification = "Allow standard local package scripts used to verify and format code.",
+  match = [
+    "npm run test",
+    "pnpm run typecheck",
+    "yarn run format:check",
+    "bun run lint",
+  ],
+)
+
+prefix_rule(
+  pattern = [["npx", "pnpm", "yarn", "bun"], ["tsc", "vitest", "jest", "eslint", "prettier", "next", "vite"]],
+  decision = "allow",
+  justification = "Allow common local project CLIs for build, lint, test, and dev-server verification.",
+  match = [
+    "npx tsc --noEmit",
+    "pnpm vitest run",
+    "yarn eslint .",
+    "bun vite --host 127.0.0.1",
+  ],
+)
+
+prefix_rule(
+  pattern = [["python", "python3"], ["-m"], ["pytest", "unittest", "compileall", "mypy", "ruff", "black"]],
+  decision = "allow",
+  justification = "Allow common Python verification and formatting commands.",
+  match = [
+    "python -m pytest",
+    "python3 -m unittest",
+    "python -m ruff check .",
+    "python3 -m black --check .",
+  ],
+)
+
+prefix_rule(
+  pattern = [["go", "cargo", "dotnet"], ["test", "build", "check", "fmt"]],
+  decision = "allow",
+  justification = "Allow common local compiled-language build, test, and format checks.",
+  match = [
+    "go test ./...",
+    "cargo test",
+    "cargo check",
+    "dotnet build",
+  ],
+)
+
+prefix_rule(
+  pattern = [["curl", "wget"], []],
+  decision = "allow",
+  justification = "Allow local HTTP probes against development servers.",
+  match = [
+    "curl --max-time 5 -i http://localhost:3000/",
+    "curl --max-time 5 -sS http://127.0.0.1:3000/api/health",
+    "wget -S -O - -T 5 http://localhost:3000/",
+  ],
+)
+
+prefix_rule(
+  pattern = [["ss", "lsof", "pgrep", "ps"], []],
+  decision = "allow",
+  justification = "Allow local process and port inspection during development-server verification.",
+  match = [
+    "ss -tanp",
+    "lsof -iTCP:3000 -sTCP:LISTEN -P -n",
+    "pgrep -af next",
+    "ps -ef",
+  ],
+)

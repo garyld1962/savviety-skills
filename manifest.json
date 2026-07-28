@@ -1,0 +1,119 @@
+{
+  "$comment": "Source-of-truth manifest for the cli/skill.sh installer. See docs/repo-skills-design.md.",
+
+  "claude": {
+    "skills": {
+      "from": "claude",
+      "to": ".claude/skills",
+      "skip": [
+        "README.md",
+        "MODEL-POLICY.md",
+        "SESSION-CONTEXT.md",
+        "settings.template.json",
+        "infra",
+        "install-scan"
+      ],
+      "preserve_subdirs": [
+        "_project",
+        "_local"
+      ]
+    },
+    "extras": [
+      { "from": "claude/infra/pr-guardrail",    "to": ".claude/pr-guardrail" },
+      { "from": "claude/infra/journal",         "to": ".claude/journal" },
+      { "from": "claude/infra/hooks",           "to": ".claude/hooks" },
+      { "from": "claude/install-scan",          "to": ".claude/install-scan" },
+      { "from": "claude/settings.template.json", "to": ".claude/settings.json" }
+    ],
+    "starters": [
+      { "from": "templates/CLAUDE.starter.md",            "to": "CLAUDE.md" },
+      { "from": "templates/CLAUDE.local.md",              "to": "CLAUDE.local.md" },
+      { "from": "templates/settings.local.starter.json",  "to": ".claude/settings.local.json" }
+    ],
+    "gitignore": [
+      "CLAUDE.local.md",
+      ".claude/journal/*.md",
+      ".claude/journal/.lock.*",
+      ".claude/SESSION.md"
+    ]
+  },
+
+  "copilot": {
+    "trees": [
+      { "from": "copilot-native/prompts",      "to": ".github/prompts" },
+      { "from": "copilot-native/agents",       "to": ".github/agents" },
+      { "from": "copilot-native/skills",       "to": ".github/skills" },
+      { "from": "copilot-native/instructions", "to": ".github/instructions" },
+      { "from": "copilot-native/templates",    "to": ".github/templates" }
+    ],
+    "starters": [
+      { "from": "templates/copilot-instructions.starter.md",
+        "to":   ".github/copilot-instructions.md" }
+    ]
+  },
+
+  "codex": {
+    "trees": [
+      { "from": "codex/plugins",         "to": ".codex/plugins" },
+      { "from": "codex/agents",          "to": ".codex/agents" },
+      { "from": "codex/prompts",         "to": ".codex/prompts" },
+      { "from": "codex/templates/rules", "to": ".codex/rules" },
+      { "from": "codex/templates/hooks", "to": ".codex/hooks" }
+    ],
+    "extras": [
+      { "from": "codex/templates/config.toml",      "to": ".codex/config.toml" },
+      { "from": "codex/templates/hooks.json",       "to": ".codex/hooks.json" },
+      { "from": "codex/templates/marketplace.json", "to": ".claude-plugin/marketplace.json" }
+    ],
+    "starters": [
+      { "from": "codex/templates/AGENTS.starter.md", "to": "AGENTS.md" }
+    ],
+    "gitignore": [
+      ".codex/journal/*.jsonl"
+    ]
+  },
+
+  "kimi": {
+    "$comment": "Kimi-native plugin distribution. Skills are generated from claude/ by bin/build-kimi-plugin into kimi/skills/ with native frontmatter (type, whenToUse, arguments, flow). The plugin manifest packages skills, slash commands, and hooks. Hook script bodies remain single-sourced from claude/infra/ and claude/install-scan. The claude/ block still deploys to .claude/skills/ for Claude Code users; Kimi v1.39+ can also auto-merge .claude/skills/, but .kimi/skills/ is the canonical source for this plugin.",
+    "skills": {
+      "from": "kimi/skills",
+      "to": ".kimi/skills",
+      "skip": [
+        "README.md"
+      ],
+      "preserve_subdirs": [
+        "_project",
+        "_local"
+      ]
+    },
+    "trees": [
+      { "from": "kimi/agents",    "to": ".kimi/agents" },
+      { "from": "kimi/templates", "to": ".kimi/templates" },
+      { "from": "kimi/commands",  "to": ".kimi/commands" },
+      { "from": "kimi/hooks",     "to": ".kimi/hooks" }
+    ],
+    "extras": [
+      { "from": "kimi/kimi.plugin.json",     "to": ".kimi/kimi.plugin.json" },
+      { "from": "claude/install-scan",       "to": ".kimi/install-scan" }
+    ],
+    "starters": [
+      { "from": "kimi/templates/AGENTS.starter.md", "to": "AGENTS.md" },
+      { "from": "kimi/templates/config.toml",       "to": ".kimi/config.toml" }
+    ],
+    "gitignore": [
+      ".kimi/journal/*.md",
+      ".kimi/journal/.lock.*",
+      ".kimi/SESSION.md"
+    ]
+  },
+
+  "user_owned": [
+    ".claude/settings.local.json",
+    "CLAUDE.md",
+    "CLAUDE.local.md",
+    ".github/copilot-instructions.md",
+    ".github/instructions/personal.instructions.md",
+    "AGENTS.md",
+    ".kimi/config.toml"
+  ]
+}

@@ -1,0 +1,125 @@
+# AI Coding Skills
+
+[![CI](https://github.com/garyld1962/savviety-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/garyld1962/savviety-skills/actions/workflows/ci.yml)
+
+Cross-platform AI coding skills maintained across four canonical systems.
+
+## Platforms
+
+| Platform | Directory | Target Environment | Primary Models |
+|----------|-----------|--------------------|----------------|
+| [Claude Code](claude/README.md) | `claude/` | `.claude/skills/` | Claude Opus, Sonnet |
+| [Copilot](copilot/README.md) | `copilot/` | `.github/` (Copilot CLI + VS Code) | GPT 5.4, Gemini Pro |
+| [Codex](codex/README.md) | `codex/` | `.codex/`, `.claude-plugin/marketplace.json`, `AGENTS.md` | GPT-5 Codex family |
+| [Kimi](kimi/README.md) | `kimi/` | `.kimi/`, `AGENTS.md` (skills sourced from `claude/`) | Kimi K2.5/K2.6 |
+
+**Claude Code** workflows are primarily modeled as `/name` skills. When Claude
+needs worker roles, they usually live **inside the skill package** as nested
+sub-files or subskills rather than as a first-class top-level agent asset type.
+**Copilot Native** uses `/<prompt-name>` prompts plus first-class `@agent-name`
+agents.
+**Codex** uses plugins as the installable distribution unit, `SKILL.md` skills
+as reusable workflow packages, `.codex/agents/*.toml` for custom subagents, and
+`AGENTS.md` as the project instruction layer.
+**Kimi Code CLI** auto-discovers `.claude/skills/` natively (since v1.39, with
+`merge_all_available_skills = true` by default), so the `kimi/` tree only ships
+Kimi-specific YAML agents, hooks, and an `AGENTS.md` starter — skill bodies
+stay single-sourced under `claude/`. Slash invocation differs from Claude:
+`/skill:<name>` and `/flow:<name>` instead of `/<name>`.
+
+## Repository Structure
+
+```
+	skills/
+	├── claude/                # Claude Code skills
+	│   ├── execute-plan/      #   User-invokable skill directories
+	│   ├── domain-review/     #   Composite skill with private resources
+	│   ├── configure/         #   Template-filling skill + registry
+	│   ├── _internal/         #   Internal callable contracts and rubrics
+	│   ├── infra/             #   Hook and utility script sources
+	│   └── ...
+├── copilot/        # Copilot-first workspace
+│   ├── prompts/           #   Thinner prompts that lean on built-ins
+│   ├── agents/            #   Narrow specialist agents
+│   ├── skills/            #   Domain knowledge
+│   ├── instructions/      #   Auto-applied rules
+│   └── templates/         #   Blank config templates for user setup
+├── codex/                 # Codex-native plugin, skills, agents, hooks, rules
+│   ├── plugins/           #   Local Codex plugins
+│   ├── agents/            #   Project-scoped custom agent TOML files
+│   ├── templates/         #   AGENTS.md/config/hooks/rules starters
+│   └── prompts/           #   Documented prompt examples
+├── kimi/                  # Kimi Code CLI overlay (skills auto-sourced from claude/)
+│   ├── agents/            #   Kimi v1 agent YAML + system-prompt files
+│   └── templates/         #   AGENTS.md / config.toml starters (hooks embedded as TOML)
+├── templates/             # Project scaffold templates
+│   ├── CLAUDE.local.md    #   Personal Claude Code overrides
+│   ├── blazorstack/       #   .NET scaffold template
+│   └── ts-monorepo/       #   TypeScript scaffold template
+├── docs/                  # Design and planning docs
+└── cli/                   # skill.sh installer, driven by manifest.json
+```
+
+## Deployment
+
+Deployment into a target repository is handled by `cli/skill.sh` using
+`manifest.json`. The legacy `deploy.sh` script has been archived.
+
+For Claude Code, user-facing skill directories and `_internal/` map into
+`.claude/skills/`, while runtime project files such as `.claude/settings.json`
+and hook utilities live at `.claude/` root. `claude/infra/` is source for those
+hook utilities, not a skill namespace. `claude/README.md`,
+`claude/MODEL-POLICY.md`, and `claude/SESSION-CONTEXT.md` are source/reference
+docs, not files to drop into `.claude/skills/`.
+
+## Shared vs Local Convention
+
+Every deployment target separates **shared** (overwritten on sync) from **local** (never overwritten):
+
+| Layer | Claude Code | Copilot Native | Codex | Kimi |
+|-------|-------------|----------------|-------|------|
+| Shared | `.claude/skills/<name>/` | `.github/prompts/<category>/`, `.github/skills/<name>/` | `.codex/plugins/`, `.codex/agents/`, `.codex/rules/` | `.kimi/skills/<name>/`, `.kimi/agents/` |
+| Project | `.claude/skills/_project/` | `.github/prompts/project/`, `.github/skills/project-<name>/` | nested `AGENTS.md`, project `.codex/config.toml` | nested `AGENTS.md`, `.kimi/config.toml` |
+| Personal | `CLAUDE.local.md` | `.github/instructions/personal.instructions.md`, `.github/prompts/local/` | user-level `~/.codex/config.toml`, `~/.codex/AGENTS.md` | user-level `~/.kimi/config.toml`, `~/.kimi/AGENTS.md` |
+
+## Architecture Principles
+
+1. **Four canonical systems.** Claude Code (`claude/`), Copilot (`copilot/`), Codex (`codex/`), and Kimi (`kimi/` overlay over `claude/`).
+2. **Environment-neutral.** Skills never hardcode shells, hostnames, or project names. Variable data lives in user-editable config templates.
+3. **Config via `/configure`.** Skills that need user-specific data ship blank templates. Users fill them in via `/configure <target>` or by hand.
+4. **Pre-flight checks.** Config-dependent skills halt with actionable messages if config is missing.
+5. **Internal contracts are hidden from normal help.** Knowledge rubrics and reusable contracts live in `claude/_internal/` with `user-invocable: false`; user-facing skills call them by contract.
+
+## Platform modeling note
+
+The platforms do **not** represent worker roles the same way:
+
+- **Claude Code** usually treats the top-level deployable unit as the
+  **skill**. Worker roles are often nested inside the skill package (for
+  example `execute-plan/agents/*.md`) or represented as subskills/specialists inside
+  the same workflow tree.
+- **Copilot Native** has a first-class top-level **agent** asset layer under
+  `copilot/agents/`.
+- **Codex** has project-scoped custom agent TOML files under `.codex/agents/`
+  and only spawns subagents when explicitly asked.
+
+So a one-for-one "every Copilot agent must become a top-level Claude agent"
+port is too literal. The parity question is whether the worker role exists in
+the Claude workflow, not whether it exists as a top-level peer directory.
+
+## Repository-level Copilot instructions
+
+This repo now has a real project instruction file at
+`.github/copilot-instructions.md`.
+
+That file is the top-level source of truth when using Copilot in this
+repository, including when authoring the assets under `copilot/`. The
+files inside `copilot/` are source templates for downstream repos, not
+the governing instruction layer for this repository itself.
+
+## Adding Skills
+
+1. Add the skill in the appropriate platform directory
+2. If the skill needs user config, add a `config.template.md` and a registry entry in `claude/configure/registry.md`
+3. Embed the pre-flight check pattern if the skill depends on config
+4. Test in the target environment

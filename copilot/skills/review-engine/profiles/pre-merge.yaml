@@ -1,0 +1,36 @@
+---
+id: pre-merge
+title: Pre-Merge Review
+description: >
+  Lighter profile for fast PR feedback during active development. Focuses on
+  the lenses that catch bugs and maintenance debt. Skips the expensive
+  load-shape lenses (performance, resilience, operability) — those live in
+  competence or comprehensive profiles used at milestones.
+
+  Good fit for the common case: routine feature work on a codebase that
+  already has solid infra and is changing business logic.
+
+domains:
+  - id: concept/correctness
+    mode: always
+  - id: concept/tests
+    mode: always
+  - id: concept/maintainability
+    mode: always
+  - id: concept/style
+    mode: always
+  - id: concept/security
+    mode: always          # never drop security, even in a fast profile
+  - id: concept/async
+    mode: conditional
+  - id: concept/data-integrity
+    mode: conditional
+  - id: concept/api-contract
+    mode: conditional
+
+overlays:
+  - dialect/csharp-async
+  - dialect/typescript-async
+  - dialect/python-async
+  - dialect/typescript-types
+  - platform/postgres

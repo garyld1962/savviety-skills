@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dep Migrate"
+  short_description: "Plan major dependency migrations"
+  default_prompt: "Use $dep-migrate to run this Savviety Codex workflow."

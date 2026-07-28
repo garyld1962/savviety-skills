@@ -1,0 +1,19 @@
+{
+  "$comment": "Python interpreters, package managers, test runners, and formatters.",
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(pip:*)",
+      "Bash(pip3:*)",
+      "Bash(uv:*)",
+      "Bash(uvx:*)",
+      "Bash(poetry:*)",
+      "Bash(pipx:*)",
+      "Bash(pytest:*)",
+      "Bash(ruff:*)",
+      "Bash(black:*)",
+      "Bash(mypy:*)"
+    ]
+  }
+}

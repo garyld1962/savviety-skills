@@ -1,0 +1,39 @@
+---
+id: code-comprehensive
+title: Comprehensive Code Review
+description: >
+  Broader implementation review for significant changes. Starts from
+  defect-focused code review and adds maintainability, requirements alignment,
+  and dependency scrutiny where the code change suggests those issues can cause
+  real bugs or rework.
+
+domains:
+  - id: concept/correctness
+    mode: always
+  - id: concept/tests
+    mode: always
+  - id: concept/security
+    mode: always
+  - id: concept/maintainability
+    mode: always
+  - id: concept/requirements
+    mode: always
+  - id: concept/async
+    mode: conditional
+  - id: concept/data-integrity
+    mode: conditional
+  - id: concept/api-contract
+    mode: conditional
+  - id: concept/dependencies
+    mode: conditional
+  - id: concept/ui-design
+    mode: conditional
+
+overlays:
+  - dialect/csharp-async
+  - dialect/typescript-async
+  - dialect/python-async
+  - dialect/typescript-types
+  - platform/azure-service-bus
+  - platform/nats-jetstream
+  - platform/postgres

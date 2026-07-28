@@ -1,0 +1,64 @@
+---
+id: comprehensive
+title: Comprehensive Review
+description: >
+  Strict superset of competence. Adds correctness, test quality, architecture,
+  documentation, style, commit hygiene, dependencies, and requirements
+  alignment. Use for significant changes, milestone reviews, or when a full
+  quality audit is warranted. Expect this profile to produce a long report —
+  that's the point.
+
+# The full set. Every concept domain, every always-on plus every conditional.
+domains:
+  # --- Competence defaults (always on) ---
+  - id: concept/performance
+    mode: always
+  - id: concept/resilience
+    mode: always
+  - id: concept/concurrency
+    mode: always
+  - id: concept/operability
+    mode: always
+  - id: concept/security
+    mode: always
+  - id: concept/maintainability
+    mode: always
+
+  # --- Competence conditional ---
+  - id: concept/async
+    mode: conditional
+  - id: concept/data-integrity
+    mode: conditional
+  - id: concept/api-contract
+    mode: conditional
+
+  # --- Comprehensive adds (always on in this profile) ---
+  - id: concept/correctness
+    mode: always
+  - id: concept/tests
+    mode: always
+  - id: concept/architecture
+    mode: always
+  - id: concept/documentation
+    mode: always
+  - id: concept/style
+    mode: always
+  - id: concept/commits
+    mode: always
+  - id: concept/requirements
+    mode: always
+
+  # --- Comprehensive adds (conditional on diff content) ---
+  - id: concept/dependencies
+    mode: conditional
+  - id: concept/ui-design
+    mode: conditional
+
+overlays:
+  - dialect/csharp-async
+  - dialect/typescript-async
+  - dialect/python-async
+  - dialect/typescript-types
+  - platform/azure-service-bus
+  - platform/nats-jetstream
+  - platform/postgres

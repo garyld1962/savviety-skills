@@ -1,0 +1,4 @@
+interface:
+  display_name: "Process Tune"
+  short_description: "Propose workflow improvements from runs"
+  default_prompt: "Use $process-tune to run this Savviety Codex workflow."

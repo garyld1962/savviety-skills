@@ -1,0 +1,5 @@
+.DS_Store
+.claude/SESSION.md
+.remember/
+runs/
+__pycache__/

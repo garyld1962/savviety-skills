@@ -1,0 +1,10 @@
+{
+  "$comment": ".NET SDK, NuGet, MSBuild.",
+  "permissions": {
+    "allow": [
+      "Bash(dotnet:*)",
+      "Bash(nuget:*)",
+      "Bash(msbuild:*)"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "savviety-local",
+  "interface": {
+    "displayName": "Savviety Local"
+  },
+  "plugins": [
+    {
+      "name": "savviety-workflows",
+      "source": {
+        "source": "local",
+        "path": "./codex/plugins/savviety-workflows"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

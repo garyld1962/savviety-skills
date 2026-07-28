@@ -1,0 +1,44 @@
+---
+id: competence
+title: Competence Review
+description: >
+  Catches the things tests and linters don't: load behavior, failure handling,
+  concurrency bugs, operational blindness, trust boundary violations, and
+  maintenance pain. Excludes correctness (tests catch it) and style (linters
+  catch it). This is the default review mode for day-to-day PRs.
+
+# Domains included in this profile. The controller selects from this list,
+# then applies each domain's own triggers to decide which actually fire.
+# always-on: runs on every invocation of this profile.
+# conditional: runs only if the domain's triggers match the diff.
+
+domains:
+  - id: concept/performance
+    mode: always
+  - id: concept/resilience
+    mode: always
+  - id: concept/concurrency
+    mode: always
+  - id: concept/operability
+    mode: always
+  - id: concept/security
+    mode: always
+  - id: concept/maintainability
+    mode: always
+  - id: concept/async
+    mode: conditional
+  - id: concept/data-integrity
+    mode: conditional
+  - id: concept/api-contract
+    mode: conditional
+
+# Overlays apply to workers whose files match the overlay triggers.
+# Listed here so the controller knows they're in scope for this profile.
+overlays:
+  - dialect/csharp-async
+  - dialect/typescript-async
+  - dialect/python-async
+  - dialect/typescript-types
+  - platform/azure-service-bus
+  - platform/nats-jetstream
+  - platform/postgres

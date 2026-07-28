@@ -1,0 +1,4 @@
+interface:
+  display_name: "Triage"
+  short_description: "Investigate bugs without editing"
+  default_prompt: "Use $triage to run this Savviety Codex workflow."

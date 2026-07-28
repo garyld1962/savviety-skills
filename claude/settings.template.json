@@ -1,0 +1,88 @@
+{
+  "permissions": {
+    "allow": [],
+    "deny": [
+      "Bash(git reset --hard*)",
+      "Bash(git push --force *)",
+      "Bash(git push --force)",
+      "Bash(git push -f*)",
+      "Bash(git clean -f*)",
+      "Bash(git branch -D*)",
+      "Bash(rtk git reset --hard*)",
+      "Bash(rtk git push --force*)",
+      "Bash(rtk git push -f*)",
+      "Bash(rtk git clean -f*)",
+      "Bash(rtk git branch -D*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -f ${CLAUDE_PROJECT_DIR}/.claude/SESSION.md && cat ${CLAUDE_PROJECT_DIR}/.claude/SESSION.md || true"
+          },
+          {
+            "type": "command",
+            "command": "printf '\\n## Session start %s UTC — %s [%s]\\n' \"$(date -u +%Y-%m-%dT%H:%M)\" \"$(basename \"$CLAUDE_PROJECT_DIR\")\" \"$(git -C \"$CLAUDE_PROJECT_DIR\" branch --show-current 2>/dev/null || echo no-branch)\" | bash ${CLAUDE_PROJECT_DIR}/.claude/journal/append.sh"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/journal/precheck.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/journal/session-state.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/journal/session-journal.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "if": "Bash(gh pr create:*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/pr-guardrail/pr-guardrail.sh",
+            "timeout": 15,
+            "statusMessage": "Checking for existing PRs..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "if": "Bash(git commit*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/default-branch-guard.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sha=$(git -C \"$CLAUDE_PROJECT_DIR\" rev-parse --short HEAD 2>/dev/null) || exit 0; grep -q \"commit $sha\" \"$CLAUDE_PROJECT_DIR/.claude/journal/$(date +%F).md\" 2>/dev/null && exit 0; msg=\"$(date -u +%H:%MZ) commit $sha — $(git -C \"$CLAUDE_PROJECT_DIR\" log -1 --format=%s)\"; printf -- '- %s\\n' \"$msg\" | bash ${CLAUDE_PROJECT_DIR}/.claude/journal/append.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

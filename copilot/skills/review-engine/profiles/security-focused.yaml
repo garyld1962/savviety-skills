@@ -1,0 +1,29 @@
+---
+id: security-focused
+title: Security-Focused Review
+description: >
+  Narrow profile for changes to auth, token handling, session management,
+  crypto, public API surface, or anything else where the security lens is
+  the dominant concern. Does not replace a comprehensive review; complements
+  one.
+
+domains:
+  - id: concept/security
+    mode: always
+  - id: concept/api-contract
+    mode: conditional       # public-surface changes are security-relevant
+  - id: concept/dependencies
+    mode: conditional       # supply chain is part of the security posture
+  - id: concept/correctness
+    mode: always            # auth logic errors are security bugs
+  - id: concept/resilience
+    mode: always            # failure modes in auth can fail-open
+  - id: concept/operability
+    mode: always            # audit logging, auth event visibility
+  - id: concept/tests
+    mode: always            # security tests are often the weakest part
+
+# No overlays needed by default — the security concept covers the cross-cutting
+# smells. Add targeted overlays here if the codebase develops security-relevant
+# platform concerns.
+overlays: []
