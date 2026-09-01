@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+# install-agentic-tools — install the modern CLI set that agentic dev loops
+# rely on (non-interactive, gitignore-aware, structured output).
+#
+# uv is a hard prerequisite. The script verifies uv is installed AND
+# configured (on PATH, tool bin dir on PATH, a Python available) before
+# touching anything else, and prints the exact fix for whatever is wrong.
+#
+# Usage:
+#   bin/install-agentic-tools           # verify uv, install what's missing
+#   bin/install-agentic-tools --check   # report only, install nothing
+#
+# Routes, in order: apt (Debian/Ubuntu) → brew (macOS) → uv tool → cargo →
+# print manual steps. Exit 0 when everything is present, 1 when tools are
+# still missing, 2 when uv itself is missing or misconfigured.
+
+set -euo pipefail
+
+CHECK=
+case "${1:-}" in
+  --check) CHECK=1 ;;
+  -h|--help) sed -n '2,15p' "$0" | sed 's/^# \?//'; exit 0 ;;
+  "") ;;
+  *) echo "unknown argument: $1" >&2; exit 2 ;;
+esac
+
+ok()   { printf '  \033[32mok\033[0m    %s\n' "$*"; }
+miss() { printf '  \033[31mMISSING\033[0m %s\n' "$*"; }
+step() { printf '        %s\n' "$*"; }
+on_path() { case ":$PATH:" in *":$1:"*) return 0 ;; *) return 1 ;; esac; }
+
+# ---------------------------------------------------------------- uv gate
+echo "== uv (prerequisite)"
+uv_fail=0
+
+if ! command -v uv >/dev/null 2>&1; then
+  miss "uv is not installed"
+  step 'curl -LsSf https://astral.sh/uv/install.sh | sh'
+  step 'then open a new shell (the installer adds ~/.local/bin to PATH) and re-run this script'
+  if [ -x "$HOME/.local/bin/uv" ]; then
+    step "note: $HOME/.local/bin/uv exists but is not on PATH — add to your shell rc:"
+    step '  export PATH="$HOME/.local/bin:$PATH"'
+  fi
+  exit 2
+fi
+ok "uv $(uv --version | awk '{print $2}') at $(command -v uv)"
+
+uv_bin="$(uv tool dir --bin 2>/dev/null || true)"
+if [ -z "$uv_bin" ]; then
+  miss "uv tool dir --bin failed — uv install looks broken"
+  step 'uv self update   # or reinstall: curl -LsSf https://astral.sh/uv/install.sh | sh'
+  uv_fail=1
+elif on_path "$uv_bin"; then
+  ok "uv tool bin dir on PATH ($uv_bin)"
+else
+  miss "uv tool bin dir $uv_bin is not on PATH — tools installed via 'uv tool' won't be found"
+  step 'uv tool update-shell   # appends the export to your shell rc'
+  step "or add manually: export PATH=\"$uv_bin:\$PATH\""
+  step 'then open a new shell and re-run'
+  uv_fail=1
+fi
+
+if py="$(uv python find 2>/dev/null)"; then
+  ok "python available to uv ($py)"
+else
+  miss "uv cannot find a Python interpreter"
+  step 'uv python install          # installs the latest CPython into uv'"'"'s managed dir'
+  uv_fail=1
+fi
+
+if [ "$uv_fail" -ne 0 ]; then
+  echo
+  echo "Fix the uv items above first, then re-run." >&2
+  exit 2
+fi
+
+# ---------------------------------------------------------------- platform
+PM=
+if command -v apt-get >/dev/null 2>&1; then PM=apt
+elif command -v brew >/dev/null 2>&1; then PM=brew
+fi
+echo
+echo "== package manager: ${PM:-none (uv/cargo/manual routes only)}"
+
+apt_updated=
+apt_install() {
+  [ -n "$apt_updated" ] || { sudo apt-get update -qq; apt_updated=1; }
+  sudo apt-get install -y -qq "$1"
+}
+
+# ---------------------------------------------------------------- tools
+# name | binary | apt pkg | brew pkg | uv pkg | cargo crate | manual hint
+TOOLS='
+ripgrep  |rg       |ripgrep  |ripgrep  |-           |ripgrep  |https://github.com/BurntSushi/ripgrep#installation
+fd       |fd       |fd-find  |fd       |-           |fd-find  |https://github.com/sharkdp/fd#installation
+jq       |jq       |jq       |jq       |-           |-        |https://jqlang.github.io/jq/download/
+ast-grep |ast-grep |-        |ast-grep |ast-grep-cli|ast-grep |https://ast-grep.github.io/guide/quick-start.html
+sd       |sd       |sd       |sd       |-           |sd       |https://github.com/chmln/sd#installation
+gh       |gh       |gh       |gh       |-           |-        |https://github.com/cli/cli#installation
+just     |just     |just     |just     |-           |just     |https://github.com/casey/just#installation
+hyperfine|hyperfine|hyperfine|hyperfine|-           |hyperfine|https://github.com/sharkdp/hyperfine#installation
+xh       |xh       |-        |xh       |-           |xh       |curl -sSL https://raw.githubusercontent.com/ducaale/xh/master/install.sh | sh
+'
+
+install_one() {
+  local name="$1" apt="$2" brew="$3" uvpkg="$4" crate="$5" manual="$6"
+  if [ "$PM" = apt ] && [ "$apt" != - ]; then apt_install "$apt" && return 0; fi
+  if [ "$PM" = brew ] && [ "$brew" != - ]; then brew install "$brew" && return 0; fi
+  if [ "$uvpkg" != - ]; then uv tool install "$uvpkg" && return 0; fi
+  if [ "$crate" != - ] && command -v cargo >/dev/null 2>&1; then cargo install "$crate" && return 0; fi
+  miss "$name: no automatic route on this host"
+  step "$manual"
+  return 1
+}
+
+echo
+echo "== tools"
+missing=0
+while IFS='|' read -r name bin apt brew uvpkg crate manual; do
+  [ -n "$name" ] || continue
+  name="${name// /}"; bin="${bin// /}"; apt="${apt// /}"; brew="${brew// /}"
+  uvpkg="${uvpkg// /}"; crate="${crate// /}"; manual="${manual#"${manual%%[! ]*}"}"
+
+  # Ubuntu ships fd as fdfind; expose it under its real name.
+  if [ "$bin" = fd ] && ! command -v fd >/dev/null 2>&1 && command -v fdfind >/dev/null 2>&1; then
+    if [ -n "$CHECK" ]; then
+      miss "fd: installed as fdfind only"; step "ln -s \"\$(command -v fdfind)\" ~/.local/bin/fd"
+      missing=$((missing + 1)); continue
+    fi
+    mkdir -p "$HOME/.local/bin"; ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
+  fi
+
+  if command -v "$bin" >/dev/null 2>&1; then ok "$name ($(command -v "$bin"))"; continue; fi
+
+  if [ -n "$CHECK" ]; then miss "$name"; missing=$((missing + 1)); continue; fi
+
+  echo "  installing $name..."
+  if install_one "$name" "$apt" "$brew" "$uvpkg" "$crate" "$manual"; then
+    if [ "$bin" = fd ] && ! command -v fd >/dev/null 2>&1 && command -v fdfind >/dev/null 2>&1; then
+      mkdir -p "$HOME/.local/bin"; ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
+    fi
+    hash -r
+    if command -v "$bin" >/dev/null 2>&1; then ok "$name ($(command -v "$bin"))"
+    else miss "$name: installed but '$bin' not on PATH — open a new shell and re-run --check"; missing=$((missing + 1)); fi
+  else
+    missing=$((missing + 1))
+  fi
+done <<EOF
+$TOOLS
+EOF
+
+echo
+if [ "$missing" -eq 0 ]; then echo "All tools present."; exit 0; fi
+echo "$missing tool(s) missing — see steps above." >&2
+exit 1
