@@ -102,6 +102,15 @@ execution; the PRD is used only for traceability.
    returned recommendation as a Closed Decision in the plan,
    citing the rejected options.
 
+   `<this-skill-dir>` is the `Base directory for this skill:` path
+   printed when this skill loaded. The `.mjs` file is a Workflow-tool
+   script, not a Node module: pass its absolute path as `scriptPath`
+   and nothing else — do not run it with `node`, `import` it, or paste
+   its contents into `script`. This step is the operator's opt-in to
+   multi-agent orchestration; no further confirmation is needed. If
+   the session has no Workflow tool, halt and say so — do not emulate
+   the script with the Agent tool.
+
 7. **Draft the plan** in the `_internal/plan-format` contract:
    frontmatter (slug/source_prd/intent/type), Closed Decisions,
    `## Task N:` sections each with the yaml metadata block
