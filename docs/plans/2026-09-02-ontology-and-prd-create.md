@@ -424,7 +424,7 @@ milestone_end: true
 - `! rg -q --pcre2 '(?<![\w/-])/plan(?![\w-])' claude && ! rg -q 'prd-not-ready' claude`
 - `for f in prd-validate kickoff execute-prd spec-review-adversarial; do rg -q 'aers-readiness' claude/$f/SKILL.md || exit 1; done`
 - `find claude -name "*.mjs" -print0 | xargs -0 bin/check-workflow-syntax && jq empty claude/settings.template.json`
-- `for d in claude/*/ claude/_internal/*/; do case $d in claude/infra/|claude/_internal/closed-decisions/) continue;; esac; test -f "$d/SKILL.md" && n=$(rg -o '^name: .*' "$d/SKILL.md" | cut -d' ' -f2) && test "$n" = "$(basename $d)" || exit 1; done`
+- `for d in claude/*/ claude/_internal/*/; do case $d in claude/infra/|claude/_internal/|claude/install-scan/|claude/_internal/closed-decisions/) continue;; esac; test -f "$d/SKILL.md" && n=$(rg -o '^name: .*' "$d/SKILL.md" | cut -d' ' -f2) && test "$n" = "$(basename $d)" || exit 1; done`
 
 ## Sequencing
 
