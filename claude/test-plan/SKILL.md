@@ -187,13 +187,16 @@ lands in none is carried into the report as unsliced context.
 
 | Ontology rows | Selector | Slice goes to |
 |---|---|---|
-| `## Fact Types` rows | Constraints cell names a value domain (`value domain: …`) | boundary-validation |
+| `## Fact Types` rows | Constraints cell names a value domain — `value domain: …` is the prefix `/prd-create` emits, and a free-text range or enumeration in the cell without that prefix is still recognised | boundary-validation |
 | `## Lifecycles` sections (heading with its `Total:` flag, transition rows, `Terminal:` line) | any lifecycle for an in-scope entity | state-lifecycle |
 | `## Fact Types` rows | Constraints cell declares uniqueness, a mandatory role, or fact-type arity | contract-compliance |
-| `## Fact Types` rows | the fact crosses a system edge — an entity on one side is external, or the fact is exchanged over an API | integration-surface |
+| `## Fact Types` rows **plus the `## Entity Types` rows (reference schemes) of every entity those fact types name** | the fact crosses a system edge — an entity on one side is external, or the fact is exchanged over an API | integration-surface |
 
 Each slice is a verbatim copy of the matching rows with their `#` or heading, so
-the analyst can cite the row a spec came from.
+the analyst can cite the row a spec came from. The integration-surface slice is
+the only one that carries rows from two sections: its edge-crossing fact-type
+rows travel with the `## Entity Types` row of every entity they name, so the
+analyst has each entity's reference scheme alongside the fact.
 
 **For `--validate` mode:** Skip. Context already in plan file.
 
@@ -224,8 +227,10 @@ For each selected analyst:
 1. Read `test-plan/analysts/{name}/SKILL.md`
 2. Pass the task context, Zod schemas, DB schema, reference implementation, and CLAUDE.md conventions
 3. Pass that analyst's **ontology slice** from State 2, when an ontology
-   resolved. Omit the item when no ontology resolved or the analyst's slice is
-   empty — the analyst then re-derives from prose as before.
+   resolved — for integration-surface that is the edge-crossing `## Fact Types`
+   rows plus the `## Entity Types` rows (reference schemes) of every entity
+   those fact types name. Omit the item when no ontology resolved or the
+   analyst's slice is empty — the analyst then re-derives from prose as before.
 4. Analyst produces `TestSpecification[]` conforming to the canonical
    schema in `foundations/test-case-schema.md`. Specs that violate the
    schema are dropped at State 5 with a warning — the analyst is

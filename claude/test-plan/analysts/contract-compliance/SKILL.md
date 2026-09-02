@@ -39,7 +39,9 @@ first — each constraint yields at least one spec:
 - **mandatory role** (`mandatory: Order→Customer`) → a spec asserting the fact
   cannot be recorded with that role unfilled
 - **fact-type arity** → a spec asserting the operation binds exactly the roles
-  the verbalized fact type names, no more and no fewer
+  the verbalized fact type names, no more and no fewer. Read the arity from the
+  bold role mentions in the row's "Verbalized fact type" cell — each **bolded**
+  entity in the verbalization is one role.
 
 Each spec's rationale (`traceability`) cites the row, e.g.
 `ONTOLOGY.md F1 — mandatory: Order→Customer`. Prose re-derivation from the task
