@@ -148,6 +148,7 @@ Goal validated. Recommended next step:
 - Do NOT ask more than 3 clarifying questions
 - Do NOT skip the stress-test reasoning even when the intent seems obvious — the reframe often surfaces in step 2
 - Do NOT persist without confirmation when the default file doesn't exist
+- Do NOT run from a non-interactive context — refuse; this is an interview.
 
 ## Contract
 

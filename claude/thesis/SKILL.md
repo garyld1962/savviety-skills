@@ -148,6 +148,7 @@ Tight output. Paste-ready for the top of a handoff doc, PRD, or design doc.
 - **Kill darlings out loud.** Name the cuts. The user can overrule.
 - **Respect the composition.** This skill produces a thesis artifact, not a handoff doc. Offer at the end: *"Want to hand this to your coding CLI now? The handoff doc goes on top of this."*
 - **Stop when done.** Thesis produced, audit complete, user confirms. Don't keep grilling.
+- **Interactive only.** This is a conversation; when no human is at the keyboard, refuse and point at `/prd-create` or `/prd-validate` for artifact work.
 
 ## Examples of Thesis Quality
 
