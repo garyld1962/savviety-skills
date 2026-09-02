@@ -114,9 +114,15 @@ monotonic growth:
 | Modality of each stated rule | It is a label today. Later it is the difference between a schema constraint, a validation rule, and an alert — and reclassifying means pulling a rule out of the schema. |
 | Temporality declaration | Not implementation — *declaration*. "Price is point-in-time; historisation is out of scope this release" is a closed decision. Silence is a defect, because retrofitting history requires a backfill of data that was never recorded. |
 
+**Temporality declaration** means exactly two things: whether each fact holds at
+an **instant or over an interval**, and a statement of whether **historisation is
+in scope this release**. Distinguishing a correction from a supersession is not
+part of the core and is deferrable.
+
 Everything else is deferrable: frequency and subset/exclusion constraints, ring
-constraints, lifecycle totality for unreachable states, open value domains, and
-any fact type touching an out-of-scope entity.
+constraints, lifecycle totality for unreachable states, open value domains,
+correction-vs-supersession distinguishability, and any fact type touching an
+out-of-scope entity.
 
 **Hard failure.** A mandatory-core item marked `deferred` or `unknown` scores
 **2** regardless of how it is marked, and **caps the verdict at `Partial`** no
@@ -128,7 +134,8 @@ warning.
 **Rule 3 — three states per item, not two.** See **Item states** above. The UoD
 boundary is what licenses a deferral: it is the positive, checkable claim that
 these facts are not representable in this release. A deferral against a stub UoD
-boundary is not licensed.
+boundary is not licensed: score it as `unknown` (**2**), the same as a deferral
+with no re-entry condition.
 
 **Rule 4 — additions append, revisions halt.** `/prd-create --extend` loads the
 existing `ONTOLOGY.md` and interrogates only the delta declared by `scope:` and
@@ -213,23 +220,42 @@ scores **2** and caps the verdict at `Partial`.
 - unstated temporality on a fact that visibly changes over time
 - surviving homonym
 
-**Mode-aware scoring.** In `greenfield` and `refresh`, score the whole ontology.
-In `feature` and `rewrite`, score only the delta declared by `scope:` and
-`extends:` — pre-existing settled rows are not re-scored. Any `revision:` entry
-in the Extension Log is flagged in the verdict: in `feature` mode it is a halt
-condition for callers (`/kickoff` and `/execute-prd` route it through their
-reopened-decision halt); in `rewrite` mode it must be matched by a confirmed
-closed decision in the PRD, and is a halt if it is not.
+**Score each defect once.** The per-category score and the ambiguity list never
+both fire for the same defect. A mandatory-core failure and its matching
+ambiguity category — entity with no reference scheme, surviving homonym,
+unclassified modality, undeclared temporality — score **2** in total, not 4,
+plus the cap at `Partial`. The ambiguity categories charge only defects the
+per-category score did not already charge.
 
-**Trivial domain.** Count the distinct entity types the artifact requires the
-system to represent, across its Functional Requirements and Data Models, within
-the mode's scoring window — so a change spec against an existing codebase counts
-only the entity types its delta introduces or redefines, not the ones it merely
-edits around. If that count is fewer than three **and** the artifact declares no
-state or status field, the domain is trivial: a missing `ONTOLOGY.md` reports
-`Ontology: Absent (trivial domain)` and contributes **0** to the composite.
-Modelling theatre is a real cost; proportionality comes from auditable deferral,
-not from ceremony over a two-noun domain.
+**Constraints boundary.** Generic constraint text — "standard validation",
+"usual rules" — is a **Constraints** category stub, **+1**, charged once for the
+section however many rows read that way. The `fact type with no constraint`
+ambiguity category fires only when a constraint cell is **blank or absent**;
+`[unconstrained]` and generic-but-present text do not fire it.
+
+**Mode-aware scoring.** In `greenfield` and `refresh`, score the whole ontology.
+In `feature` and `rewrite`, score per category over the **delta rows only**. The
+delta is the new entities plus any `deferred` item the feature now touches —
+which is exactly what `scope:` and `extends:` declare (Rule 4). Pre-existing
+settled rows are not re-scored, and a category with no delta rows scores **0**.
+Any `revision` entry in the Extension Log is flagged in the verdict: in
+`feature` mode it is a halt condition for callers (`/kickoff` and
+`/execute-prd` route it through their reopened-decision halt); in `rewrite` mode
+it must be matched by a confirmed closed decision in the PRD, and is a halt if
+it is not.
+
+**Trivial domain.** Count the entity types the artifact itself **defines or
+changes** — introduces, adds fields to, or specifies states for — across its
+Functional Requirements and any Data-Models-equivalent section (persistence
+model, schema, entity list). Entity types the artifact merely references from
+existing code, or edits around without redefining, do not count. This count is
+**mode-independent**: the rule only fires when `ONTOLOGY.md` is missing, so
+there is no `mode:` field to read and none may be guessed. If the count is fewer
+than three **and** the artifact declares no state or status field of its own,
+the domain is trivial: a missing `ONTOLOGY.md` reports
+`Ontology: Absent (trivial domain)`, contributes **0** to the composite, and
+never halts a caller. Modelling theatre is a real cost; proportionality comes
+from auditable deferral, not from ceremony over a two-noun domain.
 
 ### Verdict
 
@@ -241,23 +267,27 @@ Ontology: Ready / Partial / Absent
 |---|---|---|
 | `0–2` | **Ready** | Proceed. |
 | `3–6` | **Partial** | Suggest `/prd-create --extend` or `/prd-validate` to the operator; do not auto-invoke. In autonomous mode, log the gap list as a known risk and proceed. |
-| `7+`, or `ONTOLOGY.md` missing on a non-trivial domain | **Absent** | Log a known risk. Combined with a structural verdict of `Partially ready` or worse, halt. |
+| `7+`, or `ONTOLOGY.md` missing on a non-trivial domain | **Absent** | Log a known risk. Combined with a structural verdict of `Partially ready` or worse, halt. Callers halt only on a **bare** `Absent`; `Absent (trivial domain)` never halts and contributes 0. |
 
 ```
 Composite contribution: Ready → 0, Partial → +2, Absent → +4 (cap 4)
 ```
 
+**Composite** means `_internal/aers-readiness`'s structural points **plus** the
+contribution above, compared against its bands — `0–2` Ready, `3–6` Partially
+ready, `7+` Not ready — which this rubric leaves unchanged. This rubric's own
+point total feeds only the `Ontology:` line and never enters the structural
+count directly.
+
 The cap is load-bearing. Uncapped, one required section (+2) plus seven
 ambiguity categories (+14) flips every artifact written before this rubric
 existed to `Not ready`, jamming `/kickoff` and `/execute-prd`. Ontology gaps get
-their own verdict line; they do not dominate the structural score, whose
-thresholds (`0–2` / `3–6` / `7+`) are unchanged.
+their own verdict line; they do not dominate the structural score.
 
-### Why "suggest, don't auto-invoke"
-
-`/prd-create` is an interview, not a gate. Auto-invoking it from a
-non-interactive context (CI, autonomous run, scheduled agent) hangs waiting for
-input. The score is the gate; the interview is the remedy.
+**Suggest, don't auto-invoke.** `/prd-create` is an interview, not a gate; the
+interaction boundary and its rationale are defined once, in
+`_internal/aers-readiness` § *Why "suggest, don't auto-invoke"*, and apply here
+unchanged.
 
 ## Worked example
 
@@ -299,9 +329,9 @@ Score, line by line:
 | UoD boundary | Both halves stated, names the excluded facts | 0 |
 | Entity types + reference schemes | Four entities, each with a reference scheme | 0 |
 | Fact types | Five verbalized, one predicate each | 0 |
-| Constraints | Present, but three of five rows read "standard validation" rather than a named constraint kind — generic boilerplate | 1 |
+| Constraints | Present, but three of five rows read "standard validation" rather than a named constraint kind — generic boilerplate, so a category stub per **Constraints boundary**. No cell is blank, so the fact-type ambiguity category does not fire | 1 |
 | Lifecycle totality | `Order` table marked `Total: yes`, terminal states `Cancelled`, `Delivered`; `Shipment` deferred with condition | 0 |
-| Temporality | Declared for `Product.price` and `Order.placed_at`; one row deferred with condition | 0 |
+| Temporality | Instant-vs-interval declared for `Product.price` and `Order.placed_at`, historisation scope stated; the `Order.total` correction-vs-supersession row is deferrable, not core, and carries a condition | 0 |
 | Modality | All five rules labelled alethic or deontic | 0 |
 | Homonyms/synonyms | "account" resolved; no survivor | 0 |
 | Deferred items (6) | All carry a re-entry condition | 0 |
@@ -323,6 +353,6 @@ among the deferrals, the mandatory-core cap would force `Partial` at any total.
 
 - **Inputs:** a requirements artifact (PRD, AERS, spec), and optionally `docs/prds/<slug>/ONTOLOGY.md`. For `feature` and `rewrite` modes, also the prior ontology named by `extends:`.
 - **Preconditions:** the artifact is text and readable. This is a reference rubric, not an interview — `/prd-create` is the interactive remedy and requires a supervising human.
-- **Outputs:** an `Ontology: Ready / Partial / Absent` verdict line; a capped composite contribution per **Automated ontology check**; a gap list keyed to the eight elicitation categories, the ambiguity categories, and any `revision:` entry in the Extension Log.
+- **Outputs:** an `Ontology: Ready / Partial / Absent` verdict line; a capped composite contribution per **Automated ontology check**; a gap list keyed to the eight elicitation categories, the ambiguity categories, and any `revision` entry in the Extension Log.
 - **Postconditions:** callers act per the verdict thresholds; existing settled rows are preserved; the Extension Log stays append-only; no `deferred` item is silently converted to `settled`.
-- **Failure modes:** artifact unreadable → `Ontology: Absent` with the file-access error in the gap list. `ONTOLOGY.md` missing on a non-trivial domain → report `Absent`, never fabricate an ontology to close the gap. Mandatory-core item not `settled` → `Partial` at best, regardless of total. `revision:` entry in `feature` mode → halt and surface, do not score past it. Code-seeded rows presented as `settled` without human confirmation → treat as `unknown`.
+- **Failure modes:** artifact unreadable → `Ontology: Absent` with the file-access error in the gap list. `ONTOLOGY.md` missing on a non-trivial domain → report `Absent`, never fabricate an ontology to close the gap. Mandatory-core item not `settled` → `Partial` at best, regardless of total. `revision` entry in `feature` mode → halt and surface, do not score past it. Code-seeded rows presented as `settled` without human confirmation → treat as `unknown`.
