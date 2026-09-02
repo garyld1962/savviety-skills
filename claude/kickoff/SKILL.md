@@ -1,29 +1,46 @@
 ---
 name: kickoff
-description: "Use for standard feature work to autonomously ship a PRD/story/AERS: readiness → plan → implement → review. Does not produce audit-grade governed artifacts."
+description: "Use for operator-supervised feature work from a PRD/story/AERS: readiness → plan → implement → review, with the operator at the keyboard. Does not produce audit-grade governed artifacts; for an unattended run use /execute-prd."
 model: opus
 ---
 
-# /kickoff — Autonomous Development Start
+# /kickoff — Interactive Development Start
 
-**Purpose:** Begin implementation work from a requirements artifact, following a built-in-first flow: readiness check → plan → implement → review. Does NOT produce audit-grade governed artifacts.
+**Purpose:** Begin implementation work from a requirements artifact with the operator at the keyboard, following a built-in-first flow: readiness check → plan → implement → review. Does NOT produce audit-grade governed artifacts; for an unattended run, use `/execute-prd`.
 
 ## When to Use
 
 - Starting standard feature work from an AERS, PRD, story, or spec
 - Work is routine enough that governed artifacts aren't required
-- You want an autonomous readiness → plan → implement → review flow
+- You want an operator-supervised readiness → plan → implement → review flow
 
 ## When NOT to Use
 
 - Work needs audit-grade traceable review artifacts — use a project-specific governed workflow
 - You already have a written plan — use `/execute-plan`
-- You only need planning, not implementation — use `/plan`
+- You only need planning, not implementation — use `superpowers:writing-plans`
 
 ## Arguments
 
-- `<path>` — path to the requirements artifact (AERS, PRD, spec, story). Defaults to `AERS.md` if it exists.
+- `<path>` — path to the requirements artifact (AERS, PRD, spec, story). If not provided, resolve it by the order below.
 - `--skip-readiness` — skip the readiness gate
+
+Resolution order — first match wins:
+
+1. The explicit `<path>` argument, if one was supplied.
+2. The most recently modified `docs/prds/*/AERS.md`.
+3. `./AERS.md` (legacy root location).
+4. The most recently modified `docs/prds/*/PRD.md`.
+5. `./PRD.md`.
+6. `./prompt.md`.
+
+If two or more candidates tie within the same tier, do not guess: ask the
+operator which is canonical (interactive) or emit a `plan-ambiguity` finding
+and stop (autonomous).
+
+Sibling artifacts — `ONTOLOGY.md`, `UBIQUITOUS_LANGUAGE.md`, and `PRD.md` —
+resolve relative to the directory of the resolved requirements file, not the
+repo root.
 
 ## Workflow
 
@@ -38,7 +55,24 @@ When the ask is a routine, low-risk, convention-bound edit (single-file change, 
 
 0. **Load project memory.** Check `~/.claude/agent-memory/<repo-slug>/` for a `kickoff-context.md` file, where `<repo-slug>` is the current repo's directory name. If it exists, read it — it contains architectural decisions, patterns, and constraints from prior sessions. Surface any relevant entries as "Loaded from project memory: ..." before proceeding. If the directory doesn't exist, skip silently.
 
-1. **Read the artifact.** Read the exact artifact or files the user supplied. If no path is given and `AERS.md` exists, use it. Prefer reading actual files over guessing content.
+1. **Read the artifact.** Read the exact artifact or files the user supplied. Prefer reading actual files over guessing content. If no path is given, resolve one:
+
+   Resolution order — first match wins:
+
+   1. The explicit `<path>` argument, if one was supplied.
+   2. The most recently modified `docs/prds/*/AERS.md`.
+   3. `./AERS.md` (legacy root location).
+   4. The most recently modified `docs/prds/*/PRD.md`.
+   5. `./PRD.md`.
+   6. `./prompt.md`.
+
+   If two or more candidates tie within the same tier, do not guess: ask the
+   operator which is canonical (interactive) or emit a `plan-ambiguity` finding
+   and stop (autonomous).
+
+   Sibling artifacts — `ONTOLOGY.md`, `UBIQUITOUS_LANGUAGE.md`, and `PRD.md` —
+   resolve relative to the directory of the resolved requirements file, not the
+   repo root.
 
 2. **Check readiness.** Unless `--skip-readiness`, score the artifact
    with the **Automated readiness check** in
@@ -56,7 +90,7 @@ When the ask is a routine, low-risk, convention-bound edit (single-file change, 
    path, do not reopen routine defaults already implied by repo
    conventions.
 
-3. **Plan.** Once the artifact is ready enough to build, use `superpowers:writing-plans` or `/plan` for implementation planning. Skip for the small change fast path unless the user asks for a plan or the work expands.
+3. **Plan.** Once the artifact is ready enough to build, use `superpowers:writing-plans` for implementation planning. Skip for the small change fast path unless the user asks for a plan or the work expands.
 
 4. **Implement.** After planning:
    - Inspect the repo structure and relevant files
@@ -105,7 +139,7 @@ This skill references:
 
 ## Contract
 
-- **Inputs:** path to a requirements artifact (or `AERS.md` by default if it exists); optional `--skip-readiness`. Calls `_internal/aers-readiness` (readiness scoring), `/prd-validate` (only when operator opts in interactively), `superpowers:writing-plans` or `/plan` (planning), `superpowers:requesting-code-review` or `/domain-review` (review). Consults `_internal/disposition` and `_internal/repo-delivery`.
+- **Inputs:** path to a requirements artifact (or the resolution order under `## Arguments` when no path is given); optional `--skip-readiness`. Calls `_internal/aers-readiness` (readiness scoring), `/prd-validate` (only when operator opts in interactively), `superpowers:writing-plans` (planning), `superpowers:requesting-code-review` or `/domain-review` (review). Consults `_internal/disposition` and `_internal/repo-delivery`.
 - **Preconditions:** in a git repo; artifact exists and is readable; operator is at the keyboard (kickoff is interactive by design — for autonomous flow, use `/execute-prd`).
 - **Outputs:** code committed for the requested change; review pass recorded; concise progress updates per the output contract above (decision context, edits, validation, blockers).
 - **Postconditions:** repo's existing validation steps (lint/build/test) have actually run; closed decisions added to the artifact when the operator confirms; no audit-grade governed artefacts (those belong to `/execute-prd`).

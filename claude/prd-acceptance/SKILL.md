@@ -19,19 +19,33 @@ description: "Validate implementation against PRD acceptance criteria. Reads a P
 - You need a general code review — use `/domain-review`
 - No PRD/acceptance criteria exist — there's nothing to verify against
 
-**Arguments:**
-- `<path>` — path to the PRD file (required on first run, remembered after)
+## Arguments
+
+- `<path>` — path to the requirements artifact. If not provided, resolve it by the order below.
 - `--recheck` — re-run only previously failed criteria
 - `--dry-run` — show verification plan without executing
 
+Resolution order — first match wins:
+
+1. The explicit `<path>` argument, if one was supplied.
+2. The most recently modified `docs/prds/*/AERS.md`.
+3. `./AERS.md` (legacy root location).
+4. The most recently modified `docs/prds/*/PRD.md`.
+5. `./PRD.md`.
+6. `./prompt.md`.
+
+If two or more candidates tie within the same tier, do not guess: ask the
+operator which is canonical (interactive) or emit a `plan-ambiguity` finding
+and stop (autonomous).
+
+Sibling artifacts — `ONTOLOGY.md`, `UBIQUITOUS_LANGUAGE.md`, and `PRD.md` —
+resolve relative to the directory of the resolved requirements file, not the
+repo root.
+
 ## Step 1: Load the PRD
 
-Read the PRD file from the argument path. If no path is given, check these locations in order:
-1. `test_prd.md` (project root)
-2. `docs/plans/*.md` (most recently modified)
-3. `PRD.md` or `prd.md` (project root)
-
-If no PRD is found, ask the user.
+Read the requirements artifact from the argument path, or resolve one by the
+order under `## Arguments`. If nothing resolves, ask the user.
 
 ## Step 2: Extract Acceptance Criteria
 
@@ -45,10 +59,14 @@ For each criterion, extract:
 - **Text**: The criterion as written
 - **Category**: Classify into one of: `build`, `code-structure`, `api`, `ui`, `data`, `test`, `behavior`
 
+If the artifact declares no acceptance criteria at all, halt with a
+`no-acceptance-criteria` finding and suggest `/prd-validate` — do not invoke
+it, and do not invent criteria to verify against.
+
 Display the extracted criteria and ask the user to confirm before proceeding:
 
 ```
-Found 24 acceptance criteria in test_prd.md:
+Found 24 acceptance criteria in docs/prds/inventory-api/PRD.md:
 
   Build (4):        AC-01..AC-04
   Code Structure (3): AC-05..AC-07
@@ -196,8 +214,8 @@ docs/prd-acceptance/<YYYY-MM-DD>--<PRD-filename>--acceptance.md
 
 ### Result Logic
 
-- **PASS**: All criteria pass (MANUAL counts as pass — they're noted for human spot-check)
-- **PARTIAL**: >70% pass, no build failures
+- **PASS**: all criteria pass (MANUAL counts as pass — they're noted for human spot-check)
+- **PARTIAL**: ≥70% pass, no build failures
 - **FAIL**: <70% pass OR any build failure
 
 ## Step 6: Response
@@ -233,8 +251,8 @@ Next steps:
 
 ## Contract
 
-- **Inputs:** path to the PRD/AERS to verify against; the built / running application. Calls `/prd-validate` if the artifact is incomplete and `/domain-review` when defects warrant a structured list.
+- **Inputs:** path to the PRD/AERS to verify against (or the resolution order under `## Arguments`); the built / running application. Calls `/domain-review` when defects warrant a structured list; it does not call `/prd-validate` — an artifact with no acceptance criteria halts with `no-acceptance-criteria` and suggests `/prd-validate` instead.
 - **Preconditions:** project compiles; required services (DB, queue, etc.) are reachable; ports/paths detected from the actual implementation, not assumed from the PRD.
 - **Outputs:** acceptance report with PASS/FAIL per criterion plus evidence (exit code, response body, code snippet, screenshot reference); list of mismatches between PRD and implementation.
 - **Postconditions:** all background processes started during verification are killed before exit; report attached to the PRD or the run report; no code edits are made.
-- **Failure modes:** build fails → halt early; required service unreachable → fail with platform-specific setup instructions; PRD declares behaviour the implementation contradicts → report as `prd-implementation-mismatch`, do not assume the PRD is wrong.
+- **Failure modes:** artifact declares no acceptance criteria → halt with `no-acceptance-criteria` and suggest `/prd-validate`; build fails → halt early; required service unreachable → fail with platform-specific setup instructions; PRD declares behaviour the implementation contradicts → report as `prd-implementation-mismatch`, do not assume the PRD is wrong.

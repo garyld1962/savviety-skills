@@ -18,15 +18,32 @@ model: opus
 
 ## When NOT to Use
 
-- Requirements are already implementation-ready — skip to `/plan` or `/kickoff`
+- Requirements are already implementation-ready — skip to `/execute-prd` or `/kickoff`
 - Verifying completed work — use `/prd-acceptance`
 - You need the rubric itself — see `_internal/aers-readiness/SKILL.md`
 
 ## Arguments
 
-- `<path>` — path to the requirements artifact. If not provided, scan common locations: `AERS.md`, `PRD.md`, `docs/plans/*.md` (most recent).
+- `<path>` — path to the requirements artifact. If not provided, resolve it by the order below.
 - `--refine-problem` — focus on problem refinement mode (vague problem → precise statement)
 - `--full-spec` — produce a complete requirements specification (interview in batches)
+
+Resolution order — first match wins:
+
+1. The explicit `<path>` argument, if one was supplied.
+2. The most recently modified `docs/prds/*/AERS.md`.
+3. `./AERS.md` (legacy root location).
+4. The most recently modified `docs/prds/*/PRD.md`.
+5. `./PRD.md`.
+6. `./prompt.md`.
+
+If two or more candidates tie within the same tier, do not guess: ask the
+operator which is canonical (interactive) or emit a `plan-ambiguity` finding
+and stop (autonomous).
+
+Sibling artifacts — `ONTOLOGY.md`, `UBIQUITOUS_LANGUAGE.md`, and `PRD.md` —
+resolve relative to the directory of the resolved requirements file, not the
+repo root.
 
 ## Rubric
 
@@ -36,7 +53,8 @@ This skill follows `_internal/aers-readiness/SKILL.md` for the full AERS checkli
 
 ### Step 1: Read the Artifact
 
-Read the provided file or scan for common locations. If nothing is found, ask:
+Read the provided file, or resolve one by the order under `## Arguments`.
+If nothing is found, ask:
 > "No requirements artifact found. Tell me what you want to achieve in plain language."
 
 ### Step 2: Assess Current State
@@ -96,7 +114,7 @@ Blocking gaps:
 - (list, or "None")
 
 Recommended next step:
-- /plan <path>  (if ready)
+- /execute-prd <path>  (if ready)
 - Continue refining (if not ready)
 ```
 
@@ -127,12 +145,12 @@ Bias toward:
 - Do NOT overwrite an existing artifact wholesale without showing proposed changes.
 - Do NOT mark the artifact ready if blocking ambiguity remains.
 - Do NOT stop at a business-oriented PRD if the user needs an engineering-executable output.
-- Do NOT drift into implementation planning — that belongs in `/plan`.
+- Do NOT drift into implementation planning — that belongs in `/execute-prd`.
 
 ## Contract
 
 - **Inputs:** `<path>` to a requirements artifact, OR the artifact pasted into the conversation. Optional flags: `--refine-problem`, `--full-spec`. Embeds `_internal/aers-readiness` for the rubric.
 - **Preconditions:** human operator is at the keyboard — this is an interactive interview, not a gate. Callers (`/kickoff`, `/execute-prd`) MUST NOT auto-invoke this skill from a non-interactive context.
-- **Outputs:** an enriched AERS written back to the artifact path (or a sibling `AERS.md` when started from a non-file source); closed decisions inlined; a fresh readiness score per the rubric's automated check; a gap list for residual unresolved items.
+- **Outputs:** an enriched AERS written back to the resolved artifact path (or, when started from a non-file source, a new `docs/prds/<slug>/AERS.md`); closed decisions inlined; a fresh readiness score per the rubric's automated check; a gap list for residual unresolved items.
 - **Postconditions:** artifact moves toward `Ready` — but does not require it (`Partially ready` is an acceptable exit when residual gaps are documented as open decisions); callers can re-score with `_internal/aers-readiness` to confirm.
 - **Failure modes:** non-interactive context detected → refuse to start and suggest `_internal/aers-readiness` for a deterministic score instead; user says "you choose" on a non-default question → propose a default and ask for confirmation, do not silently pick.

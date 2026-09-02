@@ -10,6 +10,22 @@ Converts a requirements source into a plan conforming to
 `/execute-plan`. After the plan is written, the plan governs
 execution; the PRD is used only for traceability.
 
+## Arguments
+
+- `<path>` — path to the requirements source. If not provided and no
+  ticket flag is set, resolve it by the order in step 2.
+- `--ado <id>` — fetch the requirements source from Azure DevOps via
+  `/work-item` instead of a file.
+- `--linear <id>` — fetch the requirements source from Linear via
+  `/work-item` instead of a file.
+- `--type <bug|feature|refactor|infra>` — force the plan type instead of
+  inferring it in step 2.
+- Pass-through flags — `--force`, `--accept-risk <category>`, and
+  `--adversarial <auto|always|never>` are forwarded verbatim to
+  `/execute-plan` in step 10.
+
+At most one of `<path>` / `--ado` / `--linear` may be set.
+
 ## Workflow
 
 1. **Load repo contract** — `CLAUDE.md ## Commands` per
@@ -18,25 +34,34 @@ execution; the PRD is used only for traceability.
 
 2. **Load requirements source.**
 
-   Resolution order:
+   If `--ado <id>` or `--linear <id>` was supplied, invoke `/work-item`
+   to fetch the ticket. `/work-item` returns the rendered markdown to
+   stdout — it does **not** write to disk. **execute-prd** then persists
+   that rendered markdown to `docs/prds/<source-slug>/PRD.md` (creating
+   the directory if needed) so the rest of the flow has a stable file to
+   reference. Extract title, description, acceptance criteria, and
+   work-item type from the rendered markdown. The plan header carries
+   `**Source:** ADO #<id> — <title>` (or `Linear <id> — <title>`).
+   Reject if more than one of `<path>` / `--ado` / `--linear` is set.
 
-   1. If `--ado <id>` or `--linear <id>` was supplied, invoke `/work-item`
-      to fetch the ticket. `/work-item` returns the rendered markdown to
-      stdout — it does **not** write to disk. **execute-prd** then
-      persists that rendered markdown to
-      `docs/plans/PRD-<source-slug>.md` (creating the directory if
-      needed) so the rest of the flow has a stable file to reference.
-      Extract title, description, acceptance criteria, and work-item type
-      from the rendered markdown. The plan header carries
-      `**Source:** ADO #<id> — <title>` (or `Linear <id> — <title>`).
-      Reject if more than one of `<path>` / `--ado` / `--linear` is set.
-   2. Otherwise, use the explicit `<path>` if provided.
-   3. Otherwise, prefer `prompt.md`, `docs/plans/PRD.md`, `PRD.md`, then
-      obvious RFC/spec files under `docs/`.
+   Otherwise resolve the requirements artifact from the filesystem.
 
-   If multiple plausible sources exist and none was named, pause and ask
-   the operator which is canonical (interactive mode) or abort with a
-   `plan-ambiguity` finding (autonomous mode).
+   Resolution order — first match wins:
+
+   1. The explicit `<path>` argument, if one was supplied.
+   2. The most recently modified `docs/prds/*/AERS.md`.
+   3. `./AERS.md` (legacy root location).
+   4. The most recently modified `docs/prds/*/PRD.md`.
+   5. `./PRD.md`.
+   6. `./prompt.md`.
+
+   If two or more candidates tie within the same tier, do not guess: ask the
+   operator which is canonical (interactive) or emit a `plan-ambiguity` finding
+   and stop (autonomous).
+
+   Sibling artifacts — `ONTOLOGY.md`, `UBIQUITOUS_LANGUAGE.md`, and `PRD.md` —
+   resolve relative to the directory of the resolved requirements file, not the
+   repo root.
 
    **Classify plan type.** Use `--type` if supplied. Otherwise infer
    from the requirements source:
@@ -185,6 +210,40 @@ execution; the PRD is used only for traceability.
 - Do not loop on `/validate-plan` without bound. Three attempts then
   surface to the operator (see step 9).
 - Do not invent product decisions to close ambiguity. Halt and ask.
+
+## Contract
+
+- **Inputs:** one requirements source — `<path>`, `--ado <id>`, or
+  `--linear <id>` — resolved per step 2; optional `--type`; pass-through
+  flags forwarded to `/execute-plan`. Calls `/work-item` (ticket fetch),
+  `/audit-existing` (repo audit), `_internal/aers-readiness` (readiness
+  scoring), the `workflows/design-it-twice.mjs` Workflow script (step 6,
+  conditional), `/validate-plan` (plan gate), and `/execute-plan`
+  (execution). Consults `_internal/plan-format` and
+  `_internal/repo-delivery`.
+- **Preconditions:** repo has a `CLAUDE.md ## Commands` section; the
+  requirements source resolves to exactly one artifact; for `--ado` /
+  `--linear`, the tracker integration `/work-item` needs is configured;
+  the Workflow tool is available if step 6 fires.
+- **Outputs:** a plan file in the `_internal/plan-format` contract
+  (frontmatter, Closed Decisions, `## Task N:` sections with dependency
+  metadata and mechanical acceptance bullets); for a ticket source, the
+  fetched work item persisted to `docs/prds/<source-slug>/PRD.md`; then
+  whatever `/execute-plan` produces (execution report, postmortem).
+- **Postconditions:** `/audit-existing`, the readiness gate, and
+  `/validate-plan` all ran before execution; every non-negotiable from the
+  requirements source appears in a task acceptance block or the final
+  traceability task; no product decision was invented to close ambiguity.
+- **Failure modes:** missing `CLAUDE.md ## Commands` → halt with the same
+  message as `/execute-plan` preflight gate 1; more than one of `<path>` /
+  `--ado` / `--linear` → reject; several plausible requirements sources and
+  none named → ask the operator (interactive) or abort with a
+  `plan-ambiguity` finding (autonomous); readiness `Not ready` (7+ pts) →
+  halt and suggest `/prd-validate` (interactive) or abort with a
+  `requirements-incomplete` finding (autonomous); `/validate-plan` still
+  failing after three fix cycles → surface the top blocking finding and ask
+  the operator; no Workflow tool when step 6 fires → halt, never emulate
+  the script with the Agent tool.
 
 ## When NOT to Use
 

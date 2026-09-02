@@ -238,7 +238,7 @@ use a fixed vocabulary so cross-run aggregation works.
 | `claude-md/conventions` | The repo's `CLAUDE.md` conventions section |
 | `adversarial-triggers` | The `adversarial_triggers` glob list |
 | `auto-accept-deviations` | The `auto_accept_deviations` category list |
-| `plan-template` | The plan author's template (drives `/plan` and `/execute-prd` step 5) |
+| `plan-template` | The plan author's template (drives `/execute-prd` step 7) |
 | `aers-readiness` | The AERS readiness rubric |
 | `execute-plan-skill` | This skill's own behaviour (gates, phases, defaults) |
 | `execute-prd-skill` | The `/execute-prd` skill's behaviour |
@@ -356,6 +356,35 @@ Destructive git commands are denied by `settings.template.json`
 permissions (`git reset --hard`, `git push --force*`, `git clean -f`,
 `git branch -D`). This skill assumes those rules are installed; it
 does not restate them as instructions.
+
+## Contract
+
+- **Inputs:** `<path>` to a plan file in the `_internal/plan-format`
+  contract; optional `--force` (override a `/validate-plan` FAIL),
+  `--accept-risk <category>`, `--adversarial <auto|always|never>`, and
+  `resumeFromRunId` when resuming a failed run. Calls `/validate-plan`
+  (preflight gate 2) and the `workflows/run-plan.mjs` Workflow script,
+  which owns the task loop. Consults `_internal/repo-delivery`,
+  `_internal/disposition`, and `_internal/decision-record`.
+- **Preconditions:** the session has the Workflow tool; repo has a
+  `CLAUDE.md ## Commands` section; the plan validates (or a human
+  `--force` is explicit and recorded); the working branch is not
+  `default_branch`.
+- **Outputs:** `execution-report.json` written verbatim from the workflow
+  result plus `execution-report.md` rendered from it; decision records for
+  choices a future run could reverse; a postmortem plus a
+  `docs/postmortems/index.json` entry when the verdict is WARN/FAIL, the
+  retry budget was exhausted, or any deviation ended `accepted-risk`.
+- **Postconditions:** a PASS / WARN / FAIL verdict is stated against the
+  rules above; no `critical` or `major` finding is left `open` without the
+  verdict being FAIL; every `plan-ambiguity` resolved or raised in
+  preflight gate 4 appears in the report; commits and worktree branches
+  from a thrown run are preserved for resume.
+- **Failure modes:** missing `CLAUDE.md ## Commands` → halt; `/validate-plan`
+  FAIL without `--force` → refuse to execute; on `default_branch` → refuse;
+  preflight-gate-4 ambiguity in an autonomous session → halt listing the
+  open questions as `plan-ambiguity` findings; no Workflow tool → halt and
+  say so, never emulate `run-plan.mjs` with the Agent tool.
 
 ## When NOT to Use
 
