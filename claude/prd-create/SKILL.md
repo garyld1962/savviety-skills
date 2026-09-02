@@ -115,6 +115,10 @@ Step 3 confirms.
    Produce a per-entity question budget: the 4 mandatory-core categories, plus at
    most 2 discretionary questions before offering deferral.
 
+Under `--dry-run`, print the resolved mode with its evidence and the resolved
+output paths here. In brownfield modes continue to Step 1 and stop after the seed
+proposal; in `greenfield` stop here. Either way write nothing and ask nothing.
+
 ### Step 1: Codebase seed (brownfield only; skipped by `--no-scan` where permitted)
 
 Compose existing scanners. Never invent a new one.
@@ -159,9 +163,20 @@ confirm-or-amend question.
 Brownfield: seeded entities outside this release's ask are proposed as out of the
 UoD. That is what licenses deferring their fact types.
 
-### Step 3: Ontology interview (rubric order)
+**`rewrite` only — agree the permitted-change list here**, alongside the UoD
+boundary, with one question:
 
-Order: entities and reference schemes → homonyms and synonyms → fact types →
+> "Which ontology items may this rewrite revise? Everything not on this list is
+> preserved as-is."
+
+Record the answer as a confirmed closed decision. Step 3 gates every `revision`
+against this list, and Step 5 records it as the PRD's `What May Change`. Agreeing
+it in Step 2 is what makes the Step 3 gate checkable — the PRD does not exist
+until Step 5.
+
+### Step 3: Ontology interview
+
+Ask in this order: entities and reference schemes → homonyms and synonyms → fact types →
 constraints → modality → lifecycle totality → temporality. Per entity, the
 mandatory core first.
 
@@ -173,8 +188,8 @@ mandatory core first.
 - **Mandatory core cannot be deferred.** Refuse with the Rule 2 rationale from
   `_internal/ontology-readiness`. The only two exits are `settled`, or removing
   the entity from this release's UoD.
-- A deferral requires a **re-entry condition**. Without one it is `unknown`,
-  scores 2, and you say so at the time.
+- A deferral requires a **re-entry condition**. Without one it is `unknown`, and
+  scores per `_internal/ontology-readiness` § *Item states*. Say so at the time.
 - One elementary predicate per fact type; bold the entity names; split compound
   statements. Every fact type gets a constraint or the explicit `[unconstrained]`
   marker — blank is an omission. Constraint cells use the `unique:`,
@@ -185,14 +200,28 @@ mandatory core first.
 
 **Under `--extend`:** interview only new entities plus `deferred` items this
 feature now touches — exactly the delta declared by `scope:` and `extends:`.
-Classify every change as an `addition` (appends freely) or a `revision` (one of
-the five kinds in Rule 4). In `feature` mode a `revision` is a **halt**: list the
-stale downstream artifacts (PRD, AERS, data models, tests, code) and write
-nothing. In `rewrite` mode a `revision` is allowed only when it is listed in the
-PRD's `What May Change` and confirmed as a closed decision; log it as `revision`
-in the Extension Log citing that decision. Unlisted in `What May Change` → halt.
+
+**Classify every change** as an `addition` (appends freely) or a `revision` (one
+of the five kinds in Rule 4). Revision handling is per mode:
+
+- `feature` — a `revision` **halts**. List the stale downstream artifacts (PRD,
+  AERS, data models, tests, code) and write nothing.
+- `refresh` — same rule as `feature`: a `revision` **halts** with the same stale
+  artifact list. Add to the halt message that a change of this class means the
+  ask is really a rewrite, and offer re-running in `--mode rewrite`. Refresh has
+  no permitted-change list of its own.
+- `rewrite` — a `revision` is allowed only when the item appears in the
+  permitted-change list agreed in Step 2, and is confirmed there as a closed
+  decision. Log it as `revision` in the Extension Log, citing that decision.
+  Anything outside the Step 2 list **halts**. Do not consult the PRD's
+  `What May Change`: Step 5 writes that section *from* the Step 2 agreement, so
+  it does not exist yet when this gate runs.
+- `greenfield` — no baseline exists; every change is an `addition`.
 
 ### Step 4: Requirements interview (aers-readiness risk order)
+
+Under `--full-spec`, print once before asking anything:
+`--full-spec` is a one-release alias; it will be removed.
 
 Second extended-thinking gate — the `/prd-validate` Step 2.5 questions: which
 gaps cause the most expensive mistake, which small-looking ambiguities hide a
@@ -223,6 +252,11 @@ later); **Current State → Target State** (brownfield only; delta table
 Non-functional Requirements; Acceptance Criteria; Closed Decisions and Open
 Decisions (product-level only — engineering decisions live in the AERS); Risks
 and Assumptions; Non-goals; **What May Change** (rewrite only).
+
+In `rewrite` mode, `What May Change` is not elicited here: it records the
+permitted-change list agreed in Step 2, together with the preserved list that is
+its complement. Every Extension Log `revision` written in Step 3 must appear in
+it.
 
 The PRD carries no Public API, Data Models, Verification Matrix, Repo Starting
 State, Tooling Assumptions, Execution Preflight or Readiness Assessment. PRD
@@ -268,6 +302,10 @@ hand-write it, never hand-edit it, and never let it disagree with the ontology.
 
 ### Step 9: Report and handoff
 
+Print this to the console. It is the run report, **not** the AERS
+**Readiness Assessment** section — that one is written into `AERS.md` in Step 7,
+in the `_internal/aers-readiness` template, and is not restated here.
+
 ```
 PRD folder: docs/prds/<slug>/
   PRD.md · AERS.md · ONTOLOGY.md · UBIQUITOUS_LANGUAGE.md
@@ -288,11 +326,11 @@ Next step:
 |---|---|---|---|---|
 | Step 1 seed | skipped | audit + entity scan | audit + entity scan + modernization-rubric §1 shape | audit + entity scan (or `--extend` in lieu) |
 | Baseline ontology | none | existing via `--extend` (delta) or seeded | current-state facts from code are the baseline, confirmed before any target-state change | the existing ontology is the contract to preserve |
-| Change classification | all additions | addition appends; revision halts | additions append; revision halts unless listed in `What May Change` | revision only if listed in `What May Change` and confirmed as a closed decision; unlisted halts |
-| PRD-specific sections | — | Current State → Target State | Current State → Target State with shape header; redirect to `/modernize` when no behaviour changes | Current State → Target State, What May Change, explicit preserved list |
+| Change classification | all additions | addition appends; revision halts | additions append; revision halts, offering `--mode rewrite` | additions append; revision only if in the Step 2 permitted-change list, confirmed as a closed decision; outside it halts |
+| PRD-specific sections | — | Current State → Target State | Current State → Target State with shape header; redirect to `/modernize` when no behaviour changes | Current State → Target State, plus `What May Change` and the preserved list, both recording the Step 2 agreement |
 | AERS Repo Starting State | "empty repo" | from audit | from audit + shape | from audit; replacement strategy recorded as a decision |
 | `--no-scan` | n/a | allowed (recorded) | refused | only with `--extend` |
-| Extension Log | created empty | appended | appended | appended; revisions cite the confirming decision |
+| Extension Log | created empty | appended | appended | appended; revisions cite the Step 2 decision that permitted them |
 
 ## Rules
 
@@ -303,15 +341,16 @@ Next step:
   `unknown`, defined once in `_internal/ontology-readiness` § *Item states*.
   Use those words; do not redefine them.
 - The mandatory core is Rule 2's four categories. It is never deferred, and a
-  mandatory-core row that is not `settled` caps the ontology verdict at
-  `Partial` however low the total.
+  mandatory-core row that is not `settled` carries the mandatory-core cap defined
+  in `_internal/ontology-readiness` Rule 2.
 - Question budget per entity: 4 mandatory-core, then at most 2 discretionary
   before offering deferral. Deferral is free; silence is not.
 - Every seeded row keeps its `code:<file:line>` source until a human settles it.
 - Ontology describes the world; Data Models describe the representation. Keep
   them separate.
 - Halt conditions surface and stop: `--extend` target without a `uod:` header,
-  a `revision` in feature mode, an unlisted `revision` in rewrite mode.
+  a `revision` in feature or refresh mode, a `revision` outside the Step 2
+  permitted-change list in rewrite mode.
 - Score with the rubrics' automated checks. Do not invent a variant.
 
 ## CRITICAL: Do Not
@@ -340,4 +379,4 @@ Next step:
 - **Preconditions:** a human operator is at the keyboard — this is an interview, never a gate and never auto-invoked. Write access to `--out` (default `docs/prds/<slug>/`). For `--extend`, the named ontology exists and its header carries `uod:`.
 - **Outputs:** the folder `docs/prds/<slug>/` containing `PRD.md`, `ONTOLOGY.md`, `AERS.md` and the derived `UBIQUITOUS_LANGUAGE.md`, plus the Step 9 report with the `Readiness:` and `Ontology:` lines and a next step. Under `--dry-run`: the detected mode with evidence, the resolved paths and the seed proposal, and no files.
 - **Postconditions:** every ontology row carries `settled`, `deferred` with a re-entry condition, or `unknown`; the mandatory core is complete or the report says `INCOMPLETE`; the Extension Log is append-only; pre-existing `settled` rows are unchanged; the glossary is derived, not authored.
-- **Failure modes:** non-interactive context → refuse and point at the two rubrics for a deterministic score. `--extend` target with no `uod:` header → halt. `revision` classified in feature mode, or unlisted in `What May Change` in rewrite mode → halt with the stale-artifact list, write nothing. `--no-scan` in refresh, or in rewrite without `--extend` → refuse and explain there is no baseline. Existing `--out` folder → show the diff and ask before overwriting. User asks to skip the mandatory core → refuse with Rule 2's rationale and offer to drop the entity from this release's UoD instead. User wants an existing artifact hardened rather than drafted → hand off to `/prd-validate`.
+- **Failure modes:** non-interactive context → refuse and point at the two rubrics for a deterministic score. `--extend` target with no `uod:` header → halt. `revision` classified in feature or refresh mode → halt with the stale-artifact list, write nothing (refresh additionally offers `--mode rewrite`). `revision` in rewrite mode outside the Step 2 permitted-change list → halt. `--no-scan` in refresh, or in rewrite without `--extend` → refuse and explain there is no baseline. Existing `--out` folder → show the diff and ask before overwriting. User asks to skip the mandatory core → refuse with Rule 2's rationale and offer to drop the entity from this release's UoD instead. User wants an existing artifact hardened rather than drafted → hand off to `/prd-validate`.

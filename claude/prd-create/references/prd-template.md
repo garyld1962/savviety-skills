@@ -107,9 +107,10 @@ Product-level only; engineering decisions live in ./AERS.md.
 
 ## What May Change  *(rewrite only)*
 
-Named surfaces this rewrite is permitted to change. An ontology `revision` is
-allowed only when it appears in this list and is confirmed as a closed decision;
-anything not listed here halts the interview.
+Records the permitted-change list agreed in Step 2 as a closed decision — this
+section reports that agreement, it is not where it is made. Step 3 gates every
+ontology `revision` against the Step 2 list, and every `revision` in the
+Extension Log must appear here.
 
 | Surface | May change | Confirmed by |
 |---|---|---|
