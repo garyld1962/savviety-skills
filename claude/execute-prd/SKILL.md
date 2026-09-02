@@ -151,7 +151,10 @@ At most one of `<path>` / `--ado` / `--linear` may be set.
    reclassified modality, retrofitted temporality — is mode-dependent, and
    the mode is read from the `mode:` header of `ONTOLOGY.md`: in `feature`
    mode any `revision` entry in the Extension Log is a halt condition and
-   halts with an `ontology-revision` finding; in `rewrite` mode a
+   halts with an `ontology-revision` finding; `refresh` mode follows the
+   `feature` rule, so any `revision` entry halts the same way; in
+   `greenfield` mode a `revision` entry is itself a defect — nothing
+   existed to revise — and halts the same way; in `rewrite` mode a
    `revision` entry must be matched by a confirmed closed decision in the
    PRD, and is a halt — the same `ontology-revision` finding — only if it
    is not.

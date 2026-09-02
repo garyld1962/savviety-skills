@@ -213,7 +213,10 @@ Blocking gaps:
 
 Recommended next step:
 - /execute-prd <path>  (if ready)
-- /prd-create --extend <path>  (if the ontology is Partial, or Absent on a non-trivial domain)
+- /prd-create  (if the ontology is Absent on a non-trivial domain — there is no
+  ONTOLOGY.md to extend, so this writes a new PRD folder)
+- Step 3.5 closure pass here, then /prd-create --extend <path> only if the
+  remaining gap is new entities  (if the ontology is Partial)
 - Continue refining (if not ready)
 ```
 
@@ -280,4 +283,4 @@ and do not start a batched interview.
 - **Preconditions:** human operator is at the keyboard — this is an interactive interview, not a gate. Callers (`/kickoff`, `/execute-prd`) MUST NOT auto-invoke this skill from a non-interactive context. A requirements artifact exists; a blank start belongs to `/prd-create`.
 - **Outputs:** an enriched AERS written back to the resolved artifact path (or, when started from a non-file source, a new `docs/prds/<slug>/AERS.md`); an `ONTOLOGY.md` written or updated beside it in the same folder; closed decisions inlined; a fresh composite score and `Ontology:` verdict line per the two rubrics' automated checks; a gap list for residual unresolved items, including `unknown` rows raised by the closure pass.
 - **Postconditions:** artifact moves toward `Ready` — but does not require it (`Partially ready` is an acceptable exit when residual gaps are documented as open decisions); the Step 3.5 closure pass has run against the drafted output; `ONTOLOGY.md` keeps its existing `settled` rows and its append-only Extension Log; callers can re-score with `_internal/aers-readiness` to confirm.
-- **Failure modes:** non-interactive context detected → refuse to start and suggest `_internal/aers-readiness` for a deterministic score instead; user says "you choose" on a non-default question → propose a default and ask for confirmation, do not silently pick; ontology absent on a non-trivial domain → report the gap and recommend `/prd-create`, **do not fabricate** an ontology to close it; `revision` entry in the Extension Log → surface it rather than scoring past it.
+- **Failure modes:** non-interactive context detected → refuse to start and suggest `_internal/aers-readiness` for a deterministic score instead; user says "you choose" on a non-default question → propose a default and ask for confirmation, do not silently pick; ontology absent on a non-trivial domain → report the gap and recommend a bare `/prd-create`, never `--extend` (there is no `ONTOLOGY.md` to extend), and **do not fabricate** an ontology to close it; ontology `Partial` → settle what the Step 3.5 closure pass can settle here (`unknown` rows and incomplete mandatory core on entities the ontology already carries) and recommend `/prd-create --extend` only when the remaining gap is new entities; `revision` entry in the Extension Log → surface it rather than scoring past it.

@@ -139,7 +139,7 @@ Ask about these first:
 - unclear source of truth
 - unclear workflow/business rules
 - unclear permissions/security boundary
-- unclear calculation or normalization rules
+- unclear calculation/normalization rules
 - unclear stack/platform choice that changes implementation
 
 Then the seven **high-risk semantic ambiguity categories** named in

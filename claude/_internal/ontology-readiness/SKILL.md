@@ -133,7 +133,7 @@ warning.
 
 **Rule 3 — three states per item, not two.** See **Item states** above. The UoD
 boundary is what licenses a deferral: it is the positive, checkable claim that
-these facts are not representable in this release. A deferral against a stub UoD
+these facts are not representable in this release. A deferral against a stub or absent UoD
 boundary is not licensed: score it as `unknown` (**2**), the same as a deferral
 with no re-entry condition.
 
@@ -238,11 +238,13 @@ In `feature` and `rewrite`, score per category over the **delta rows only**. The
 delta is the new entities plus any `deferred` item the feature now touches —
 which is exactly what `scope:` and `extends:` declare (Rule 4). Pre-existing
 settled rows are not re-scored, and a category with no delta rows scores **0**.
-Any `revision` entry in the Extension Log is flagged in the verdict: in
-`feature` mode it is a halt condition for callers (`/kickoff` and
-`/execute-prd` route it through their reopened-decision halt); in `rewrite` mode
-it must be matched by a confirmed closed decision in the PRD, and is a halt if
-it is not.
+Any `revision` entry in the Extension Log is flagged in the verdict, and the
+rule covers all four modes: in `feature` mode it is a halt condition for callers
+(`/kickoff` and `/execute-prd` route it through their reopened-decision halt);
+`refresh` mode follows the `feature` rule, so any `revision` entry halts the same
+way; in `greenfield` mode a `revision` entry is itself a defect — nothing existed
+to revise — and halts the same way; in `rewrite` mode it must be matched by a
+confirmed closed decision in the PRD, and is a halt if it is not.
 
 **Trivial domain.** Count the entity types the artifact itself **defines or
 changes** — introduces, adds fields to, or specifies states for — across its
@@ -266,7 +268,7 @@ Ontology: Ready / Partial / Absent
 | Total points | Verdict | Caller behavior |
 |---|---|---|
 | `0–2` | **Ready** | Proceed. |
-| `3–6` | **Partial** | Suggest `/prd-create --extend` or `/prd-validate` to the operator; do not auto-invoke. In autonomous mode, log the gap list as a known risk and proceed. |
+| `3–6` | **Partial** | Suggest `/prd-validate` to the operator — its closure pass settles `unknown` rows and incomplete mandatory core on entities the ontology already carries; suggest `/prd-create --extend` only when the delta is new entities. Do not auto-invoke either. In autonomous mode, log the gap list as a known risk and proceed. |
 | `7+`, or `ONTOLOGY.md` missing on a non-trivial domain | **Absent** | Log a known risk. Combined with a structural verdict of `Partially ready` or worse, halt. Callers halt only on a **bare** `Absent`; `Absent (trivial domain)` never halts and contributes 0. |
 
 ```
@@ -279,10 +281,11 @@ ready, `7+` Not ready — which this rubric leaves unchanged. This rubric's own
 point total feeds only the `Ontology:` line and never enters the structural
 count directly.
 
-The cap is load-bearing. Uncapped, one required section (+2) plus seven
-ambiguity categories (+14) flips every artifact written before this rubric
-existed to `Not ready`, jamming `/kickoff` and `/execute-prd`. Ontology gaps get
-their own verdict line; they do not dominate the structural score.
+The cap is load-bearing. Uncapped, the per-category and ambiguity charges above
+would let ontology gaps alone flip an artifact from one structural band to the
+next — jamming `/kickoff` and `/execute-prd` on every artifact written before
+this rubric existed. Ontology gaps get their own verdict line; they do not
+dominate the structural score.
 
 **Suggest, don't auto-invoke.** `/prd-create` is an interview, not a gate; the
 interaction boundary and its rationale are defined once, in
@@ -299,6 +302,7 @@ extends: none
 scope: Customer, Order, OrderLine, Product
 uod: Representable: orders placed by one customer against catalogue products, and their fulfilment state. Not representable this release: partial shipments, returns, multi-currency pricing, customer merges.
 seeded-from-code: n/a (greenfield)
+thesis: Capture a customer's order against catalogue products and track it to fulfilment.
 status: settled 14 · deferred 6 · unknown 0 · mandatory core: complete
 ```
 
@@ -355,4 +359,4 @@ among the deferrals, the mandatory-core cap would force `Partial` at any total.
 - **Preconditions:** the artifact is text and readable. This is a reference rubric, not an interview — `/prd-create` is the interactive remedy and requires a supervising human.
 - **Outputs:** an `Ontology: Ready / Partial / Absent` verdict line; a capped composite contribution per **Automated ontology check**; a gap list keyed to the eight elicitation categories, the ambiguity categories, and any `revision` entry in the Extension Log.
 - **Postconditions:** callers act per the verdict thresholds; existing settled rows are preserved; the Extension Log stays append-only; no `deferred` item is silently converted to `settled`.
-- **Failure modes:** artifact unreadable → `Ontology: Absent` with the file-access error in the gap list. `ONTOLOGY.md` missing on a non-trivial domain → report `Absent`, never fabricate an ontology to close the gap. Mandatory-core item not `settled` → `Partial` at best, regardless of total. `revision` entry in `feature` mode → halt and surface, do not score past it. Code-seeded rows presented as `settled` without human confirmation → treat as `unknown`.
+- **Failure modes:** artifact unreadable → `Ontology: Absent` with the file-access error in the gap list. `ONTOLOGY.md` missing on a non-trivial domain → report `Absent`, never fabricate an ontology to close the gap. Mandatory-core item not `settled` → `Partial` at best, regardless of total. `revision` entry in `feature`, `refresh`, or `greenfield` mode → halt and surface, do not score past it. Code-seeded rows presented as `settled` without human confirmation → treat as `unknown`.

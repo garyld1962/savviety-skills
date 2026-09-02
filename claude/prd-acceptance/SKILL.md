@@ -379,7 +379,7 @@ Failed:
 Skipped (ontology, not verified):
   Shipment lifecycle — deferred: "When partial shipments enter scope"
   Currency value domain — unknown: "No decision on multi-currency pricing"
-  Order.placed_at — N/A: instant fact, no history to retain"
+  Order.placed_at — N/A: instant fact, no history to retain
 
 Manual (verify by hand):
   AC-15: Score selectors are interactive

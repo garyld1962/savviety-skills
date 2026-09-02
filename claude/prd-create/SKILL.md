@@ -277,8 +277,9 @@ greenfield and appended in every other mode; it is append-only.
 This skill writes `<out>/AERS.md` itself, by applying the
 `_internal/aers-readiness` transformation to the PRD:
 
-- Map PRD sections onto the **Required Sections**, plus `Domain Ontology` — a
-  pointer to the sibling `ONTOLOGY.md`, never an inline copy.
+- Map PRD sections onto the **Required Sections**, one of which is
+  `Domain Ontology` — a pointer to the sibling `ONTOLOGY.md`, never an inline
+  copy.
 - Generate the sections the PRD does not carry: Public API or Public Interface;
   Data Models (citing `ONTOLOGY.md` as the source and naming which entity each
   structure represents); Verification Matrix; Repo Starting State; Tooling
@@ -311,7 +312,7 @@ PRD folder: docs/prds/<slug>/
   PRD.md · AERS.md · ONTOLOGY.md · UBIQUITOUS_LANGUAGE.md
 Mode: <mode>   Seeded from code: yes @ <sha> | no (--no-scan) | n/a (greenfield)
 Readiness: Ready | Partially ready | Not ready   (structural <n>, ontology +<c>, composite <n>)
-Ontology: Ready | Partial | Absent   (settled <n> · deferred <n> · unknown <n>; mandatory core complete | INCOMPLETE)
+Ontology: Ready / Partial / Absent   (settled <n> · deferred <n> · unknown <n>; mandatory core complete | INCOMPLETE)
 Blocking gaps:
 - ...
 Next step:
