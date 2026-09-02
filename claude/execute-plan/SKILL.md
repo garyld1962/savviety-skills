@@ -94,16 +94,20 @@ handling, disposition decisions, verdict interpretation, postmortem.
    or closed decision in the plan that contradicts a `settled` row
    without a matching `revision` entry in that Extension Log → halt with
    an `ontology-revision` finding naming the row and the contradicting
-   task. In `rewrite` mode the check also runs the other way: a
-   `revision` entry must be matched by a confirmed closed decision in
-   the PRD, and the same halt fires when it is not.
+   task.
 
-   An `addition` entry in the `ONTOLOGY.md` Extension Log passes. A
-   **revision** — one of exactly five kinds per
+   An `addition` entry in the `ONTOLOGY.md` Extension Log passes.
+
+   A **revision** — one of exactly five kinds per
    `_internal/ontology-readiness` § *Completeness and Extension* Rule 4:
    changed reference scheme, homonym split, tightened constraint,
-   reclassified modality, retrofitted temporality — halts with an
-   `ontology-revision` finding.
+   reclassified modality, retrofitted temporality — is mode-dependent, and
+   the mode is read from the `mode:` header of `ONTOLOGY.md`: in `feature`
+   mode any `revision` entry in the Extension Log is a halt condition and
+   halts with an `ontology-revision` finding; in `rewrite` mode a
+   `revision` entry must be matched by a confirmed closed decision in the
+   PRD, and is a halt — the same `ontology-revision` finding — only if it
+   is not.
 
    This gate does not score readiness. `/execute-prd` and `/kickoff` own
    the `Ontology:` verdict; gate 5 only refuses a plan that silently

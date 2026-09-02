@@ -105,7 +105,8 @@ At most one of `<path>` / `--ado` / `--linear` may be set.
    ```
 
    Both lines are always emitted, even when the ontology contribution
-   is 0.
+   is 0. The structural verdict is the structural score read against the
+   same bands (see `_internal/aers-readiness`).
 
    Behaviour by composite verdict:
 
@@ -142,11 +143,18 @@ At most one of `<path>` / `--ado` / `--linear` may be set.
 
    **Ontology revision halt.** The reopened-decision halt extends to
    the ontology. An `addition` entry in the `ONTOLOGY.md` Extension Log
-   passes. A **revision** — one of exactly five kinds per
+   passes.
+
+   A **revision** — one of exactly five kinds per
    `_internal/ontology-readiness` § *Completeness and Extension* Rule 4:
    changed reference scheme, homonym split, tightened constraint,
-   reclassified modality, retrofitted temporality — halts with an
-   `ontology-revision` finding.
+   reclassified modality, retrofitted temporality — is mode-dependent, and
+   the mode is read from the `mode:` header of `ONTOLOGY.md`: in `feature`
+   mode any `revision` entry in the Extension Log is a halt condition and
+   halts with an `ontology-revision` finding; in `rewrite` mode a
+   `revision` entry must be matched by a confirmed closed decision in the
+   PRD, and is a halt — the same `ontology-revision` finding — only if it
+   is not.
 
    The readiness gate's purpose is to refuse the most expensive failure
    mode this skill exists to prevent: a beautifully-validated plan built
@@ -289,8 +297,11 @@ At most one of `<path>` / `--ado` / `--linear` may be set.
   logs a known risk under `## Open Decisions`, and
   `Absent (trivial domain)` never halts); an ontology revision — changed
   reference scheme, homonym split, tightened constraint, reclassified
-  modality, retrofitted temporality — → halt with an `ontology-revision`
-  finding, while `addition` entries pass; `/validate-plan` still
+  modality, retrofitted temporality — in `feature` mode → halt with an
+  `ontology-revision` finding, and in `rewrite` mode → the same halt
+  unless the `revision` entry is matched by a confirmed closed decision
+  in the PRD (mode read from the `mode:` header of `ONTOLOGY.md`), while
+  `addition` entries pass; `/validate-plan` still
   failing after three fix cycles → surface the top blocking finding and ask
   the operator; no Workflow tool when step 6 fires → halt, never emulate
   the script with the Agent tool.

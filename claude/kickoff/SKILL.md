@@ -23,7 +23,9 @@ model: opus
 ## Arguments
 
 - `<path>` — path to the requirements artifact (AERS, PRD, spec, story). If not provided, resolve it by the order below.
-- `--skip-readiness` — skip the readiness gate
+- `--skip-readiness` — skip the readiness scoring and the ontology halt.
+  It never skips the ontology revision halt, which is a reopened-decision
+  guard rather than a scoring step.
 
 Resolution order — first match wins:
 
@@ -96,7 +98,8 @@ When the ask is a routine, low-risk, convention-bound edit (single-file change, 
    ```
 
    Both lines are always emitted, even when the ontology contribution
-   is 0.
+   is 0. The structural verdict is the structural score read against the
+   same bands (see `_internal/aers-readiness`).
 
    Behaviour by composite verdict:
    - **Ready** → proceed to step 3.
@@ -119,18 +122,26 @@ When the ask is a routine, low-risk, convention-bound edit (single-file change, 
    `Absent`, tell the operator the ontology is missing and carry it as
    a known risk.
 
-   **Ontology revision halt.** The reopened-decision halt extends to
-   the ontology. An `addition` entry in the `ONTOLOGY.md` Extension Log
-   passes. A **revision** — one of exactly five kinds per
-   `_internal/ontology-readiness` § *Completeness and Extension* Rule 4:
-   changed reference scheme, homonym split, tightened constraint,
-   reclassified modality, retrofitted temporality — halts with an
-   `ontology-revision` finding.
-
    Produce only the lightest useful additions: gap report, proposed
    closed decisions, contract examples. For the small change fast
    path, do not reopen routine defaults already implied by repo
    conventions.
+
+   **Ontology revision halt.** The reopened-decision halt extends to
+   the ontology. It is a reopened-decision guard, not a scoring step, so
+   it runs regardless of `--skip-readiness`. An `addition` entry in the
+   `ONTOLOGY.md` Extension Log passes.
+
+   A **revision** — one of exactly five kinds per
+   `_internal/ontology-readiness` § *Completeness and Extension* Rule 4:
+   changed reference scheme, homonym split, tightened constraint,
+   reclassified modality, retrofitted temporality — is mode-dependent, and
+   the mode is read from the `mode:` header of `ONTOLOGY.md`: in `feature`
+   mode any `revision` entry in the Extension Log is a halt condition and
+   halts with an `ontology-revision` finding; in `rewrite` mode a
+   `revision` entry must be matched by a confirmed closed decision in the
+   PRD, and is a halt — the same `ontology-revision` finding — only if it
+   is not.
 
 3. **Plan.** Once the artifact is ready enough to build, use `superpowers:writing-plans` for implementation planning. Skip for the small change fast path unless the user asks for a plan or the work expands.
 
@@ -185,4 +196,4 @@ This skill references:
 - **Preconditions:** in a git repo; artifact exists and is readable; operator is at the keyboard (kickoff is interactive by design — for autonomous flow, use `/execute-prd`).
 - **Outputs:** code committed for the requested change; review pass recorded; concise progress updates per the output contract above (decision context, edits, validation, blockers).
 - **Postconditions:** repo's existing validation steps (lint/build/test) have actually run; closed decisions added to the artifact when the operator confirms; no audit-grade governed artefacts (those belong to `/execute-prd`).
-- **Failure modes:** readiness `Not ready` → halt before coding; blocking ambiguity remaining → halt and ask; any closed decision in the artifact reopened → halt and surface the conflict; a bare `Ontology: Absent` with a structural verdict of `Partially ready` or worse → halt and suggest `/prd-create` to the operator, never auto-invoke `/prd-create` (a structural `Ready` with a bare `Absent` proceeds and logs a known risk, and `Absent (trivial domain)` never halts); an ontology revision — changed reference scheme, homonym split, tightened constraint, reclassified modality, retrofitted temporality — → halt with an `ontology-revision` finding, while `addition` entries pass.
+- **Failure modes:** readiness `Not ready` → halt before coding; blocking ambiguity remaining → halt and ask; any closed decision in the artifact reopened → halt and surface the conflict; a bare `Ontology: Absent` with a structural verdict of `Partially ready` or worse → halt and suggest `/prd-create` to the operator, never auto-invoke `/prd-create` (a structural `Ready` with a bare `Absent` proceeds and logs a known risk, and `Absent (trivial domain)` never halts); an ontology revision — changed reference scheme, homonym split, tightened constraint, reclassified modality, retrofitted temporality — in `feature` mode → halt with an `ontology-revision` finding, and in `rewrite` mode → the same halt unless the `revision` entry is matched by a confirmed closed decision in the PRD (mode read from the `mode:` header of `ONTOLOGY.md`), while `addition` entries pass; this revision halt runs even under `--skip-readiness`.
