@@ -7,7 +7,7 @@ private-resource: true
 
 # Integration Surface Analyst
 
-> **Sub-skill of `/test-plan`.** Invoke this via `/test-plan` (State 4 dispatches it when the target layer is `router`; it is not selected for the schema layer). Direct invocation is unsupported — without the orchestrator's layer detection and State 5 deduplication, the output will be incomplete and may collide with other analysts' specs.
+> **Sub-skill of `/test-plan`.** Invoke this via `/test-plan` (State 4 dispatches it when the target layer is `service`, `router`, or `component`; not selected for `schema`). Direct invocation is unsupported — without the orchestrator's layer detection and State 5 deduplication, the output will be incomplete and may collide with other analysts' specs.
 
 **"Does it wire up correctly?"** — Tests the glue between layers.
 
@@ -242,7 +242,7 @@ When testing that service A calls service B, describe the mock arrangement clear
 ## Contract
 
 - **Inputs:** router files, service files, Zod schemas bound to procedures, auth middleware definitions, CLAUDE.md conventions.
-- **Preconditions:** invoked from `/test-plan` State 4 only when the target layer is `router`; analyst is not selected for the schema layer.
+- **Preconditions:** invoked from `/test-plan` State 4 when the target layer is `service`, `router`, or `component`; not selected for `schema`.
 - **Outputs:** `TestSpecification[]` conforming to `test-plan/foundations/test-case-schema.md`, with `analyst: "integration-surface"` and `category: "integration"` for ~80–90% of specs.
 - **Postconditions:** orchestrator validates, dedupes, and merges with other analysts' specs.
 - **Failure modes:** router file unreachable → emit empty array; mismatch between Zod schema and procedure binding → emit a P1 spec that asserts the binding and let the test reveal the bug.

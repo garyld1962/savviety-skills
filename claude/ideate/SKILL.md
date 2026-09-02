@@ -1,23 +1,23 @@
 ---
 name: ideate
-description: "Use before /plan or brainstorming to shape a rough ask, doc, or folder into a direction. Three modes: idea (general), ba (business-analysis), tech (technical options)."
+description: "Use before superpowers:writing-plans or brainstorming to shape a rough ask, doc, or folder into a direction. Three modes: idea (general), ba (business-analysis), tech (technical options)."
 model: opus
 ---
 
 # /ideate — Explore and Shape Ideas
 
-**Purpose:** Take a rough idea, a single document, or a folder of related documents and turn them into a clear direction with identified options, risks, and next steps. Does NOT produce implementation plans — use `superpowers:brainstorming` or `/plan` after the direction is chosen.
+**Purpose:** Take a rough idea, a single document, or a folder of related documents and turn them into a clear direction with identified options, risks, and next steps. Does NOT produce implementation plans — use `superpowers:brainstorming` or `superpowers:writing-plans` after the direction is chosen.
 
 ## When to Use
 
 - Rough idea or scattered docs need shaping into a coherent direction
 - Deciding between multiple technical or business approaches
-- Upstream of `/plan` or `superpowers:brainstorming`, when the problem itself isn't framed yet
+- Upstream of `superpowers:writing-plans` or `superpowers:brainstorming`, when the problem itself isn't framed yet
 
 ## When NOT to Use
 
-- Direction is already clear — jump to `superpowers:brainstorming` or `/plan`
-- You need an implementation plan — use `/plan`
+- Direction is already clear — jump to `superpowers:brainstorming` or `superpowers:writing-plans`
+- You need an implementation plan — use `superpowers:writing-plans`
 - Requirements exist but are ambiguous — use `/prd-validate`
 
 ## Arguments
@@ -142,8 +142,8 @@ At the end, recommend the next workflow:
 - Continue ideation (more questions to resolve)
 - Write/upgrade a BRD, PRD, AERS, or story → `/prd-validate`
 - Design the solution → `superpowers:brainstorming`
-- Plan the implementation → `/plan`
-- Do not jump to `/plan` until the direction is clear enough to plan
+- Plan the implementation → `superpowers:writing-plans`
+- Do not jump to `superpowers:writing-plans` until the direction is clear enough to plan
 
 ## CRITICAL: Do Not Guess
 
@@ -151,13 +151,13 @@ At the end, recommend the next workflow:
 - Do NOT read every file in a folder if a smaller set establishes the pattern.
 - Do NOT force technical implementation details during early ideation unless they materially change the business decision.
 - Do NOT turn routine implementation defaults into workshop decisions.
-- Do NOT jump to `/plan` until the direction is chosen.
+- Do NOT jump to `superpowers:writing-plans` until the direction is chosen.
 - Do NOT lose shared ideation context when switching from `idea` into `ba` or `tech` mode.
 
 ## Contract
 
 - **Inputs:** a rough ask, a single document path, or a folder of related documents; mode flag (`idea` | `ba` | `tech`, default `idea`).
 - **Preconditions:** human operator at the keyboard (this is interactive ideation, not autonomous synthesis); inputs are readable.
-- **Outputs:** a direction document with identified options, risks, closed decisions where settled, and explicit open questions. Hands off to `/prd-validate`, `/plan`, or `superpowers:brainstorming` once the direction is chosen.
-- **Postconditions:** the artifact is concrete enough to drive `/prd-validate` or `/plan`; routine implementation defaults are NOT promoted into workshop decisions; mode-switch transitions preserve shared context.
+- **Outputs:** a direction document with identified options, risks, closed decisions where settled, and explicit open questions. Hands off to `/prd-validate`, `superpowers:writing-plans`, or `superpowers:brainstorming` once the direction is chosen.
+- **Postconditions:** the artifact is concrete enough to drive `/prd-validate` or `superpowers:writing-plans`; routine implementation defaults are NOT promoted into workshop decisions; mode-switch transitions preserve shared context.
 - **Failure modes:** input too vague for any mode → ask one clarifying question and stop; multi-document inputs disagree on direction → surface the conflict, do not silently average them.

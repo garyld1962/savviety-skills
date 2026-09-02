@@ -11,7 +11,7 @@ description: "Apply an expedited fix for a critical production issue: branch fro
 
 - Production is broken and needs an immediate fix
 - A critical bug was found right after a release
-- The normal /plan, /domain-review, /checkpoint pipeline is too slow
+- The normal /execute-prd, /domain-review, /checkpoint pipeline is too slow
 
 ## When NOT to Use
 

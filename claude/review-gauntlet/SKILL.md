@@ -1,7 +1,6 @@
 ---
 name: review-gauntlet
 description: "Use when a code review's conclusions need scrutiny. Reviews THE REVIEW via 3 lenses (Skeptic, Architect, Pragmatist). Returns SOLID / MIXED / UNRELIABLE."
-model: opus
 ---
 
 # /review-gauntlet -- Meta-Review of Code Reviews

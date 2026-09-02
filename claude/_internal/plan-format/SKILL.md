@@ -2,13 +2,15 @@
 name: plan-format
 description: "Canonical plan document format produced by /execute-prd and consumed by /execute-plan's runtime workflow. Defines frontmatter, task metadata (depends_on, milestone_end), and mechanical acceptance blocks. Not user-invokable."
 user-invocable: false
+internal: true
+kind: reference
 ---
 
 # Plan Format (compiler ↔ runtime contract)
 
 A plan is a markdown file. The runtime workflow parses it via an
 agent with a JSON schema; this document is the source of truth both
-for the author (execute-prd step 5) and the parser prompt
+for the author (execute-prd step 7) and the parser prompt
 (run-plan.mjs `PLAN_SCHEMA` agent).
 
 ## Frontmatter (YAML, required)
@@ -48,7 +50,7 @@ the runtime computes groups and caps concurrency itself.
 Single-owner surfaces (root manifests, lockfiles, shared types,
 migrations, generated files) must appear in exactly one task's
 `write_scope`. Overlap between two dependency-independent tasks is a
-validation error (execute-prd step 7 checks it; the runtime re-checks
+validation error (execute-prd step 8 checks it; the runtime re-checks
 and serialises the pair if found).
 
 ## Acceptance blocks

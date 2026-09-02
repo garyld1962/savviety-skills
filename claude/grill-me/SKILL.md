@@ -10,7 +10,7 @@ model: opus
 
 ## When to Use
 
-- Before committing to an architectural decision in `/plan`
+- Before committing to an architectural decision in `superpowers:writing-plans`
 - After drafting a PRD or design doc — to find the gaps
 - When a plan "feels right" but hasn't been challenged
 - When the user explicitly wants their thinking stress-tested
