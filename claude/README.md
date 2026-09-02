@@ -31,7 +31,7 @@ project-local `.claude/skills/_project/` content.
 
 | Skill | Invocation | Purpose |
 |-------|------------|---------|
-| kickoff | `/kickoff` | Start autonomous development from a PRD, story, or AERS |
+| kickoff | `/kickoff` | Interactive readiness → plan → implement → review |
 | execute-prd | `/execute-prd` | Convert PRD/work-item context into a plan and execute it |
 | execute-plan | `/execute-plan` | Execute a plan file with task-by-task validation |
 | validate-plan | `/validate-plan` | Validate that a written plan is ready to execute |
@@ -44,6 +44,8 @@ project-local `.claude/skills/_project/` content.
 | audit-existing | `/audit-existing` | Audit an existing implementation against test and delivery expectations |
 | parallel-optimization | `/parallel-optimization` | Restructure a plan for safe parallel execution |
 | process-tune | `/process-tune` | Tune shared workflow rules from repeated run evidence |
+| issue-slices | `/issue-slices` | Break a PRD into independently-grabbable GitHub issues as vertical slices |
+| modernize | `/modernize` | Audit a codebase against current AI toolchain capability and produce a refactor plan |
 
 ### Requirements, Design & BA
 
@@ -57,6 +59,10 @@ project-local `.claude/skills/_project/` content.
 | grill-me | `/grill-me` | Stress-test a plan or design by walking decision branches |
 | ubiquitous-language | `/ubiquitous-language` | Build a shared business/domain vocabulary |
 | what-is-it-about | `/what-is-it-about` | Extract a thesis and outline from a YouTube/video artifact |
+| goal | `/goal` | Clarify and validate a development goal before writing a PRD |
+| design-twice | `/design-twice` | Explore multiple radically different designs before committing |
+| refactor-brief | `/refactor-brief` | Plan a refactor through interview and file it as a GitHub issue RFC |
+| drawio | `/drawio` | Generate native .drawio diagrams (flowcharts, ER, sequence, class, architecture) |
 
 ### Review & Investigation
 
@@ -70,6 +76,7 @@ project-local `.claude/skills/_project/` content.
 | triage | `/triage` | Investigate a bug through reproduction and root-cause analysis |
 | postmortem | `/postmortem` | Retrospective analysis after delivery or incident work |
 | test-plan | `/test-plan` | Build or refresh a TDD-first test plan |
+| bug-session | `/bug-session` | Interactive bug-reporting session that files durable GitHub issues |
 
 ### Review Skills Decision Matrix
 
@@ -83,7 +90,7 @@ Several review skills overlap with Claude Code built-ins. Use this matrix to pic
 | High-stakes diff (200+ lines, auth/payments/migrations) | `/review-adversarial` | Runs on a **different model** to challenge assumptions |
 | Challenging an existing review's conclusions | `/review-gauntlet` | Meta-review — attacks the review itself, not the code |
 | Specs / requirements / acceptance criteria — not code | `/spec-review-adversarial` | Targets ambiguity in specs before they become defects |
-| Test suite coverage & quality audit | `review-tests` (superpowers) | Behavior-focused test review |
+| Test suite coverage & quality audit | `review-tests` (external skill, not shipped from this repo) | Behavior-focused test review |
 | Workflow retrospective after a governed run | `/postmortem` | Reviews the process, not the code |
 
 **Compose, don't duplicate:** `/pr` and `/ship` already call `/checkpoint` internally; don't run both. `/review-adversarial` is an *optional* follow-up after `/domain-review` passes, not a replacement.
@@ -99,6 +106,7 @@ Several review skills overlap with Claude Code built-ins. Use this matrix to pic
 | dep-migrate | `/dep-migrate` | Plan major-version dependency migrations |
 | work-item | `/work-item` | Fetch Azure DevOps or Linear work-item context |
 | repo-status | `/repo-status` | Show live branch, worktree, push, stash, and PR state |
+| gh-readiness | `/gh-readiness` | Verify GitHub CLI is installed, authenticated, and reachable before PR/issue/release skills run |
 
 ### Session & Meta
 
@@ -106,6 +114,8 @@ Several review skills overlap with Claude Code built-ins. Use this matrix to pic
 |-------|------------|---------|
 | skill-help | `/skill-help` | Discover available shared and local Claude skills |
 | skill-audit | `/skill-audit` | Audit skill and plugin ecosystem coverage |
+| feature-sweep | `/feature-sweep` | Audit installed skills against new Claude Code/API releases and propose integrations |
+| vault | `/vault` | Search, create, and manage notes in the Obsidian vault |
 
 ### Utilities (not slash commands)
 
@@ -171,15 +181,23 @@ test-plan/
 
 execute-plan/
 ├── SKILL.md                           # Orchestrator
-└── agents/                            # Private worker prompts
-    ├── implementer.md
-    ├── reviewer.md
-    └── fixer.md
+├── workflows/
+│   └── run-plan.mjs                   # Workflow tool script
+└── tests/                             # Harness smoke tests
 
 _internal/
 ├── aers-readiness/SKILL.md             # Internal callable rubric
+├── decision-record/SKILL.md            # Internal callable contract
+├── dependency-classification/SKILL.md  # Internal callable contract
+├── diff-manifest/SKILL.md              # Internal callable contract
 ├── disposition/SKILL.md                # Internal callable contract
-└── repo-delivery/SKILL.md              # Internal callable contract
+├── modernization-rubric/SKILL.md       # Internal callable rubric
+├── plan-format/SKILL.md                # Internal callable contract
+├── pre-flight-check/SKILL.md           # Internal callable contract
+├── professional-rubric/SKILL.md        # Internal callable rubric
+├── repo-delivery/SKILL.md              # Internal callable contract
+├── security-quick-check/SKILL.md       # Internal callable contract
+└── closed-decisions/                   # Fragment store (not a skill)
 ```
 
 The important architectural distinction is **private worker role vs reusable

@@ -35,7 +35,8 @@ Or, for a one-off, copy the skill dir directly into `~/repos/skills-test-harness
 
 - `<skill-name>/SKILL.md` — user-invocable skills (top-level dir per skill)
 - `_internal/` — contracts and rubrics, `user-invocable: false`, called by other skills
-- `infra/` — hook scripts (installed to `.claude/{pr-guardrail,journal,install-scan}`, NOT to `.claude/skills/`)
+- `infra/` — hook scripts (installed to `.claude/{pr-guardrail,journal}`, NOT to `.claude/skills/`)
+- `install-scan/` — a separate top-level dir, installed to `.claude/install-scan/` (not under the hook-scripts dir above)
 - `MODEL-POLICY.md`, `SESSION-CONTEXT.md`, `README.md` — reference docs, skipped by installer
 - `settings.template.json` — installed as target repo's `.claude/settings.json`
 

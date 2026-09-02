@@ -35,6 +35,9 @@ Currently pinned to `opus`:
 - `triage`
 - `dep-migrate`
 - `code-investigate`
+- `design-twice`
+- `feature-sweep`
+- `goal`
 
 ### `model: haiku` — lookup, routing, high frequency
 
