@@ -97,7 +97,7 @@ and their reference schemes, fact types, constraints, lifecycle totality,
 temporality, modality, homonyms and synonyms — is defined once, as the
 **Elicitation Categories** table in `_internal/ontology-readiness`. Elicit
 against that table rather than a second list here, and record the result in the
-artifact's `ONTOLOGY.md` (or inline, for a small domain).
+artifact's `ONTOLOGY.md`.
 
 Still elicited here, because they are computation rather than domain structure:
 
@@ -143,11 +143,12 @@ Ask about these first:
 - unclear stack/platform choice that changes implementation
 
 Then the seven **high-risk semantic ambiguity categories** named in
-`_internal/ontology-readiness` § *Automated ontology check*: entity with no
-reference scheme, term used in a requirement but absent from the ontology,
-non-total state machine, fact type with neither a constraint nor an explicit
-`[unconstrained]` marker, alethic/deontic conflation on a load-bearing rule,
-unstated temporality on a fact that visibly changes, and surviving homonym.
+`_internal/ontology-readiness` § *Automated ontology check*, by their exact names
+there: entity with no reference scheme; term used in a functional requirement but
+absent from the ontology; non-total state machine; fact type with no constraint
+and no explicit `[unconstrained]` marker; alethic/deontic conflation on a
+load-bearing rule; unstated temporality on a fact that visibly changes over time;
+surviving homonym.
 They are scored there, not here — they feed the `Ontology:` verdict line, and
 the structural list above never charges them a second time.
 
@@ -195,7 +196,7 @@ When the solution exposes code, APIs, commands, events, or library methods, defi
 
 ### Domain Ontology
 
-Points at the sibling `ONTOLOGY.md` in the artifact's `docs/prds/<slug>/` folder — or, when the domain is small enough that a separate file is ceremony, inlines the verbalized fact types directly. The notation, the file format, the item-state vocabulary, and the scoring all live in `_internal/ontology-readiness`; do not restate them here.
+Always points at the sibling `ONTOLOGY.md` in the artifact's `docs/prds/<slug>/` folder. There is no inline alternative — the ontology check scores the sibling file, so an inlined ontology reads as a missing one. Proportionality comes from the trivial-domain rule in `_internal/ontology-readiness`, which is the only escape; a legacy bare `.md` artifact with no folder of its own has no sibling, so its ontology resolves to missing and that rule decides between `Absent (trivial domain)` and a bare `Absent`. The notation, the file format, the item-state vocabulary, and the scoring all live in `_internal/ontology-readiness`; do not restate them here.
 
 This section is **excluded from the per-section 0/1/2 tally** in the **Automated readiness check** below. Its contribution to the composite arrives through the ontology check instead, so tallying it structurally as well would charge the same gap twice.
 
@@ -312,8 +313,14 @@ gaps from dominating: they get their own verdict line, they do not rewrite the
 structural picture.
 
 `Ontology: Absent (trivial domain)` — the trivial-domain rule in
-`_internal/ontology-readiness` — contributes **0** and never halts a caller.
-Callers halt only on a **bare** `Absent`.
+`_internal/ontology-readiness` — contributes **0**. The **structural verdict** is
+the structural score alone read against the same bands below; the composite
+verdict is the composite read against them.
+
+Callers halt only when the ontology line is a bare `Ontology: Absent` **and**
+the structural verdict is `Partially ready` or worse. A structural verdict of
+`Ready` with a bare `Absent` proceeds and logs the missing ontology as a known
+risk. `Ontology: Absent (trivial domain)` never halts.
 
 Item-state vocabulary (`settled`, `deferred` with its re-entry condition,
 `unknown`) is defined once, in `_internal/ontology-readiness` § *Item states*,
@@ -328,6 +335,13 @@ and `unknown` items belong in **Open Decisions**, not in narrative prose.
 | `0–2` | **Ready** | Proceed without `/prd-validate`. Note any single gap inline. |
 | `3–6` | **Partially ready** | **Suggest** `/prd-validate` to the operator, but do not auto-invoke. In autonomous mode (no human at the keyboard), proceed and log the gap list as a known risk. |
 | `7+` | **Not ready** | **Do not** draft a plan. In interactive mode, suggest `/prd-validate` to close gaps. In autonomous mode, halt with a `requirements-incomplete` finding and the gap list. |
+
+**The ontology halt is a combination, not a band.** It applies across all three
+rows above and is decided on the *structural* verdict, not the composite:
+Callers halt only when the ontology line is a bare `Ontology: Absent` **and**
+the structural verdict is `Partially ready` or worse. A structural verdict of
+`Ready` with a bare `Absent` proceeds and logs the missing ontology as a known
+risk. `Ontology: Absent (trivial domain)` never halts.
 
 Callers (`/kickoff` step 2, `/execute-prd` step 4) report the result as:
 
@@ -374,4 +388,4 @@ This rubric succeeds when:
 - **Preconditions:** the artifact is text and readable; this is a reference rubric, not an interactive interview (`/prd-validate` is the interactive remedy).
 - **Outputs:** a deterministic **composite** score using the **Automated readiness check** above — structural points plus the ontology contribution, read against the unchanged bands (`Ready` 0–2, `Partially ready` 3–6, `Not ready` 7+); the `Ontology: Ready / Partial / Absent` line copied verbatim from `_internal/ontology-readiness`, with the numeric structural score and composite recorded alongside it; a gap list keyed to required sections and high-risk ambiguity categories; either an upgraded AERS (when used as a transformation pass) or recommendations.
 - **Postconditions:** caller (`/prd-validate`, `/kickoff`, `/execute-prd`, `/spec-review-adversarial`) acts per the verdict thresholds; the artifact's existing closed decisions are preserved.
-- **Failure modes:** artifact unreadable / not text → return `Not ready` with the file-access error in the gap list; composite `7+` in autonomous mode → halt with a `requirements-incomplete` finding; a bare `Ontology: Absent` combined with `Partially ready` or worse → halt, but `Ontology: Absent (trivial domain)` contributes 0 and never halts; never invent answers (or an ontology) to close gaps; never auto-invoke `/prd-validate` or `/prd-create` from a non-interactive context.
+- **Failure modes:** artifact unreadable / not text → return `Not ready` with the file-access error in the gap list; composite `7+` in autonomous mode → halt with a `requirements-incomplete` finding; callers halt only when the ontology line is a bare `Ontology: Absent` **and** the structural verdict is `Partially ready` or worse — a structural verdict of `Ready` with a bare `Absent` proceeds and logs the missing ontology as a known risk, and `Ontology: Absent (trivial domain)` never halts; never invent answers (or an ontology) to close gaps; never auto-invoke `/prd-validate` or `/prd-create` from a non-interactive context.
