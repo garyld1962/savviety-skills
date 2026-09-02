@@ -78,6 +78,65 @@ Found 24 acceptance criteria in docs/prds/inventory-api/PRD.md:
 Proceed with verification? [Y/n]
 ```
 
+## Step 2.5: Extract Ontology Constraints
+
+Locate `ONTOLOGY.md` beside the resolved requirements file, per the
+sibling-artifact rule under `## Arguments` — it resolves relative to that file's
+directory, not the repo root. `_internal/ontology-readiness` is the authority
+for the table shapes read below and for the meaning of `settled` / `deferred` /
+`unknown`.
+
+If no sibling `ONTOLOGY.md` exists, skip this step and emit one note line:
+
+```
+Ontology: no ONTOLOGY.md beside <requirements-path> — ontology constraints not verified
+```
+
+Carry that line into the report. Do not hunt for an ontology elsewhere in the
+repo, and do not reconstruct one from the schema.
+
+When the file exists, read `## Entity Types`, `## Fact Types`, `## Lifecycles`,
+`## Temporality`, `## Deferred (with re-entry condition)`, and `## Unknown`,
+then triage every row by its `Status` cell (or by the section it sits in, for
+Deferred and Unknown):
+
+- **`settled`** → becomes an acceptance item, numbered `OC-01`, `OC-02`, … in
+  file order across those sections. Record the verbalized constraint text
+  verbatim and the constraint kind named in its `Constraints` or `Modality`
+  cell.
+- **`deferred`** → listed as SKIPPED (deferred), quoting its re-entry condition
+  from the `Re-entry condition` column. Never verified — it is outside the UoD
+  for this release, and testing it would fail correct code.
+- **`unknown`** → listed as SKIPPED (unknown), quoting the `Why unknown` cell.
+  An unknown row has no agreed behaviour to test against.
+
+**Never invent a constraint that is not in a settled row.** If the schema
+enforces a rule the ontology is silent about, that is not an `OC-` item — it is
+at most a note in the verdict.
+
+### Constraint → verification mapping
+
+| Constraint kind | Verification | What the check does |
+|---|---|---|
+| uniqueness | duplicate-insert test | Insert a second record carrying the same value in the unique role; assert it is rejected (constraint violation, 409, or field-level validation error) and the first record is unchanged. |
+| mandatory role | null-rejection test | Create the record with the mandatory role null or absent; assert rejection with a field-level error naming that role. |
+| total state machine | exhaustive transition test | Drive every transition declared in the `## Lifecycles` table and assert each succeeds; assert every (state, event) pair *not* in the table is rejected; assert each terminal state has no exit. |
+| value domain | boundary test | Exercise the lowest and highest legal values (accepted) and the value just outside each bound plus one ill-typed value (rejected). |
+| alethic rule | schema or type-level check | Read the schema or type definition and assert the rule is enforced there — `NOT NULL`, `UNIQUE`, `CHECK`, enum, non-nullable type — not only in application code. |
+| deontic rule | validation or alert check | Assert the rule is enforced on a validation path or raises an alert (request rejected with a message, or the alert/audit hook fires), and that it is deliberately *not* a schema constraint. |
+
+A settled row too thin to derive a concrete check from — no named field, no
+stated transition, no bound — is recorded as `UNVERIFIABLE` with the row quoted.
+Do not guess the missing detail.
+
+Report the triage before verification runs:
+
+```
+Ontology: docs/prds/inventory-api/ONTOLOGY.md
+  Settled → OC-01..OC-09
+  SKIPPED (deferred): 3    SKIPPED (unknown): 1
+```
+
 ## Step 3: Plan Verification
 
 For each criterion, determine the verification method. Do NOT guess — read the project first.
@@ -135,6 +194,16 @@ Verify file existence, exports, imports, shared package usage. These are static 
 ### Phase 3: Data Integrity
 Read schema definitions, check for computed vs stored fields, verify validation logic exists in code.
 
+### Phase 3b: Ontology constraints
+Verify each `OC-` item from Step 2.5 using the row for its constraint kind in
+the **Constraint → verification mapping**. Reuse the Phase 3 reads (schema
+files, migrations, validation modules) and the test framework detected in
+Step 3; run an `OC-` check against the API in Phase 4 when it needs a live
+endpoint. Record evidence in the same form as `AC-` items — the schema line, the
+migration statement, the test name and exit code, or the rejected request's
+status and body. Carry SKIPPED rows through unverified with their reason, and
+`UNVERIFIABLE` rows with the ontology text quoted.
+
 ### Phase 4: API
 Start the API server in background. Run endpoint checks. Kill the server when done.
 
@@ -172,6 +241,7 @@ docs/prd-acceptance/<YYYY-MM-DD>--<PRD-filename>--acceptance.md
 
 - **Date:** <YYYY-MM-DD HH:MM>
 - **PRD:** <path to PRD file>
+- **Ontology:** <path to ONTOLOGY.md | none — ontology constraints not verified>
 - **Result:** <PASS | PARTIAL | FAIL>
 - **Score:** <passed>/<total> (<percentage>%)
 
@@ -185,7 +255,11 @@ docs/prd-acceptance/<YYYY-MM-DD>--<PRD-filename>--acceptance.md
 | UI | N | N | N | N |
 | Data | N | N | N | N |
 | Test | N | N | N | N |
+| Ontology | N | N | N | N |
 | **Total** | **N** | **N** | **N** | **N** |
+
+SKIPPED ontology rows (deferred, unknown) are listed below and excluded from
+this table and from the percentage.
 
 ## Criteria Results
 
@@ -193,6 +267,9 @@ docs/prd-acceptance/<YYYY-MM-DD>--<PRD-filename>--acceptance.md
 
 - **AC-01** `pnpm install` succeeds
   - Evidence: exit code 0, 847 packages installed
+- **OC-03** A **Product** is identified by `sku` (uniqueness)
+  - Check: duplicate-insert test
+  - Evidence: second insert of `sku='ABC-1'` rejected — `UNIQUE constraint failed: products.sku`; row count unchanged at 1
 
 ### FAIL
 
@@ -200,6 +277,23 @@ docs/prd-acceptance/<YYYY-MM-DD>--<PRD-filename>--acceptance.md
   - Expected: HTTP 400 with field-level error for "title"
   - Actual: HTTP 500 — unhandled validation error
   - Evidence: `{"error":"Internal Server Error"}`
+- **OC-06** Every **Order** state has a defined exit; `Cancelled` is terminal (total state machine)
+  - Check: exhaustive transition test
+  - Expected: `Cancelled → Shipped` rejected
+  - Actual: transition accepted; order moved to `Shipped`
+  - Evidence: `PATCH /orders/7 {"state":"shipped"} → 200`
+
+### SKIPPED (ontology)
+
+- **Shipment lifecycle** — deferred
+  - Re-entry condition: "When partial shipments enter scope"
+- **Currency value domain** — unknown
+  - Why unknown: "No decision on multi-currency pricing"
+
+### UNVERIFIABLE (ontology)
+
+- Settled row with no derivable check, quoted verbatim, and what is missing
+  (named field, stated transition, or bound). Not guessed at.
 
 ### MANUAL
 
@@ -214,9 +308,16 @@ docs/prd-acceptance/<YYYY-MM-DD>--<PRD-filename>--acceptance.md
 
 ### Result Logic
 
+Score `AC-` and `OC-` items together — one denominator, one percentage.
+
 - **PASS**: all criteria pass (MANUAL counts as pass — they're noted for human spot-check)
-- **PARTIAL**: ≥70% pass, no build failures
+- **PARTIAL**: ≥70% but not all pass, no build failures
 - **FAIL**: <70% pass OR any build failure
+
+SKIPPED ontology rows (deferred, unknown) are excluded from both numerator and
+denominator — nothing was claimed, so nothing failed. `UNVERIFIABLE` rows stay
+in the denominator and do not pass: a settled constraint no one can test is a
+defect in the ontology, not a verification you may drop.
 
 ## Step 6: Response
 
@@ -224,11 +325,17 @@ docs/prd-acceptance/<YYYY-MM-DD>--<PRD-filename>--acceptance.md
 Acceptance: <RESULT> — <passed>/<total> (<percentage>%)
 
 PRD: <path>
+Ontology: <path | none>
 Report: <report-path>
 
 Failed:
   AC-08: POST /items missing title → 500 instead of 400
   AC-12: GET /stats returns empty instead of counts
+  OC-06: Cancelled → Shipped accepted (200); Cancelled must be terminal
+
+Skipped (ontology, not verified):
+  Shipment lifecycle — deferred: "When partial shipments enter scope"
+  Currency value domain — unknown: "No decision on multi-currency pricing"
 
 Manual (verify by hand):
   AC-15: Score selectors are interactive
@@ -251,8 +358,8 @@ Next steps:
 
 ## Contract
 
-- **Inputs:** path to the PRD/AERS to verify against (or the resolution order under `## Arguments`); the built / running application. Calls `/domain-review` when defects warrant a structured list; it does not call `/prd-validate` — an artifact with no acceptance criteria halts with `no-acceptance-criteria` and suggests `/prd-validate` instead.
+- **Inputs:** path to the PRD/AERS to verify against (or the resolution order under `## Arguments`); optionally the sibling `ONTOLOGY.md`, whose `settled` rows become `OC-` items per Step 2.5 and whose table shapes and item states are defined by `_internal/ontology-readiness`; the built / running application. Calls `/domain-review` when defects warrant a structured list; it does not call `/prd-validate` — an artifact with no acceptance criteria halts with `no-acceptance-criteria` and suggests `/prd-validate` instead.
 - **Preconditions:** project compiles; required services (DB, queue, etc.) are reachable; ports/paths detected from the actual implementation, not assumed from the PRD.
-- **Outputs:** acceptance report with PASS/FAIL per criterion plus evidence (exit code, response body, code snippet, screenshot reference); list of mismatches between PRD and implementation.
-- **Postconditions:** all background processes started during verification are killed before exit; report attached to the PRD or the run report; no code edits are made.
-- **Failure modes:** artifact declares no acceptance criteria → halt with `no-acceptance-criteria` and suggest `/prd-validate`; build fails → halt early; required service unreachable → fail with platform-specific setup instructions; PRD declares behaviour the implementation contradicts → report as `prd-implementation-mismatch`, do not assume the PRD is wrong.
+- **Outputs:** acceptance report with PASS/FAIL per `AC-` and `OC-` criterion plus evidence (exit code, response body, code snippet, screenshot reference); list of mismatches between PRD and implementation.
+- **Postconditions:** all background processes started during verification are killed before exit; report attached to the PRD or the run report; no code edits are made; no `deferred` or `unknown` ontology row is verified or reported as passing.
+- **Failure modes:** artifact declares no acceptance criteria → halt with `no-acceptance-criteria` and suggest `/prd-validate`; no sibling `ONTOLOGY.md` → skip Step 2.5 with one note line carried into the report, never reconstruct an ontology; ontology row without enough detail to derive a test → report as `UNVERIFIABLE`, do not guess; build fails → halt early; required service unreachable → fail with platform-specific setup instructions; PRD declares behaviour the implementation contradicts → report as `prd-implementation-mismatch`, do not assume the PRD is wrong.
