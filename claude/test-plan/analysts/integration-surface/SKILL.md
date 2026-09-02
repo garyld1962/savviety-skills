@@ -31,8 +31,22 @@ From the orchestrator:
 - Zod schemas bound to procedures
 - Reference implementation of a similar router/service
 - CLAUDE.md conventions (protectedProcedure, shared types)
+- Ontology slice (optional): the `## Fact Types` rows that cross a system edge —
+  an entity on one side is external, or the fact is exchanged over an API —
+  copied verbatim with their `#`, plus the reference scheme of each external entity
 
 ## Process
+
+### Derive from ontology
+
+When the ontology slice is present, derive test specs from its constraints
+first. Each edge-crossing fact type yields at least one spec asserting the fact
+survives the crossing intact: the payload carries every role the verbalized
+fact type names, and the external entity is referenced by the reference scheme
+the ontology declares for it. The spec's rationale (`traceability`) cites the
+row, e.g. `ONTOLOGY.md F9 — Invoice is issued to an external Billing Account`.
+Prose re-derivation from router and service files covers only the surfaces the
+slice does not; when no slice is present, the process below is the whole job.
 
 ### 1. Router Procedure Wiring
 
@@ -241,7 +255,7 @@ When testing that service A calls service B, describe the mock arrangement clear
 
 ## Contract
 
-- **Inputs:** router files, service files, Zod schemas bound to procedures, auth middleware definitions, CLAUDE.md conventions.
+- **Inputs:** router files, service files, Zod schemas bound to procedures, auth middleware definitions, CLAUDE.md conventions; ontology slice (optional): `## Fact Types` rows crossing a system edge (an entity on one side is external, or the fact is exchanged over an API).
 - **Preconditions:** invoked from `/test-plan` State 4 when the target layer is `service`, `router`, or `component`; not selected for `schema`.
 - **Outputs:** `TestSpecification[]` conforming to `test-plan/foundations/test-case-schema.md`, with `analyst: "integration-surface"` and `category: "integration"` for ~80–90% of specs.
 - **Postconditions:** orchestrator validates, dedupes, and merges with other analysts' specs.
