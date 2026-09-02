@@ -76,14 +76,56 @@ When the ask is a routine, low-risk, convention-bound edit (single-file change, 
 
 2. **Check readiness.** Unless `--skip-readiness`, score the artifact
    with the **Automated readiness check** in
-   `_internal/aers-readiness/SKILL.md`. Behaviour by verdict:
-   - **Ready (0–2 pts)** → proceed to step 3.
-   - **Partially ready (3–6 pts)** → ask gap questions inline (one at
+   `_internal/aers-readiness/SKILL.md`. That check is a **composite**:
+   structural points plus the ontology contribution produced by
+   `_internal/ontology-readiness/SKILL.md` over the sibling
+   `ONTOLOGY.md`. Report both the structural verdict and the
+   `Ontology:` line — the point values live in those rubrics and are
+   not restated here:
+
+   ```
+   Readiness: Not ready / Partially ready / Ready
+   Ontology: Ready / Partial / Absent
+
+   Structural score: <n>
+   Ontology contribution: <0 | +2 | +4>
+   Composite: <n>
+
+   Gaps:
+   - ...
+   ```
+
+   Both lines are always emitted, even when the ontology contribution
+   is 0.
+
+   Behaviour by composite verdict:
+   - **Ready** → proceed to step 3.
+   - **Partially ready** → ask gap questions inline (one at
      a time); record as proposed closed decisions; offer `/prd-validate`
      for a structured interview. Do not auto-invoke it.
-   - **Not ready (7+ pts)** → halt. Surface the rubric points and
+   - **Not ready** → halt. Surface the rubric points and
      suggest `/prd-validate` for the operator to close gaps; do NOT
      start coding.
+
+   **Ontology halt.** Halt only when the ontology line is a bare
+   `Ontology: Absent` **and** the structural verdict is
+   `Partially ready` or worse. A structural verdict of `Ready` with a
+   bare `Absent` proceeds and logs the missing ontology as a known
+   risk. `Ontology: Absent (trivial domain)` never halts.
+
+   On a halt, suggest `/prd-create` to the operator and stop. Do not
+   auto-invoke `/prd-create` — it is an interview, the same interaction
+   boundary as `/prd-validate`. When the run proceeds on a bare
+   `Absent`, tell the operator the ontology is missing and carry it as
+   a known risk.
+
+   **Ontology revision halt.** The reopened-decision halt extends to
+   the ontology. An `addition` entry in the `ONTOLOGY.md` Extension Log
+   passes. A **revision** — one of exactly five kinds per
+   `_internal/ontology-readiness` § *Completeness and Extension* Rule 4:
+   changed reference scheme, homonym split, tightened constraint,
+   reclassified modality, retrofitted temporality — halts with an
+   `ontology-revision` finding.
 
    Produce only the lightest useful additions: gap report, proposed
    closed decisions, contract examples. For the small change fast
@@ -131,7 +173,7 @@ This skill references:
 
 ## CRITICAL: Do Not Guess
 
-- Do NOT reopen closed decisions already settled in the artifact.
+- Do NOT reopen closed decisions already settled in the artifact, including `settled` rows in its `ONTOLOGY.md`.
 - Do NOT skip readiness checks when requirements are still ambiguous.
 - Do NOT replace built-in planning/review with a custom prompt workflow.
 - Do NOT claim completion without running the repo's existing validation steps.
@@ -139,8 +181,8 @@ This skill references:
 
 ## Contract
 
-- **Inputs:** path to a requirements artifact (or the resolution order under `## Arguments` when no path is given); optional `--skip-readiness`. Calls `_internal/aers-readiness` (readiness scoring), `/prd-validate` (only when operator opts in interactively), `superpowers:writing-plans` (planning), `superpowers:requesting-code-review` or `/domain-review` (review). Consults `_internal/disposition` and `_internal/repo-delivery`.
+- **Inputs:** path to a requirements artifact (or the resolution order under `## Arguments` when no path is given); optional `--skip-readiness`. Calls `_internal/aers-readiness` (composite readiness scoring), `_internal/ontology-readiness` (the `Ontology:` verdict line, reached through aers-readiness), `/prd-validate` and `/prd-create` (only when the operator opts in interactively), `superpowers:writing-plans` (planning), `superpowers:requesting-code-review` or `/domain-review` (review). Consults `_internal/disposition` and `_internal/repo-delivery`.
 - **Preconditions:** in a git repo; artifact exists and is readable; operator is at the keyboard (kickoff is interactive by design — for autonomous flow, use `/execute-prd`).
 - **Outputs:** code committed for the requested change; review pass recorded; concise progress updates per the output contract above (decision context, edits, validation, blockers).
 - **Postconditions:** repo's existing validation steps (lint/build/test) have actually run; closed decisions added to the artifact when the operator confirms; no audit-grade governed artefacts (those belong to `/execute-prd`).
-- **Failure modes:** readiness `Not ready` (7+ pts) → halt before coding; blocking ambiguity remaining → halt and ask; any closed decision in the artifact reopened → halt and surface the conflict.
+- **Failure modes:** readiness `Not ready` → halt before coding; blocking ambiguity remaining → halt and ask; any closed decision in the artifact reopened → halt and surface the conflict; a bare `Ontology: Absent` with a structural verdict of `Partially ready` or worse → halt and suggest `/prd-create` to the operator, never auto-invoke `/prd-create` (a structural `Ready` with a bare `Absent` proceeds and logs a known risk, and `Absent (trivial domain)` never halts); an ontology revision — changed reference scheme, homonym split, tightened constraint, reclassified modality, retrofitted temporality — → halt with an `ontology-revision` finding, while `addition` entries pass.

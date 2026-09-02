@@ -84,15 +84,33 @@ At most one of `<path>` / `--ado` / `--linear` may be set.
 
    Before extracting non-negotiables or drafting the plan, score the
    requirements source using the **Automated readiness check** in
-   `_internal/aers-readiness/SKILL.md` (compute the points; verdict is
-   `Ready` / `Partially ready` / `Not ready`). The audit from step 3 is
-   an input — readiness is judged against *this repo*, not in the
-   abstract.
+   `_internal/aers-readiness/SKILL.md`. That check is a **composite**:
+   structural points plus the ontology contribution produced by
+   `_internal/ontology-readiness/SKILL.md` over the sibling
+   `ONTOLOGY.md` resolved in step 2. Report both the structural verdict
+   and the `Ontology:` line — the point values live in those rubrics and
+   are not restated here. The audit from step 3 is an input — readiness
+   is judged against *this repo*, not in the abstract.
 
-   Behaviour by verdict:
+   ```
+   Readiness: Not ready / Partially ready / Ready
+   Ontology: Ready / Partial / Absent
 
-   - **Ready (0–2 pts):** proceed silently to step 5.
-   - **Partially ready (3–6 pts):**
+   Structural score: <n>
+   Ontology contribution: <0 | +2 | +4>
+   Composite: <n>
+
+   Gaps:
+   - ...
+   ```
+
+   Both lines are always emitted, even when the ontology contribution
+   is 0.
+
+   Behaviour by composite verdict:
+
+   - **Ready:** proceed silently to step 5.
+   - **Partially ready:**
      - Interactive operator → ask the gap questions inline (one at a
        time, via AskUserQuestion) and record answers as **closed
        decisions** in the generated plan (step 7). Do not invent
@@ -101,13 +119,34 @@ At most one of `<path>` / `--ado` / `--linear` may be set.
      - Autonomous → proceed and log the gap list in the plan as a
        known risk under `## Open Decisions`. Do not auto-invoke
        `/prd-validate`.
-   - **Not ready (7+ pts):**
+   - **Not ready:**
      - Interactive operator → halt; suggest `/prd-validate` to close
        gaps. Do not invoke it automatically — it's an interview, not a
        gate.
      - Autonomous → abort with a `requirements-incomplete` finding
        listing the rubric points and the unresolved high-risk
        ambiguities. Do not draft a plan against an unready PRD.
+
+   **Ontology halt.** Halt only when the ontology line is a bare
+   `Ontology: Absent` **and** the structural verdict is
+   `Partially ready` or worse. A structural verdict of `Ready` with a
+   bare `Absent` proceeds and logs the missing ontology as a known
+   risk. `Ontology: Absent (trivial domain)` never halts.
+
+   On a halt: interactive operator → halt and suggest `/prd-create`;
+   autonomous → halt with a `requirements-incomplete` finding. Do not
+   auto-invoke `/prd-create` — it is an interview, the same interaction
+   boundary as `/prd-validate`. When the run proceeds on a bare
+   `Absent`, log the missing ontology in the plan as a known risk under
+   `## Open Decisions`.
+
+   **Ontology revision halt.** The reopened-decision halt extends to
+   the ontology. An `addition` entry in the `ONTOLOGY.md` Extension Log
+   passes. A **revision** — one of exactly five kinds per
+   `_internal/ontology-readiness` § *Completeness and Extension* Rule 4:
+   changed reference scheme, homonym split, tightened constraint,
+   reclassified modality, retrofitted temporality — halts with an
+   `ontology-revision` finding.
 
    The readiness gate's purpose is to refuse the most expensive failure
    mode this skill exists to prevent: a beautifully-validated plan built
@@ -216,8 +255,10 @@ At most one of `<path>` / `--ado` / `--linear` may be set.
 - **Inputs:** one requirements source — `<path>`, `--ado <id>`, or
   `--linear <id>` — resolved per step 2; optional `--type`; pass-through
   flags forwarded to `/execute-plan`. Calls `/work-item` (ticket fetch),
-  `/audit-existing` (repo audit), `_internal/aers-readiness` (readiness
-  scoring), the `workflows/design-it-twice.mjs` Workflow script (step 6,
+  `/audit-existing` (repo audit), `_internal/aers-readiness` (composite
+  readiness scoring), `_internal/ontology-readiness` (the `Ontology:`
+  verdict line, reached through aers-readiness), the
+  `workflows/design-it-twice.mjs` Workflow script (step 6,
   conditional), `/validate-plan` (plan gate), and `/execute-plan`
   (execution). Consults `_internal/plan-format` and
   `_internal/repo-delivery`.
@@ -238,9 +279,18 @@ At most one of `<path>` / `--ado` / `--linear` may be set.
   message as `/execute-plan` preflight gate 1; more than one of `<path>` /
   `--ado` / `--linear` → reject; several plausible requirements sources and
   none named → ask the operator (interactive) or abort with a
-  `plan-ambiguity` finding (autonomous); readiness `Not ready` (7+ pts) →
-  halt and suggest `/prd-validate` (interactive) or abort with a
-  `requirements-incomplete` finding (autonomous); `/validate-plan` still
+  `plan-ambiguity` finding (autonomous); readiness `Not ready` → halt and
+  suggest `/prd-validate` (interactive) or abort with a
+  `requirements-incomplete` finding (autonomous); a bare
+  `Ontology: Absent` with a structural verdict of `Partially ready` or
+  worse → halt and suggest `/prd-create` (interactive) or halt with a
+  `requirements-incomplete` finding (autonomous), never auto-invoke
+  `/prd-create` (a structural `Ready` with a bare `Absent` proceeds and
+  logs a known risk under `## Open Decisions`, and
+  `Absent (trivial domain)` never halts); an ontology revision — changed
+  reference scheme, homonym split, tightened constraint, reclassified
+  modality, retrofitted temporality — → halt with an `ontology-revision`
+  finding, while `addition` entries pass; `/validate-plan` still
   failing after three fix cycles → surface the top blocking finding and ask
   the operator; no Workflow tool when step 6 fires → halt, never emulate
   the script with the Agent tool.

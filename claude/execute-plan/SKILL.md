@@ -89,6 +89,26 @@ handling, disposition decisions, verdict interpretation, postmortem.
    (this changes planSha — recompute). Autonomous session → halt
    listing the ambiguities as open questions.
 
+5. **Ontology revision.** When the plan's source PRD has a sibling
+   `ONTOLOGY.md`, read its Extension Log and its `settled` rows. A task
+   or closed decision in the plan that contradicts a `settled` row
+   without a matching `revision` entry in that Extension Log → halt with
+   an `ontology-revision` finding naming the row and the contradicting
+   task. In `rewrite` mode the check also runs the other way: a
+   `revision` entry must be matched by a confirmed closed decision in
+   the PRD, and the same halt fires when it is not.
+
+   An `addition` entry in the `ONTOLOGY.md` Extension Log passes. A
+   **revision** — one of exactly five kinds per
+   `_internal/ontology-readiness` § *Completeness and Extension* Rule 4:
+   changed reference scheme, homonym split, tightened constraint,
+   reclassified modality, retrofitted temporality — halts with an
+   `ontology-revision` finding.
+
+   This gate does not score readiness. `/execute-prd` and `/kickoff` own
+   the `Ontology:` verdict; gate 5 only refuses a plan that silently
+   rewrites a settled domain fact.
+
 ## Launch the runtime
 
 Invoke the Workflow tool:
@@ -199,7 +219,9 @@ not invoked when they should have been. Repo-delivery flags or
 <Ambiguity in the source PRD/AERS that drove rework. Plan-deviations
 or plan-ambiguities whose root cause was an unsettled product
 decision. Closed decisions that should have existed but didn't.
-aers-readiness rubric items that the source missed.>
+aers-readiness rubric items that the source missed, and ontology items
+it missed — missing reference schemes, non-total lifecycles, unstated
+temporality.>
 
 ## What the process missed
 <Gaps only visible in hindsight. Coverage holes (link to `unproved`
@@ -240,6 +262,7 @@ use a fixed vocabulary so cross-run aggregation works.
 | `auto-accept-deviations` | The `auto_accept_deviations` category list |
 | `plan-template` | The plan author's template (drives `/execute-prd` step 7) |
 | `aers-readiness` | The AERS readiness rubric |
+| `ontology-readiness` | The ontology readiness rubric |
 | `execute-plan-skill` | This skill's own behaviour (gates, phases, defaults) |
 | `execute-prd-skill` | The `/execute-prd` skill's behaviour |
 | `domain-review-profile` | A `domain-review` profile (`breakpoint` or `full`) |
@@ -365,7 +388,8 @@ does not restate them as instructions.
   `resumeFromRunId` when resuming a failed run. Calls `/validate-plan`
   (preflight gate 2) and the `workflows/run-plan.mjs` Workflow script,
   which owns the task loop. Consults `_internal/repo-delivery`,
-  `_internal/disposition`, and `_internal/decision-record`.
+  `_internal/disposition`, `_internal/decision-record`, and
+  `_internal/ontology-readiness` (preflight gate 5).
 - **Preconditions:** the session has the Workflow tool; repo has a
   `CLAUDE.md ## Commands` section; the plan validates (or a human
   `--force` is explicit and recorded); the working branch is not
@@ -383,7 +407,12 @@ does not restate them as instructions.
 - **Failure modes:** missing `CLAUDE.md ## Commands` → halt; `/validate-plan`
   FAIL without `--force` → refuse to execute; on `default_branch` → refuse;
   preflight-gate-4 ambiguity in an autonomous session → halt listing the
-  open questions as `plan-ambiguity` findings; no Workflow tool → halt and
+  open questions as `plan-ambiguity` findings; a task or closed decision
+  contradicting a `settled` `ONTOLOGY.md` row with no matching `revision`
+  entry in its Extension Log — or, in `rewrite` mode, a `revision` entry
+  with no matching confirmed closed decision in the PRD → halt with an
+  `ontology-revision` finding (preflight gate 5), while `addition`
+  entries pass; no Workflow tool → halt and
   say so, never emulate `run-plan.mjs` with the Agent tool.
 
 ## When NOT to Use
