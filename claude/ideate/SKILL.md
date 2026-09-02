@@ -140,7 +140,7 @@ Recommended next step
 
 At the end, recommend the next workflow:
 - Continue ideation (more questions to resolve)
-- Write/upgrade a BRD, PRD, AERS, or story → `/prd-validate`
+- Write a PRD → `/prd-create`; upgrade an existing one → `/prd-validate`
 - Design the solution → `superpowers:brainstorming`
 - Plan the implementation → `superpowers:writing-plans`
 - Do not jump to `superpowers:writing-plans` until the direction is clear enough to plan
@@ -158,6 +158,6 @@ At the end, recommend the next workflow:
 
 - **Inputs:** a rough ask, a single document path, or a folder of related documents; mode flag (`idea` | `ba` | `tech`, default `idea`).
 - **Preconditions:** human operator at the keyboard (this is interactive ideation, not autonomous synthesis); inputs are readable.
-- **Outputs:** a direction document with identified options, risks, closed decisions where settled, and explicit open questions. Hands off to `/prd-validate`, `superpowers:writing-plans`, or `superpowers:brainstorming` once the direction is chosen.
+- **Outputs:** a direction document with identified options, risks, closed decisions where settled, and explicit open questions. Hands off to `/prd-create` (write a new PRD), `/prd-validate` (upgrade an existing one), `superpowers:writing-plans`, or `superpowers:brainstorming` once the direction is chosen.
 - **Postconditions:** the artifact is concrete enough to drive `/prd-validate` or `superpowers:writing-plans`; routine implementation defaults are NOT promoted into workshop decisions; mode-switch transitions preserve shared context.
 - **Failure modes:** input too vague for any mode → ask one clarifying question and stop; multi-document inputs disagree on direction → surface the conflict, do not silently average them.

@@ -22,7 +22,7 @@ The two values describe how callers consume the skill:
   document. Callers *consult* it (read fields, apply rules, cite the
   contract). It is not a procedure that produces output. Examples:
   `aers-readiness`, `decision-record`, `diff-manifest`, `disposition`,
-  `professional-rubric`, `repo-delivery`.
+  `ontology-readiness`, `professional-rubric`, `repo-delivery`.
 
 - **`embedded`** — a reusable procedure with explicit Inputs /
   Outputs / Failure modes. Callers *invoke* it (run the rubric over a

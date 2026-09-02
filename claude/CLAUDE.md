@@ -65,7 +65,7 @@ The skill is almost always installed; it loses the description match. Workflow:
 For a typical "I have a PRD, build the app" flow, the correct chain is:
 
 ```
-vague intent → goal → prd-validate → execute-prd (or writing-plans) → execute-plan (or executing-plans) → checkpoint → security-review/review
+vague intent → goal → prd-create → prd-validate → execute-prd (or writing-plans) → execute-plan (or executing-plans) → checkpoint → security-review/review
 ```
 
 `/goal` sits before PRD work: it validates that the intent is outcome-shaped (not solution-shaped) before requirements are written. Skip it when the problem statement is already clear.

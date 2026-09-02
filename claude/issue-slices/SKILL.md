@@ -1,6 +1,6 @@
 ---
 name: issue-slices
-description: "Break a PRD into independently-grabbable GitHub issues as vertical tracer-bullet slices. Use when user wants to convert a PRD to tickets, create implementation issues from a PRD — phrases like 'break this PRD into issues', 'create tickets from the PRD', 'slice the PRD into work items'. When NOT to Use: want the PRD executed end-to-end automatically (use /execute-prd); rough idea not yet a PRD (use /goal → /prd-validate first); want a plan doc not issues (use /execute-prd step 1)."
+description: "Break a PRD into independently-grabbable GitHub issues as vertical tracer-bullet slices. Use when user wants to convert a PRD to tickets, create implementation issues from a PRD — phrases like 'break this PRD into issues', 'create tickets from the PRD', 'slice the PRD into work items'. When NOT to Use: want the PRD executed end-to-end automatically (use /execute-prd); rough idea not yet a PRD (use /goal → /prd-create first); want a plan doc not issues (use /execute-prd step 1)."
 ---
 
 # /issue-slices -- PRD → Vertical Slice Issues
@@ -16,7 +16,7 @@ description: "Break a PRD into independently-grabbable GitHub issues as vertical
 ## When NOT to Use
 
 - You want the full PRD executed end-to-end automatically — use `/execute-prd`
-- The input is a rough idea, not a PRD — use `/prd-validate` first
+- The input is a rough idea, not a PRD — use `/prd-create` first
 - You want a plan doc rather than issues — use `/execute-prd` step 1
 
 ## Workflow

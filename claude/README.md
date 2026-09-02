@@ -51,13 +51,14 @@ project-local `.claude/skills/_project/` content.
 
 | Skill | Invocation | Purpose |
 |-------|------------|---------|
-| prd-validate | `/prd-validate` | Turn a PRD, story, or rough spec into an implementation-ready AERS (rubric: `_internal/aers-readiness/`) |
+| prd-create | `/prd-create` | Interview to a PRD folder: PRD.md, ONTOLOGY.md, AERS.md, derived glossary (rubric: `_internal/ontology-readiness/`) |
+| prd-validate | `/prd-validate` | Turn a PRD, story, or rough spec into an implementation-ready AERS (rubrics: `_internal/aers-readiness/`, `_internal/ontology-readiness/`) |
 | prd-acceptance | `/prd-acceptance` | Validate whether delivered work satisfies the PRD/acceptance bar |
 | spec-review-adversarial | `/spec-review-adversarial` | Adversarial review of specs, requirements, stories, and acceptance criteria |
 | ideate | `/ideate` | Explore solution directions before detailed planning |
 | thesis | `/thesis` | Interrogate for a single-sentence product or architectural thesis, then audit scope against it |
 | grill-me | `/grill-me` | Stress-test a plan or design by walking decision branches |
-| ubiquitous-language | `/ubiquitous-language` | Build a shared business/domain vocabulary |
+| ubiquitous-language | `/ubiquitous-language` | Derive the domain glossary from `ONTOLOGY.md` (legacy: extract from conversation) |
 | what-is-it-about | `/what-is-it-about` | Extract a thesis and outline from a YouTube/video artifact |
 | goal | `/goal` | Clarify and validate a development goal before writing a PRD |
 | design-twice | `/design-twice` | Explore multiple radically different designs before committing |
@@ -127,6 +128,13 @@ Non-skill assets that ship alongside the skills — typically hooks or shared sc
 | journal | Session journal hook scripts. Installed to `.claude/journal/`. |
 | install-scan | Dependency/install scanning hook scripts. Installed to `.claude/install-scan/`. |
 
+## Artifact layout
+
+`/prd-create` writes a per-PRD folder, `docs/prds/<slug>/`, holding `PRD.md`,
+`AERS.md`, `ONTOLOGY.md`, and the derived `UBIQUITOUS_LANGUAGE.md`. A root-level
+`AERS.md` (outside `docs/prds/`) remains a legacy location that older flows and
+callers may still resolve to.
+
 ## Starting execution from a PRD or AERS
 
 Once you have a `PRD.md`, `AERS.md`, or similar requirements artifact, execution
@@ -143,12 +151,12 @@ workflow skills against that file.
 
 ### Typical flow
 
-1. **Read the artifact** (`PRD.md`, `AERS.md`, story, or spec).
-2. **Run readiness** if ambiguity remains (`/prd-validate` directly, or via
-   `/kickoff` / `/execute-prd`).
-3. **Plan** once the artifact is ready enough to build.
-4. **Execute** with `/execute-plan` or let `/kickoff` / `/execute-prd`
-   carry the workflow through implementation and review.
+1. **`/goal`** — validate that the intent is outcome-shaped before writing requirements.
+2. **`/thesis`** (optional) — pin down a single-sentence product or architectural thesis.
+3. **`/prd-create`** — interview to a PRD folder (`docs/prds/<slug>/`): `PRD.md`, `ONTOLOGY.md`, `AERS.md`, derived glossary.
+4. **`/prd-validate`** (if not Ready) — close remaining structural or ontology ambiguity.
+5. **`/execute-prd` or `/kickoff`** — plan and carry the workflow through implementation and review.
+6. **`/execute-plan`** — execute the resulting plan file task-by-task.
 
 ## Multi-File Skills
 
@@ -192,6 +200,7 @@ _internal/
 ├── diff-manifest/SKILL.md              # Internal callable contract
 ├── disposition/SKILL.md                # Internal callable contract
 ├── modernization-rubric/SKILL.md       # Internal callable rubric
+├── ontology-readiness/SKILL.md         # Internal callable rubric
 ├── plan-format/SKILL.md                # Internal callable contract
 ├── pre-flight-check/SKILL.md           # Internal callable contract
 ├── professional-rubric/SKILL.md        # Internal callable rubric

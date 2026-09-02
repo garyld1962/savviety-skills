@@ -30,6 +30,7 @@ Currently pinned to `opus`:
 - `kickoff`
 - `grill-me`
 - `ideate`
+- `prd-create`
 - `prd-validate`
 - `spec-review-adversarial`
 - `triage`
