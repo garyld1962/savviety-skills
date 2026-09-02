@@ -6,7 +6,11 @@ model: opus
 
 # /prd-validate — AERS Readiness Gate
 
-**Purpose:** Take a requirements artifact (story, BRD, PRD, partial AERS, or plain-language ask) and turn it into an implementation-ready AERS through focused interview. Complements `/prd-acceptance` (post-implementation validation).
+**Purpose:** Validate and upgrade a requirements artifact that already exists
+(story, BRD, PRD, or partial AERS) into an implementation-ready AERS, through
+focused interview against the structural and ontology rubrics. Writing an
+artifact from an idea is not this skill's job — that belongs to `/prd-create`.
+Complements `/prd-acceptance` (post-implementation validation).
 
 **Use before planning, `/kickoff`, or `/execute-prd`** when the requirements are still ambiguous.
 
