@@ -12,7 +12,7 @@ whenToUse: Read accumulated postmortems, group taxonomy-tagged recommendations, 
 **Purpose:** consume the postmortem index, surface recurring
 recommendations, and propose concrete artefact edits. This is the
 *write* side of the auto-improve loop that `/skill:postmortem` and
-`execute-plan` Phase 5 feed.
+the `## Postmortem` section of `claude/execute-plan/SKILL.md` feed.
 
 The skill is **proposal-only by default.** It writes a tuning report
 listing edits and the evidence behind them; the operator (or a
@@ -46,7 +46,7 @@ follow-on `/skill:execute-plan` run) makes the actual changes.
 | `--target=<value>` | Filter to one taxonomy `target` (e.g. `adversarial-triggers`). Repeatable. Default: all. |
 | `--type=<value>` | Filter to one taxonomy `type` (e.g. `tune-threshold`). Repeatable. Default: all. |
 | `--report-path=<path>` | Where to write the tuning report. Default: `docs/postmortems/tuning-<YYYYMMDD-HHMMSS>.md`. |
-| `--apply` | **Off by default.** When set, generate a `/plan` artefact at `docs/plans/process-tune-<slug>.md` that captures each high-confidence proposal as a task. Does NOT execute it; that's still the operator's call. |
+| `--apply` | **Off by default.** When set, generate a `_internal/plan-format`-shaped artefact at `docs/plans/process-tune-<slug>.md` that captures each high-confidence proposal as a task. Does NOT execute it; that's still the operator's call. |
 | `--schedule <cron>` | Register a recurring `/schedule` job to run `process-tune` automatically. Example: `--schedule "0 9 * * 1"` runs every Monday at 09:00. Requires `/schedule` to be available. Outputs the registered routine name and next run time. |
 
 ## Workflow
@@ -134,7 +134,7 @@ Group order: highest score first.
 
 ### 5. Optional: emit an actionable plan
 
-When `--apply` is set, also write a `/plan`-shaped file at
+When `--apply` is set, also write a `_internal/plan-format`-shaped file at
 `docs/plans/process-tune-<YYYYMMDD-HHMMSS>.md` containing one
 **Task** per `confidence: high` group. Each task names the file to
 edit, the operation, and an acceptance bullet that's mechanically
@@ -174,10 +174,10 @@ Surfaced groups: <K>  (<H> high-confidence, <M> medium, <L> low)
   in a tail section labelled "**Recommendations needing taxonomy
   extension**" so the taxonomy itself can be improved. Do not silently
   drop them.
-- **The taxonomy is owned by execute-plan Phase 5.** If
-  `/skill:process-tune` keeps proposing taxonomy changes, the change goes
-  into `dev/execute-plan/SKILL.md` → Phase 5 → "Recommendation
-  taxonomy", not into a parallel definition here.
+- **The taxonomy is owned by the `## Postmortem` section of
+  `claude/execute-plan/SKILL.md`.** If `/skill:process-tune` keeps proposing
+  taxonomy changes, the change goes into that section's "Recommendation
+  taxonomy" subsection, not into a parallel definition here.
 
 ## Things you must not do
 
@@ -189,7 +189,8 @@ Surfaced groups: <K>  (<H> high-confidence, <M> medium, <L> low)
   `/skill:execute-plan` like any other change. Process edits get the same
   scrutiny as feature edits.
 - Do not delete or rewrite rows in `docs/postmortems/index.json`. The
-  index is append-only (see execute-plan Phase 5). Outdated
+  index is append-only (see the `## Postmortem` section of
+  `claude/execute-plan/SKILL.md`). Outdated
   recommendations stay as evidence; the scoring logic naturally
   weights recency.
 - Do not run on an empty or near-empty index. The `--min-runs=3`

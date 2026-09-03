@@ -5,15 +5,15 @@ description: 'Audit installed skills against the latest Claude Code and API rele
   on a new model release or Claude Code update — phrases like ''what new features
   can improve our skills'', ''sweep for new integrations'', ''update skills for the
   new model'', ''what Claude features are we not using''. When NOT to Use: improving
-  skill quality or fixing bugs in a single skill (use /skill-improver); adding a new
-  skill from scratch (use /new-skill).'
+  skill quality or fixing bugs in a single skill, or adding a new skill from scratch
+  (use superpowers:writing-skills).'
 whenToUse: 'Audit installed skills against the latest Claude Code and API releases,
   then propose and optionally apply surgical integrations. Use when you want to capitalize
   on a new model release or Claude Code update — phrases like ''what new features
   can improve our skills'', ''sweep for new integrations'', ''update skills for the
   new model'', ''what Claude features are we not using''. When NOT to Use: improving
-  skill quality or fixing bugs in a single skill (use /skill-improver); adding a new
-  skill from scratch (use /new-skill).'
+  skill quality or fixing bugs in a single skill, or adding a new skill from scratch
+  (use superpowers:writing-skills).'
 ---
 
 
@@ -30,8 +30,8 @@ whenToUse: 'Audit installed skills against the latest Claude Code and API releas
 
 ## When NOT to Use
 
-- Fixing bugs or quality issues in a specific skill — use `/skill-improver`
-- Writing a new skill from scratch — use `/new-skill`
+- Fixing bugs or quality issues in a specific skill — use `superpowers:writing-skills`
+- Writing a new skill from scratch — use `superpowers:writing-skills`
 - Auditing skill descriptions for trigger overlap — use `/validate-skills`
 
 ## Arguments

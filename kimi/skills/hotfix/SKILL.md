@@ -17,7 +17,7 @@ disableModelInvocation: false
 
 - Production is broken and needs an immediate fix
 - A critical bug was found right after a release
-- The normal /plan, /skill:domain-review, /skill:checkpoint pipeline is too slow
+- The normal /skill:execute-prd, /skill:domain-review, /skill:checkpoint pipeline is too slow
 
 ## When NOT to Use
 

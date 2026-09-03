@@ -101,6 +101,33 @@ handling, disposition decisions, verdict interpretation, postmortem.
    (this changes planSha — recompute). Autonomous session → halt
    listing the ambiguities as open questions.
 
+5. **Ontology revision.** When the plan's source PRD has a sibling
+   `ONTOLOGY.md`, read its Extension Log and its `settled` rows. A task
+   or closed decision in the plan that contradicts a `settled` row
+   without a matching `revision` entry in that Extension Log → halt with
+   an `ontology-revision` finding naming the row and the contradicting
+   task.
+
+   An `addition` entry in the `ONTOLOGY.md` Extension Log passes.
+
+   A **revision** — one of exactly five kinds per
+   `_internal/ontology-readiness` § *Completeness and Extension* Rule 4:
+   changed reference scheme, homonym split, tightened constraint,
+   reclassified modality, retrofitted temporality — is mode-dependent, and
+   the mode is read from the `mode:` header of `ONTOLOGY.md`: in `feature`
+   mode any `revision` entry in the Extension Log is a halt condition and
+   halts with an `ontology-revision` finding; `refresh` mode follows the
+   `feature` rule, so any `revision` entry halts the same way; in
+   `greenfield` mode a `revision` entry is itself a defect — nothing
+   existed to revise — and halts the same way; in `rewrite` mode a
+   `revision` entry must be matched by a confirmed closed decision in the
+   PRD, and is a halt — the same `ontology-revision` finding — only if it
+   is not.
+
+   This gate does not score readiness. `/skill:execute-prd` and `/skill:kickoff` own
+   the `Ontology:` verdict; gate 5 only refuses a plan that silently
+   rewrites a settled domain fact.
+
 ## Launch the runtime
 
 Invoke the Workflow tool:
@@ -211,7 +238,9 @@ not invoked when they should have been. Repo-delivery flags or
 <Ambiguity in the source PRD/AERS that drove rework. Plan-deviations
 or plan-ambiguities whose root cause was an unsettled product
 decision. Closed decisions that should have existed but didn't.
-aers-readiness rubric items that the source missed.>
+aers-readiness rubric items that the source missed, and ontology items
+it missed — missing reference schemes, non-total lifecycles, unstated
+temporality.>
 
 ## What the process missed
 <Gaps only visible in hindsight. Coverage holes (link to `unproved`
@@ -250,8 +279,9 @@ use a fixed vocabulary so cross-run aggregation works.
 | `claude-md/conventions` | The repo's `CLAUDE.md` conventions section |
 | `adversarial-triggers` | The `adversarial_triggers` glob list |
 | `auto-accept-deviations` | The `auto_accept_deviations` category list |
-| `plan-template` | The plan author's template (drives `/plan` and `/skill:execute-prd` step 5) |
+| `plan-template` | The plan author's template (drives `/skill:execute-prd` step 7) |
 | `aers-readiness` | The AERS readiness rubric |
+| `ontology-readiness` | The ontology readiness rubric |
 | `execute-plan-skill` | This skill's own behaviour (gates, phases, defaults) |
 | `execute-prd-skill` | The `/skill:execute-prd` skill's behaviour |
 | `domain-review-profile` | A `domain-review` profile (`breakpoint` or `full`) |
@@ -368,6 +398,41 @@ Destructive git commands are denied by `settings.template.json`
 permissions (`git reset --hard`, `git push --force*`, `git clean -f`,
 `git branch -D`). This skill assumes those rules are installed; it
 does not restate them as instructions.
+
+## Contract
+
+- **Inputs:** `<path>` to a plan file in the `_internal/plan-format`
+  contract; optional `--force` (override a `/skill:validate-plan` FAIL),
+  `--accept-risk <category>`, `--adversarial <auto|always|never>`, and
+  `resumeFromRunId` when resuming a failed run. Calls `/skill:validate-plan`
+  (preflight gate 2) and the `workflows/run-plan.mjs` Workflow script,
+  which owns the task loop. Consults `_internal/repo-delivery`,
+  `_internal/disposition`, `_internal/decision-record`, and
+  `_internal/ontology-readiness` (preflight gate 5).
+- **Preconditions:** the session has the Workflow tool; repo has a
+  `CLAUDE.md ## Commands` section; the plan validates (or a human
+  `--force` is explicit and recorded); the working branch is not
+  `default_branch`.
+- **Outputs:** `execution-report.json` written verbatim from the workflow
+  result plus `execution-report.md` rendered from it; decision records for
+  choices a future run could reverse; a postmortem plus a
+  `docs/postmortems/index.json` entry when the verdict is WARN/FAIL, the
+  retry budget was exhausted, or any deviation ended `accepted-risk`.
+- **Postconditions:** a PASS / WARN / FAIL verdict is stated against the
+  rules above; no `critical` or `major` finding is left `open` without the
+  verdict being FAIL; every `plan-ambiguity` resolved or raised in
+  preflight gate 4 appears in the report; commits and worktree branches
+  from a thrown run are preserved for resume.
+- **Failure modes:** missing `CLAUDE.md ## Commands` → halt; `/skill:validate-plan`
+  FAIL without `--force` → refuse to execute; on `default_branch` → refuse;
+  preflight-gate-4 ambiguity in an autonomous session → halt listing the
+  open questions as `plan-ambiguity` findings; a task or closed decision
+  contradicting a `settled` `ONTOLOGY.md` row with no matching `revision`
+  entry in its Extension Log — or, in `rewrite` mode, a `revision` entry
+  with no matching confirmed closed decision in the PRD → halt with an
+  `ontology-revision` finding (preflight gate 5), while `addition`
+  entries pass; no Workflow tool → halt and
+  say so, never emulate `run-plan.mjs` with the Agent tool.
 
 ## When NOT to Use
 

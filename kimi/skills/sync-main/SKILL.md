@@ -96,7 +96,7 @@ git rebase origin/$MAIN
 If conflicts occur:
 1. List conflicted files: `git diff --name-only --diff-filter=U`
 2. For each file, attempt auto-resolution:
-   - **Lock files** — follow `dev/closed-decisions/git/lockfile-conflicts.md`: take main's side, then regenerate via the project's install command and amend.
+   - **Lock files** — follow `_internal/closed-decisions/git/lockfile-conflicts.md`: take main's side, then regenerate via the project's install command and amend.
    - **Code conflicts** — show the conflict markers and ask the user how to resolve. Never auto-resolve code.
 3. After resolution: `git rebase --continue`
 4. If resolution fails after 2 attempts: `git rebase --abort` and report
@@ -134,7 +134,7 @@ Next: run /skill:checkpoint to verify everything still builds and passes.
 ## Key Rules
 
 1. **Never force-push without asking.** After a rebase, the branch history changes. If the branch has been pushed, warn the user that they'll need `--force-with-lease`.
-2. **Lock files get auto-resolved per closed decision.** See `dev/closed-decisions/git/lockfile-conflicts.md`. Never hand-edit a lock file.
+2. **Lock files get auto-resolved per closed decision.** See `_internal/closed-decisions/git/lockfile-conflicts.md`. Never hand-edit a lock file.
 3. **Code conflicts require human input.** Never silently pick a side on code conflicts.
 4. **Abort is safe.** If anything goes wrong, `git rebase --abort` or `git merge --abort` restores the previous state.
 5. **Always report divergence.** The user should know how far behind they are before deciding to sync.

@@ -31,6 +31,8 @@ Adapted from screenwriter Corey Mandel's "What is it about?" discipline. Applica
 
 Thesis + audit only. This skill deliberately does **not** produce a PRD, design doc, or handoff doc. Those are separate artifacts; the thesis is the referee they all answer to. The output of this skill is meant to be pasted into the top of a handoff doc, PRD, or design doc — not replace them.
 
+The thesis sentence also doubles as the universe-of-discourse (UoD) boundary test used by `_internal/ontology-readiness` and `/skill:prd-create`: it's what lets you say "that entity isn't in this world."
+
 ## Workflow
 
 Three phases, strict order. Do not skip ahead.
@@ -149,6 +151,7 @@ Tight output. Paste-ready for the top of a handoff doc, PRD, or design doc.
 - **Kill darlings out loud.** Name the cuts. The user can overrule.
 - **Respect the composition.** This skill produces a thesis artifact, not a handoff doc. Offer at the end: *"Want to hand this to your coding CLI now? The handoff doc goes on top of this."*
 - **Stop when done.** Thesis produced, audit complete, user confirms. Don't keep grilling.
+- **Interactive only.** This is a conversation; when no human is at the keyboard, refuse and point at `/skill:prd-create` or `/skill:prd-validate` for artifact work.
 
 ## Examples of Thesis Quality
 
@@ -179,3 +182,11 @@ The weak versions don't tell you what to cut or which alternative to reject. The
 - **The "everything platform."** Symptom: thesis has "and" in it, or the feature list spans unrelated capabilities. Fix: the thesis isn't narrow enough, or you have two projects.
 - **The missing product thesis.** Symptom: a crisp architectural thesis but a fuzzy user. Fix: run the skill again in `product` mode. These are different artifacts.
 - **The buried thesis.** Symptom: the real organizing idea shows up in design decision #6, not at the top. Fix: the decision is the thesis — promote it.
+
+## Contract
+
+- **Inputs:** mode (`product` or `arch`); the rest is conversational.
+- **Preconditions:** interactive session — one question at a time, the user's answers shape the next question. Never auto-invoke from non-interactive callers.
+- **Outputs:** the thesis artifact from Phase 3 (Product or Arch block above), paste-ready for the top of a handoff doc, PRD, or design doc. This is the input `/skill:prd-create --from` consumes for its UoD boundary.
+- **Postconditions:** every item currently in scope has been audited against the locked thesis; cuts, deferrals, and "two-projects" splits are named.
+- **Failure modes:** thesis candidate fails its own tests (Product or Architectural) → keep interrogating, do not advance to Phase 2. Non-interactive caller → refuse; this skill requires a conversation.

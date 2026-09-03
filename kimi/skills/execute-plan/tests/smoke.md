@@ -1,9 +1,10 @@
-# claude-new smoke test (run in the skills-test harness, fresh session)
+# claude smoke test (run in the skills-test harness, fresh session)
 
 1. Sync: `cli/skill.sh --claude --update ~/repos/skills-test-harness/claude-test`
-   then manually copy `claude-new/execute-plan` and `claude-new/execute-prd`
-   over the installed pair in the harness `.claude/skills/` (claude-new is
-   not yet in manifest.json).
+   then manually copy `claude/execute-plan` and `claude/execute-prd`
+   over the installed pair in the harness `.claude/skills/`
+   (claude/execute-plan and claude/execute-prd are not yet in
+   manifest.json).
 2. In the harness repo, create `CLAUDE.md ## Commands` declaring
    install/lint/build/test for a toy Node project, and an empty git repo
    on a feature branch.
