@@ -133,7 +133,7 @@ It should include:
 - Tooling Assumptions
 - Definition of Done
 
-If these are missing, use `#prompt:prd-validator` before `/plan`.
+If these are missing, use `#prompt:prd-validate` before `/plan`.
 
 Treat the validator workflow as:
 

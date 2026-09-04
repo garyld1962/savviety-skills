@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gh Readiness"
+  short_description: "Verify GitHub access before remote work"
+  default_prompt: "Use $gh-readiness for this request, preserving existing decisions and reporting verified results."

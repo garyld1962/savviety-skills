@@ -25,7 +25,7 @@ Follow the skill: `.github/skills/prd-readiness/SKILL.md`
 - Use project instructions from `.github/copilot-instructions.md` if present.
 - Keep the interaction one question at a time.
 - Do not drift into implementation planning; that belongs in `/plan`.
-- The prompt name may still reference `prd-validator` for compatibility, but the preferred artifact term is **AERS**: Agent-Executable Requirements Spec.
+- The prompt name may still reference `prd-validate` for compatibility, but the preferred artifact term is **AERS**: Agent-Executable Requirements Spec.
 
 ## Input → output contract
 

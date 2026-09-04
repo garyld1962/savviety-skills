@@ -1,38 +1,51 @@
 ---
 name: execute-plan
-description: "Execute an existing written implementation plan end-to-end with validation, task checkpoints, focused build/test cycles, milestone verification, review gates, retry discipline, and optional user-authorized parallel lanes. Use when the user already has a plan file, often produced by execute-prd, and says 'execute the plan', 'run docs/plans/X.md', 'resume the plan', or 'work through this plan'. Prefer this over ad-hoc execution when the plan has tasks, acceptance criteria, verification commands, or parallel metadata."
+description: "Execute or resume a written task graph plan with ownership checks, acceptance proof, milestone reviews, bounded retries and final-head gates. Use for an existing plan; use execute-prd when requirements still need planning."
 ---
 
-# Execute Plan
+# Execute plan
 
-Execute a plan end to end, but keep Codex's subagent policy explicit.
+Read the sibling validate-plan skill's [execution contract](../validate-plan/references/execution.md),
+[plan format](../validate-plan/references/plan-format.md), and
+[reporting contract](../validate-plan/references/reporting.md) before implementation.
 
-Load Codex-native references as needed:
+1. Resolve the plan, command contract and existing work. Validate structure and
+   semantic readiness, record plan/base hashes, and prepare a working branch.
+2. Execute ready tasks in dependency order. Use concurrent workers only with existing
+   authorization and actual host support; otherwise run the same graph sequentially.
+3. Check ownership against actual changed paths, prove each acceptance criterion,
+   and review at milestone boundaries. Preserve governing decisions.
+4. Apply global retry/fix/time budgets and the loop fuse. A missing review, unproved
+   acceptance or false alignment blocks completion.
+5. Complete required gates on the final code commit, disposition every finding, and
+   validate the canonical report using validate-plan's scripts/validate_report.py.
+   Preserve work and write reports/postmortems on failure as well as success.
 
-- `references/preflight.md` for validation, branch, toolchain, and safety gates.
-- `references/task-loop.md` for sequential task execution, ambiguity handling, decision records, and retries.
-- `references/parallel-waves.md` for user-authorized subagent lanes.
-- `references/review-gates.md` for milestone and PR-boundary reviews.
-- `references/loop-fuse.md` for stopping repeated verification/tool loops.
-- `references/reporting.md` for final reports and postmortems.
-- `references/agent-prompts/` for default lane prompt templates.
-- `scripts/toolchain_probe.py` for deterministic PATH checks.
+## Options and compatibility
+Honor explicit --resume, --create-branch, --interactive=yes|no|auto,
+--max-retries=N, --max-fix-cycles=N, --max-minutes=N,
+--adversarial=auto|always|never, --accept-risk=<finding-id>,
+--run-folder=<path|auto|off>, and --postmortem=auto|always|never.
+With run-folder=off, return the same report content without persistent run files.
+With postmortem=never, still include blockers and recovery evidence in the report.
+Accept --postmortem-mode=auto|full|lightweight to control detail, not required evidence.
+A force request must identify waived validation findings; it never makes an invalid
+dependency graph executable. Reject unknown options instead of silently ignoring them.
+Options are instructions to the agent, not a claim that a background CLI exists.
 
-`references/legacy/` is archival only. Do not load it during normal execution.
+## Examples
+- "Execute docs/plans/export.md" → validate, implement, verify and report.
+- "Resume this failed plan" → reconcile saved hashes, commits and proof before continuing.
 
-## Relationship To Codex Behavior
+## Closed decisions and open decisions
+Honor the plan and referenced decisions. Resolve material codebase ambiguity from code
+first, then ask or report a batch blocker. Do not reopen choices already settled.
 
-This skill is the structured plan executor for Savviety workflows. It adds plan validation, delivery contracts, per-task verification, review gates, and explicit subagent authorization around normal Codex implementation work. For vague intent without a plan, use `execute-prd` or clarify requirements first. For a trivial change, edit directly.
+## Do not
+Do not treat worker status as proof, missing findings as a clean review, or a graph as
+permission to delegate. Do not bypass a required gate to achieve a successful verdict.
 
-## Workflow
-
-1. Run `validate-plan`.
-2. Summarize tasks, milestones, ownership, and verification commands.
-3. Ask before using subagents for parallel lanes. If not authorized, execute sequentially.
-4. For authorized lanes, use disjoint write scopes and include the multi-agent coordination warning.
-5. Run focused verification after each task and full verification at milestones.
-6. Apply the loop fuse before every verification rerun or alternate probe.
-7. Run review gates at milestones and the PR boundary.
-8. Keep a concise execution log and final report.
-
-Never assume worker agents inherit parent environment or durable state.
+## Codex integration
+Use $execute-plan and native Codex tools. Read AGENTS.md; preserve current host permissions.
+Private agent briefs live under execute-plan/references/agent-prompts. Legacy references
+are archival and are not part of the active contract.

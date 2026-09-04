@@ -10,7 +10,7 @@ This repository is not an application repo. It is the **source of truth for
 skill authoring** across:
 
 - `claude/` - Claude Code skills
-- `copilot-native/` - source assets for Copilot prompts, agents, skills, and
+- `copilot/` - source assets for Copilot prompts, agents, skills, and
   instructions
 
 Treat this repository as an **authoring system**, not as a deployed `.github/`
@@ -19,15 +19,15 @@ workspace.
 ## Precedence and circular authoring rule
 
 - These repo-level instructions apply when working anywhere in this repository.
-- Files under `copilot-native/` are **source assets** that will later be
+- Files under `copilot/` are **source assets** that will later be
   deployed into `.github/` in downstream repos.
-- `copilot-native/copilot-instructions.md` and
-  `copilot-native/instructions/*.instructions.md` are themselves authoring
+- `copilot/copilot-instructions.md` and
+  `copilot/instructions/*.instructions.md` are themselves authoring
   artifacts/templates. They must align with this file rather than redefining the
   repo's top-level authoring rules.
 - It is valid and expected for skills in this repository, including root-level
   and `claude/` authoring workflows, to create or refine assets under
-  `copilot-native/`. That is not a circular mistake; it is the intended design
+  `copilot/`. That is not a circular mistake; it is the intended design
   of the repo.
 
 ## Copilot asset authoring rules for this repo
@@ -70,14 +70,14 @@ For non-trivial prompts, agents, and skills, prefer to include all three:
   workflow style.
 - One precise example is better than several generic ones.
 
-## What to do when editing `copilot-native/`
+## What to do when editing `copilot/`
 
-- Treat `copilot-native/` as the canonical source tree for future Copilot
+- Treat `copilot/` as the canonical source tree for future Copilot
   assets, not as a live deployed `.github/` folder.
-- When updating asset templates inside `copilot-native/`, make the asset itself
+- When updating asset templates inside `copilot/`, make the asset itself
   follow the same rules this repo uses to author it.
-- If `copilot-native/` instructions disagree with this file, update the
-  `copilot-native/` file so it matches the repo-level rule unless there is a
+- If `copilot/` instructions disagree with this file, update the
+  `copilot/` file so it matches the repo-level rule unless there is a
   deliberate, documented exception.
 
 ## What to do when reviewing or porting assets

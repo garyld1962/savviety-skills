@@ -33,3 +33,18 @@ Restart Codex after changing plugin contents so the installed local plugin cache
 - `execute-prd` consolidates full PRD execution and lightweight `kickoff`.
 - `skills` consolidates Claude `skill-help`, `skill-audit`, and `find-skills`.
 - `grill-me` remains explicit because it is a distinct decision stress-test workflow.
+
+## Claude functionality update (0.2.0)
+
+The [coverage map](../docs/parity/claude-native.md) maps every public Claude workflow
+onto 44 Codex entrypoints, retaining delivery/kickoff/skill-management consolidations.
+Nine additional skills cover bug intake, interface comparisons, draw.io, release-feature
+audits, GitHub readiness, goal discovery, issue slicing, refactor briefs and vault notes.
+
+Plans use depends_on, write_scope and milestone_end. Older wave/lane metadata needs
+explicit migration. Shared contracts are packaged inside the plugin; no sibling Claude
+tree or Workflow host is required. The validators need Python 3 and PyYAML. Required
+checks and reviews must prove the final code head, and manual checks remain unproved.
+Existing .codex/config.toml, hooks.json and local marketplace settings are user-owned
+on installer updates. Run bin/sync-native-contracts --check, the Codex asset validator,
+bin/validate-native-parity and the behavioral tests before publishing changes.

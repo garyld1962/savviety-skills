@@ -1,0 +1,408 @@
+{
+  "source_commit": "c95088fdb443676d8ec7cfadbfbe60bbc825e3d6",
+  "reviewed_at": "2026-09-04",
+  "coverage": "entrypoint and contract coverage; not live-host certification",
+  "workflows": [
+    {
+      "claude": "audit-existing",
+      "codex": "codex/plugins/savviety-workflows/skills/audit-existing/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/audit-existing.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "bug-session",
+      "codex": "codex/plugins/savviety-workflows/skills/bug-session/SKILL.md",
+      "copilot": [
+        "copilot/skills/bug-session/SKILL.md",
+        "copilot/prompts/dev/bug-session.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "changelog",
+      "codex": "codex/plugins/savviety-workflows/skills/changelog/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/changelog.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "checkpoint",
+      "codex": "codex/plugins/savviety-workflows/skills/checkpoint/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/checkpoint.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "code-investigate",
+      "codex": "codex/plugins/savviety-workflows/skills/code-investigate/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/code-investigate.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "code-review-professional",
+      "codex": "codex/plugins/savviety-workflows/skills/code-review-professional/SKILL.md",
+      "copilot": [
+        "copilot/prompts/review/code-review-professional.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "configure",
+      "codex": "codex/plugins/savviety-workflows/skills/configure/SKILL.md",
+      "copilot": [
+        "copilot/skills/configure/SKILL.md",
+        "copilot/prompts/common/configure.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "dep-audit",
+      "codex": "codex/plugins/savviety-workflows/skills/dep-audit/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/dep-audit.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "dep-migrate",
+      "codex": "codex/plugins/savviety-workflows/skills/dep-migrate/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/dep-migrate.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "design-twice",
+      "codex": "codex/plugins/savviety-workflows/skills/design-twice/SKILL.md",
+      "copilot": [
+        "copilot/skills/design-twice/SKILL.md",
+        "copilot/prompts/ba/design-twice.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "domain-review",
+      "codex": "codex/plugins/savviety-workflows/skills/code-review/SKILL.md",
+      "copilot": [
+        "copilot/prompts/review/domain-review.prompt.md"
+      ],
+      "mapping": "consolidated"
+    },
+    {
+      "claude": "drawio",
+      "codex": "codex/plugins/savviety-workflows/skills/drawio/SKILL.md",
+      "copilot": [
+        "copilot/skills/drawio/SKILL.md",
+        "copilot/prompts/common/drawio.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "env-check",
+      "codex": "codex/plugins/savviety-workflows/skills/env-check/SKILL.md",
+      "copilot": [
+        "copilot/prompts/common/env-check.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "execute-plan",
+      "codex": "codex/plugins/savviety-workflows/skills/execute-plan/SKILL.md",
+      "copilot": [
+        "copilot/skills/execute-plan/SKILL.md",
+        "copilot/prompts/dev/execute-plan.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "execute-prd",
+      "codex": "codex/plugins/savviety-workflows/skills/execute-prd/SKILL.md",
+      "copilot": [
+        "copilot/skills/execute-prd/SKILL.md",
+        "copilot/prompts/dev/execute-prd.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "feature-sweep",
+      "codex": "codex/plugins/savviety-workflows/skills/feature-sweep/SKILL.md",
+      "copilot": [
+        "copilot/skills/feature-sweep/SKILL.md",
+        "copilot/prompts/common/feature-sweep.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "gh-readiness",
+      "codex": "codex/plugins/savviety-workflows/skills/gh-readiness/SKILL.md",
+      "copilot": [
+        "copilot/skills/gh-readiness/SKILL.md",
+        "copilot/prompts/common/gh-readiness.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "goal",
+      "codex": "codex/plugins/savviety-workflows/skills/goal/SKILL.md",
+      "copilot": [
+        "copilot/skills/goal/SKILL.md",
+        "copilot/prompts/ba/goal.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "grill-me",
+      "codex": "codex/plugins/savviety-workflows/skills/grill-me/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/grill-me.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "hotfix",
+      "codex": "codex/plugins/savviety-workflows/skills/ship/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/hotfix.prompt.md"
+      ],
+      "mapping": "consolidated"
+    },
+    {
+      "claude": "ideate",
+      "codex": "codex/plugins/savviety-workflows/skills/ideate/SKILL.md",
+      "copilot": [
+        "copilot/prompts/ba/ideate.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "issue-slices",
+      "codex": "codex/plugins/savviety-workflows/skills/issue-slices/SKILL.md",
+      "copilot": [
+        "copilot/skills/issue-slices/SKILL.md",
+        "copilot/prompts/ba/issue-slices.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "k8s-verify",
+      "codex": "codex/plugins/savviety-workflows/skills/k8s-verify/SKILL.md",
+      "copilot": [
+        "copilot/skills/k8s-verify/SKILL.md",
+        "copilot/prompts/dev/k8s-verify.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "kickoff",
+      "codex": "codex/plugins/savviety-workflows/skills/execute-prd/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/kickoff.prompt.md"
+      ],
+      "mapping": "consolidated"
+    },
+    {
+      "claude": "modernize",
+      "codex": "codex/plugins/savviety-workflows/skills/modernize/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/modernize.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "parallel-optimization",
+      "codex": "codex/plugins/savviety-workflows/skills/parallel-optimization/SKILL.md",
+      "copilot": [
+        "copilot/skills/parallel-optimization/SKILL.md",
+        "copilot/prompts/dev/parallel-optimization.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "postmortem",
+      "codex": "codex/plugins/savviety-workflows/skills/postmortem/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/postmortem.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "pr",
+      "codex": "codex/plugins/savviety-workflows/skills/ship/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/pr.prompt.md"
+      ],
+      "mapping": "consolidated"
+    },
+    {
+      "claude": "prd-acceptance",
+      "codex": "codex/plugins/savviety-workflows/skills/prd-acceptance/SKILL.md",
+      "copilot": [
+        "copilot/skills/prd-acceptance/SKILL.md",
+        "copilot/prompts/dev/prd-acceptance.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "prd-validate",
+      "codex": "codex/plugins/savviety-workflows/skills/prd-validate/SKILL.md",
+      "copilot": [
+        "copilot/prompts/ba/prd-validate.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "process-tune",
+      "codex": "codex/plugins/savviety-workflows/skills/process-tune/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/process-tune.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "refactor-brief",
+      "codex": "codex/plugins/savviety-workflows/skills/refactor-brief/SKILL.md",
+      "copilot": [
+        "copilot/skills/refactor-brief/SKILL.md",
+        "copilot/prompts/dev/refactor-brief.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "repo-status",
+      "codex": "codex/plugins/savviety-workflows/skills/repo-status/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/repo-status.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "review-adversarial",
+      "codex": "codex/plugins/savviety-workflows/skills/review-adversarial/SKILL.md",
+      "copilot": [
+        "copilot/skills/review-adversarial/SKILL.md",
+        "copilot/prompts/review/review-adversarial.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "review-gauntlet",
+      "codex": "codex/plugins/savviety-workflows/skills/review-gauntlet/SKILL.md",
+      "copilot": [
+        "copilot/prompts/review/review-gauntlet.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "ship",
+      "codex": "codex/plugins/savviety-workflows/skills/ship/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/ship.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "skill-audit",
+      "codex": "codex/plugins/savviety-workflows/skills/skills/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/skill-audit.prompt.md"
+      ],
+      "mapping": "consolidated"
+    },
+    {
+      "claude": "skill-help",
+      "codex": "codex/plugins/savviety-workflows/skills/skills/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/skill-help.prompt.md"
+      ],
+      "mapping": "consolidated"
+    },
+    {
+      "claude": "spec-review-adversarial",
+      "codex": "codex/plugins/savviety-workflows/skills/spec-review-adversarial/SKILL.md",
+      "copilot": [
+        "copilot/prompts/review/spec-review-adversarial.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "sync-main",
+      "codex": "codex/plugins/savviety-workflows/skills/sync-main/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/sync-main.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "test-plan",
+      "codex": "codex/plugins/savviety-workflows/skills/test-plan/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/test-plan.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "thesis",
+      "codex": "codex/plugins/savviety-workflows/skills/thesis/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/thesis.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "triage",
+      "codex": "codex/plugins/savviety-workflows/skills/triage/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/triage.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "ubiquitous-language",
+      "codex": "codex/plugins/savviety-workflows/skills/ubiquitous-language/SKILL.md",
+      "copilot": [
+        "copilot/prompts/ba/ubiquitous-language.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "validate-plan",
+      "codex": "codex/plugins/savviety-workflows/skills/validate-plan/SKILL.md",
+      "copilot": [
+        "copilot/skills/validate-plan/SKILL.md",
+        "copilot/prompts/dev/validate-plan.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "vault",
+      "codex": "codex/plugins/savviety-workflows/skills/vault/SKILL.md",
+      "copilot": [
+        "copilot/skills/vault/SKILL.md",
+        "copilot/prompts/common/vault.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "what-is-it-about",
+      "codex": "codex/plugins/savviety-workflows/skills/what-is-it-about/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/what-is-it-about.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
+      "claude": "work-item",
+      "codex": "codex/plugins/savviety-workflows/skills/work-item/SKILL.md",
+      "copilot": [
+        "copilot/prompts/dev/work-item.prompt.md"
+      ],
+      "mapping": "direct"
+    }
+  ]
+}

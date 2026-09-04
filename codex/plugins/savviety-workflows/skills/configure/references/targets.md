@@ -17,3 +17,9 @@ Use this for Codex-side setup.
 - Preserve user-owned files unless the user asked to update them.
 - Run pre-flight checks after config changes when available.
 
+
+## Obsidian vault
+
+For the vault target, resolve an explicit path or OBSIDIAN_VAULT first. Otherwise
+write user-owned .savviety/vault.json using the sibling vault skill contract.
+Ask once for an unknown location, preserve existing fields, and verify directory access.

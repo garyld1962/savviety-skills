@@ -1,0 +1,4 @@
+interface:
+  display_name: "Refactor Brief"
+  short_description: "Plan refactors as small verified changes"
+  default_prompt: "Use $refactor-brief for this request, preserving existing decisions and reporting verified results."

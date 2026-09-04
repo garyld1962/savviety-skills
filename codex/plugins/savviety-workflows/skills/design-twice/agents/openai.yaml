@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Twice"
+  short_description: "Compare contrasting interface designs"
+  default_prompt: "Use $design-twice for this request, preserving existing decisions and reporting verified results."

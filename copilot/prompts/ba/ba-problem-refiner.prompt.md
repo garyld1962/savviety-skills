@@ -22,5 +22,5 @@ Follow the skill: `.github/skills/prd-readiness/SKILL.md`
 - Ask only the smallest set of questions needed to close high-risk ambiguity.
 - Keep the output solution-neutral unless the user has already chosen an
   implementation direction.
-- Use this before `#prompt:prd-validator` or built-in `/plan`, not instead of
+- Use this before `#prompt:prd-validate` or built-in `/plan`, not instead of
   them.

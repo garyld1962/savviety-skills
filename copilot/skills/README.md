@@ -2,7 +2,7 @@
 
 This directory holds the **durable Copilot skill assets** in the workspace:
 
-- `copilot-native/skills/<skill>/SKILL.md`
+- `copilot/skills/<skill>/SKILL.md`
 
 Canonical workspace docs and inventory live one level up:
 

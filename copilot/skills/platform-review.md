@@ -115,7 +115,7 @@ They should not become another layer of generic orchestration unless there is a 
 
 ### Add now
 
-- `prd-validator` (AERS validator)
+- `prd-validate` (AERS validator)
 - `copilot-asset-audit`
 - a Copilot platform playbook skill
 - an authoring instruction for future prompt/agent/skill design

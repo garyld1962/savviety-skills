@@ -1,30 +1,43 @@
 ---
 name: validate-plan
-description: "Validate an implementation plan before execution. Checks markdown structure, discrete tasks, acceptance criteria, placeholders, closed decisions, and parallel execution shape."
+description: "Validate a task graph plan's YAML, dependencies, write ownership and acceptance before execution, then review semantic readiness. Use for plan checks; do not execute or rewrite the plan unless requested."
 ---
 
-# Validate Plan
+# Validate plan
 
-Use this before executing a written implementation plan.
+Read [the plan contract](references/plan-format.md). The bundled scripts require
+Python 3 and PyYAML; missing dependencies are a reported blocker.
 
-## Workflow
+1. Resolve the explicit plan path. If omitted, inspect execution-plan candidates in
+   docs/plans and choose only an unambiguous match; do not pick a PRD by modification time.
+2. Run `python3 <this-skill>/scripts/validate_plan.py <plan.md>`.
+   Use --json for parsed task metadata, diagnostics and the exact-byte plan hash.
+3. Review what the script cannot prove: observable/relevant acceptance, repo command
+   validity, actual file ownership, requirement coverage, consistent closed decisions,
+   referenced decision records and unresolved product choices.
+4. Return PASS only when both structural and semantic checks pass. Distinguish
+   structural success from readiness. Return all failures with task IDs and remedies.
+5. When called from an authorized planning/execution workflow, repair scoped issues
+   and revalidate; when asked only for review, return findings without changing files.
 
-1. Resolve the plan path from the user argument. If omitted, use the newest `*.md` under `docs/plans/`.
-2. Run `python3 <skill-root>/scripts/validate_plan.py <path>`.
-3. Report all failures together with line references where available.
-4. Do not execute or rewrite the plan unless the user asks for fixes.
+The [execution](references/execution.md), [requirements](references/prd-planning.md)
+and [reporting](references/reporting.md) references provide the shared downstream
+contract. Before a final execution success claim run
+`python3 <this-skill>/scripts/validate_report.py <report.json> --plan <plan.md>`.
 
-## Validation Scope
+## Examples
+- Two independent tasks own the same lockfile → FAIL; assign an owner and dependency.
+- A syntactically valid plan says "the feature works" → semantic FAIL; require proof.
 
-The validator is a lightweight readiness gate. It catches mechanical issues that make execution unreliable:
+## Closed decisions and open decisions
+Validate the supplied decisions for conflicts and source authority. Do not reopen them
+merely because another design is possible.
 
-- missing H1 title
-- no discrete tasks
-- prose-only or missing acceptance criteria
-- explicit milestones with orphan tasks
-- forbidden placeholders
-- ambiguous task openers
-- malformed closed decisions
-- malformed `## Parallel Execution` sections
+## Do not
+Do not run acceptance commands during a read-only validation, equate script exit 0
+with complete readiness, or schedule a malformed dependency graph with --force.
 
-For the detailed standard, read `references/plan-readiness.md`.
+## Codex integration
+Use $validate-plan and native Codex tools. Read AGENTS.md; preserve current host permissions.
+Private agent briefs live under execute-plan/references/agent-prompts. Legacy references
+are archival and are not part of the active contract.

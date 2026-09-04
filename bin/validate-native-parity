@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""Check declared workflow coverage, install sources and native asset references."""
+import json
+from pathlib import Path
+import re
+import sys
+import yaml
+
+root = Path(__file__).resolve().parents[1]
+errors = []
+coverage = json.loads((root / "docs/parity/claude-native.json").read_text())
+names = sorted(p.parent.name for p in (root / "claude").glob("*/SKILL.md") if not p.parent.name.startswith("_"))
+rows = coverage["workflows"]
+if sorted(row["claude"] for row in rows) != names:
+    errors.append("Claude workflow inventory differs from the coverage manifest")
+for row in rows:
+    for path in [row["codex"], *row["copilot"]]:
+        if not (root / path).is_file():
+            errors.append(f"missing mapped entrypoint: {path}")
+manifest = json.loads((root / "manifest.json").read_text())
+for platform in ("codex", "copilot"):
+    for kind in ("trees", "extras", "starters"):
+        for item in manifest[platform].get(kind, []):
+            if not (root / item["from"]).exists():
+                errors.append(f"missing installer source: {item['from']}")
+
+def metadata(path):
+    text = path.read_text()
+    if not text.startswith("---\n"):
+        errors.append(f"missing frontmatter: {path.relative_to(root)}")
+        return {}
+    try:
+        data = yaml.safe_load(text.split("---", 2)[1])
+        if not isinstance(data, dict) or not isinstance(data.get("description"), str):
+            raise ValueError("missing description")
+        return data
+    except (yaml.YAMLError, ValueError, IndexError) as exc:
+        errors.append(f"invalid frontmatter: {path.relative_to(root)}: {exc}")
+        return {}
+
+for path in (root / "copilot/skills").glob("*/SKILL.md"):
+    if metadata(path).get("name") != path.parent.name:
+        errors.append(f"skill name differs from directory: {path.relative_to(root)}")
+for path in (root / "copilot/prompts").rglob("*.prompt.md"):
+    metadata(path)
+
+# These are explicitly user-created configuration destinations, not shipped assets.
+user_paths = {".github/instructions/env.config.md", ".github/instructions/project.instructions.md"}
+for path in (root / "copilot").rglob("*.md"):
+    for target in set(re.findall(r"\.github/(?:skills|prompts|agents|instructions|docs|templates)/[\w./-]+\.md", path.read_text())):
+        if target not in user_paths and not (root / "copilot" / target.removeprefix(".github/")).is_file():
+            errors.append(f"{path.relative_to(root)} references missing asset {target}")
+
+# Linked resources in the new/updated native entrypoints and packaged contracts
+# must resolve without a sibling platform source tree.
+paths = {root / row["codex"] for row in rows}
+paths.update(root / p for row in rows for p in row["copilot"])
+for platform in ("codex/plugins/savviety-workflows/skills", "copilot/skills"):
+    for skill in ("validate-plan", "drawio"):
+        paths.update((root / platform / skill).rglob("*.md"))
+for path in paths:
+    for target in re.findall(r"\[[^\]]*\]\(([^)\s]+)\)", path.read_text()):
+        if re.match(r"[a-z]+:", target) or target.startswith(("#", "/", "<")):
+            continue
+        local = target.split("#", 1)[0]
+        if local and not (path.parent / local).exists():
+            errors.append(f"{path.relative_to(root)} has broken relative link {target}")
+
+if errors:
+    print("Native parity validation failed:\n" + "\n".join(sorted(set(errors))))
+    sys.exit(1)
+print(f"Native parity validated: {len(rows)} Claude workflows, install sources and active references.")

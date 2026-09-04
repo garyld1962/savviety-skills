@@ -11,7 +11,7 @@ Follow these sources of truth:
 - `.github/docs/process/review-and-disposition.md`
 - `.github/docs/process/document-schema.md`
 - `.github/docs/templates/adversarial-review.template.md`
-- `.github/prompts/dev/adversarial-review.prompt.md`
+- `.github/prompts/review/review-adversarial.prompt.md`
 - `.github/skills/review-disposition-governance/SKILL.md`
 
 ## Missing governed workflow assets

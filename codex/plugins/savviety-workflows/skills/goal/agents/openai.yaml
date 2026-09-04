@@ -1,0 +1,4 @@
+interface:
+  display_name: "Goal"
+  short_description: "Clarify outcomes before planning solutions"
+  default_prompt: "Use $goal for this request, preserving existing decisions and reporting verified results."

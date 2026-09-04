@@ -28,7 +28,7 @@ file is missing in the consuming repo:
 
 - gather meaningful findings from review artifacts
 - track each item's status using the canonical vocabulary
-- identify unresolved `High` findings
+- identify unresolved `critical` or `major` findings
 - identify when human arbitration is required
 - record accepted-risk decisions only when explicitly justified
 - write the result to `disposition-log.md`
@@ -37,7 +37,7 @@ file is missing in the consuming repo:
 
 - Do not silently drop meaningful findings.
 - Do not mark an unresolved disagreement as `accepted-risk` without a human decision.
-- Do not mark the run ready if unresolved `High` findings remain.
+- Do not mark the run ready if unresolved `critical` or `major` findings remain.
 - Keep the log auditable and precise.
 
 ## Output contract

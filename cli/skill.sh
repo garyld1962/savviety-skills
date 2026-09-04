@@ -138,6 +138,16 @@ command -v rsync >/dev/null || die "rsync is required" 3
 
 MANIFEST="$REPO_SKILLS_HOME/manifest.json"
 
+# Validate every selected source before creating directories or copying starters.
+# A partial install must not look successful when a source tree was renamed.
+jq empty "$MANIFEST" || die "invalid manifest.json" 3
+while IFS= read -r source_path; do
+  [[ -e "$REPO_SKILLS_HOME/$source_path" ]] \
+    || die "manifest source missing: $source_path" 3
+done < <(jq -r --arg p "$PLATFORM" \
+  '.[$p] | (.skills.from // empty), (.trees[]?.from), (.extras[]?.from), (.starters[]?.from)' \
+  "$MANIFEST")
+
 # ---- target validation -------------------------------------------------------
 [[ -d "$TARGET/.git" ]] || git -C "$TARGET" rev-parse --git-dir >/dev/null 2>&1 \
   || die "target is not a git repo: $TARGET" 2

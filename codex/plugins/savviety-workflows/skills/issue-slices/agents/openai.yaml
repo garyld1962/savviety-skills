@@ -1,0 +1,4 @@
+interface:
+  display_name: "Issue Slices"
+  short_description: "Slice a PRD into linked vertical issues"
+  default_prompt: "Use $issue-slices for this request, preserving existing decisions and reporting verified results."

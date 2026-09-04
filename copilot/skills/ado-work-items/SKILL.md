@@ -11,7 +11,7 @@ Use this skill to fetch and summarize Azure DevOps work items.
 
 - Use this custom workflow because Copilot has no built-in Azure DevOps work
   item retriever.
-- Use the resulting work item details as input to `prd-validator`, BA prompts,
+- Use the resulting work item details as input to `prd-validate`, BA prompts,
   or built-in `/plan`.
 
 ## Retrieval contract
@@ -32,7 +32,7 @@ Use this skill to fetch and summarize Azure DevOps work items.
 
 - **Planning input:** Fetch work item `12345`, normalize the title,
   description, acceptance criteria, state, and tags, then hand the result to
-  `prd-validator` or `/plan`.
+  `prd-validate` or `/plan`.
 - **Missing fields:** If the work item has no acceptance criteria or assignee,
   report those fields as missing instead of filling them in from context clues.
 
