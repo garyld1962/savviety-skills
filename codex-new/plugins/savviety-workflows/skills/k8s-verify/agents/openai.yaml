@@ -1,4 +1,0 @@
-interface:
-  display_name: "K8s Verify"
-  short_description: "Verify Kubernetes rollout health"
-  default_prompt: "Use $k8s-verify to run this Savviety Codex workflow."

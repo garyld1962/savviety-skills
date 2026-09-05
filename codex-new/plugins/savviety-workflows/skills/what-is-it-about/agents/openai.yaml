@@ -1,4 +1,0 @@
-interface:
-  display_name: "What Is It About"
-  short_description: "Focus content around one thesis"
-  default_prompt: "Use $what-is-it-about to run this Savviety Codex workflow."

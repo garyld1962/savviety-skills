@@ -1,4 +1,0 @@
-interface:
-  display_name: "Repo Status"
-  short_description: "Snapshot live git and PR state"
-  default_prompt: "Use $repo-status to run this Savviety Codex workflow."

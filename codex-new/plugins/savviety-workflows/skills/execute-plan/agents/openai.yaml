@@ -1,4 +1,0 @@
-interface:
-  display_name: "Execute Plan"
-  short_description: "Run implementation plans with gates"
-  default_prompt: "Use $execute-plan to run this Savviety Codex workflow."

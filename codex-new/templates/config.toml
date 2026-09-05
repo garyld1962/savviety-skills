@@ -1,9 +1,0 @@
-[features]
-codex_hooks = true
-
-[agents]
-max_threads = 6
-max_depth = 1
-
-# Installers may copy this file to .codex/config.toml in a target repo.
-# Keep user-specific model, auth, and sandbox preferences in user-level config.

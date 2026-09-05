@@ -1,4 +1,0 @@
-interface:
-  display_name: "Skills"
-  short_description: "List, audit, and find Codex skills"
-  default_prompt: "Use $skills to run this Savviety Codex workflow."

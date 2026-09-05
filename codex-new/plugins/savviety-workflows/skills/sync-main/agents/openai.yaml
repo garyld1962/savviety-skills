@@ -1,4 +1,0 @@
-interface:
-  display_name: "Sync Main"
-  short_description: "Sync branches with main safely"
-  default_prompt: "Use $sync-main to run this Savviety Codex workflow."

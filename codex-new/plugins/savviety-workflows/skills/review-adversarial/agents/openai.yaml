@@ -1,4 +1,0 @@
-interface:
-  display_name: "Review Adversarial"
-  short_description: "Challenge high-risk code changes"
-  default_prompt: "Use $review-adversarial to run this Savviety Codex workflow."

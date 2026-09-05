@@ -1,4 +1,0 @@
-interface:
-  display_name: "Modernize"
-  short_description: "Plan within-stack codebase refresh"
-  default_prompt: "Use $modernize to run this Savviety Codex workflow."
