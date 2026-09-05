@@ -1,0 +1,4 @@
+interface:
+  display_name: "PRD Create"
+  short_description: "Draft PRD, ontology, and AERS by interview"
+  default_prompt: "Use $prd-create for this request, preserving existing decisions and reporting verified artifacts."

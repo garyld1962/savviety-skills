@@ -1,8 +1,8 @@
 # Claude → Codex / GitHub Copilot coverage
 
-All 48 public Claude workflows have an explicit native entrypoint or intentional
+All 49 public Claude workflows have an explicit native entrypoint or intentional
 consolidation. This records coverage, not equivalence of runtime internals. Codex
-uses 44 skill entrypoints. Copilot durable skills work across skill-capable hosts;
+uses 45 skill entrypoints. Copilot durable skills work across skill-capable hosts;
 prompt-only mappings require a prompt-capable host. Prompt shortcuts are optional
 for the newly added capabilities and core planning/execution workflows.
 
@@ -40,6 +40,7 @@ task graph and proof contract; it does not run the Claude Workflow scripts.
 | postmortem | [postmortem](../../codex/plugins/savviety-workflows/skills/postmortem/SKILL.md) | [prompt](../../copilot/prompts/dev/postmortem.prompt.md) |
 | pr | [ship](../../codex/plugins/savviety-workflows/skills/ship/SKILL.md) | [prompt](../../copilot/prompts/dev/pr.prompt.md) |
 | prd-acceptance | [prd-acceptance](../../codex/plugins/savviety-workflows/skills/prd-acceptance/SKILL.md) | [skill](../../copilot/skills/prd-acceptance/SKILL.md), [prompt](../../copilot/prompts/dev/prd-acceptance.prompt.md) |
+| prd-create | [prd-create](../../codex/plugins/savviety-workflows/skills/prd-create/SKILL.md) | [skill](../../copilot/skills/prd-create/SKILL.md), [prompt](../../copilot/prompts/ba/prd-create.prompt.md) |
 | prd-validate | [prd-validate](../../codex/plugins/savviety-workflows/skills/prd-validate/SKILL.md) | [prompt](../../copilot/prompts/ba/prd-validate.prompt.md) |
 | process-tune | [process-tune](../../codex/plugins/savviety-workflows/skills/process-tune/SKILL.md) | [prompt](../../copilot/prompts/dev/process-tune.prompt.md) |
 | refactor-brief | [refactor-brief](../../codex/plugins/savviety-workflows/skills/refactor-brief/SKILL.md) | [skill](../../copilot/skills/refactor-brief/SKILL.md), [prompt](../../copilot/prompts/dev/refactor-brief.prompt.md) |

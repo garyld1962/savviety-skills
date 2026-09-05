@@ -249,6 +249,15 @@
       "mapping": "direct"
     },
     {
+      "claude": "prd-create",
+      "codex": "codex/plugins/savviety-workflows/skills/prd-create/SKILL.md",
+      "copilot": [
+        "copilot/skills/prd-create/SKILL.md",
+        "copilot/prompts/ba/prd-create.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
       "claude": "prd-validate",
       "codex": "codex/plugins/savviety-workflows/skills/prd-validate/SKILL.md",
       "copilot": [
