@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feature Sweep"
+  short_description: "Find verified platform upgrades for skills"
+  default_prompt: "Use $feature-sweep for this request, preserving existing decisions and reporting verified results."

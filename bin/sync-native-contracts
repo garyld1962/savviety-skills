@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+"""Package platform-neutral contracts; --check detects drift without writing."""
+import argparse
+from pathlib import Path
+import sys
+
+root = Path(__file__).resolve().parents[1]
+bundles = {"workflow-contracts": "validate-plan", "drawio": "drawio"}
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--check", action="store_true")
+args = parser.parse_args()
+drift = []
+for bundle, skill in bundles.items():
+    source = root / "shared" / bundle
+    targets = [root / "codex/plugins/savviety-workflows/skills" / skill,
+               root / "copilot/skills" / skill]
+    for src in sorted(source.rglob("*")):
+        if not src.is_file() or "__pycache__" in src.parts:
+            continue
+        for target in targets:
+            dst = target / src.relative_to(source)
+            if not dst.exists() or dst.read_bytes() != src.read_bytes():
+                drift.append(str(dst.relative_to(root)))
+                if not args.check:
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    dst.write_bytes(src.read_bytes())
+if args.check and drift:
+    print("Native contract drift:\n" + "\n".join(drift))
+    sys.exit(1)
+print(f"Native contracts {'checked' if args.check else 'synced'} ({len(drift)} differing files).")

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vault"
+  short_description: "Work with configured Obsidian vault notes"
+  default_prompt: "Use $vault for this request, preserving existing decisions and reporting verified results."

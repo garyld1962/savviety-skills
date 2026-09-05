@@ -40,11 +40,12 @@
 
   "copilot": {
     "trees": [
-      { "from": "copilot-native/prompts",      "to": ".github/prompts" },
-      { "from": "copilot-native/agents",       "to": ".github/agents" },
-      { "from": "copilot-native/skills",       "to": ".github/skills" },
-      { "from": "copilot-native/instructions", "to": ".github/instructions" },
-      { "from": "copilot-native/templates",    "to": ".github/templates" }
+      { "from": "copilot/prompts",      "to": ".github/prompts" },
+      { "from": "copilot/agents",       "to": ".github/agents" },
+      { "from": "copilot/skills",       "to": ".github/skills" },
+      { "from": "copilot/instructions", "to": ".github/instructions" },
+      { "from": "copilot/templates",    "to": ".github/templates" },
+      { "from": "copilot/docs",         "to": ".github/docs" }
     ],
     "starters": [
       { "from": "templates/copilot-instructions.starter.md",
@@ -114,6 +115,9 @@
     ".github/copilot-instructions.md",
     ".github/instructions/personal.instructions.md",
     "AGENTS.md",
-    ".kimi/config.toml"
+    ".kimi/config.toml",
+    ".codex/config.toml",
+    ".codex/hooks.json",
+    ".claude-plugin/marketplace.json"
   ]
 }

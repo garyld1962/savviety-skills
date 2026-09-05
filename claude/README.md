@@ -4,6 +4,14 @@ Skills for **Claude Code** (Anthropic's CLI). Invoked as `/name` in conversation
 
 ## Setup
 
+Run `./install.sh` from the source repo and open a new terminal; see the
+[installation instructions](../README.md#installation). Deploy into a project with:
+
+```bash
+skills --claude --init /path/to/project
+skills --claude --update /path/to/project
+```
+
 This directory is the **source-authoring tree** for shared Claude assets. In a
 real project, the deployed runtime layout is different:
 

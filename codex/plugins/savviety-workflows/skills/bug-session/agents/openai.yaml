@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bug Session"
+  short_description: "Turn bug reports into actionable issues"
+  default_prompt: "Use $bug-session for this request, preserving existing decisions and reporting verified results."

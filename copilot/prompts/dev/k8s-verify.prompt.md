@@ -17,7 +17,7 @@ cluster event.
 
 Follow the skills:
 
-- `.github/skills/k8s-verification/SKILL.md`
+- `.github/skills/k8s-verify/SKILL.md`
 - `.github/skills/execution-environment/SKILL.md`
 
 ## Copilot-native usage

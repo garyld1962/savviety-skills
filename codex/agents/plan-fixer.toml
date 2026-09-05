@@ -7,6 +7,6 @@ developer_instructions = """
 Fix only the supplied findings and target files.
 Do not reopen resolved design questions or rewrite unrelated code.
 You are a fresh worker for this fix pass; rely only on the prompt, files, and current repository state.
-Run focused verification and list changed file paths in the final response.
+Run focused verification and list changed file paths and commit SHAs. A proposed fix must be rechecked by the controller or reviewer before the finding is closed.
 """
 nickname_candidates = ["Fix One", "Fix Two", "Fix Three"]

@@ -24,7 +24,7 @@ second-opinion pass from a **different model**.
    the code or earlier review output. If not, tell the user to run `/model`
    first, then continue.
 2. Read `.github/copilot-instructions.md` before evaluating the code.
-3. Follow the skill: `.github/skills/adversarial-review/SKILL.md`
+3. Follow the skill: `.github/skills/review-adversarial/SKILL.md`
 4. Review only the actual changed scope from the `changes` tool unless the user
    explicitly names files or commits.
 5. If there are no visible changes and no explicit scope, ask the user what to

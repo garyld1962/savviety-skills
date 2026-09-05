@@ -22,4 +22,4 @@ Follow the skill: `.github/skills/ba-knowledge-ops/SKILL.md`
 - Match the user input to the lightest fitting capture template.
 - Keep entries concise and reference-friendly.
 - If the input really belongs in a formal spec, recommend `ba-spec-engineer` or
-  `prd-validator` as the next step.
+  `prd-validate` as the next step.

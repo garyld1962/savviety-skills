@@ -36,7 +36,7 @@ The goal is to reduce execution drift and wasted reasoning by surfacing settled 
 
 ## When NOT to Use
 
-- You want an interactive interview to fix gaps — use the `prd-validator` prompt directly
+- You want an interactive interview to fix gaps — use the `prd-validate` prompt directly
 - Verifying a finished implementation — use a review prompt instead
 - Drafting a PRD from scratch — use `ba-problem-refiner` first
 
@@ -50,13 +50,13 @@ The goal is to reduce execution drift and wasted reasoning by surfacing settled 
 
 This skill is the shared durable logic behind:
 
-- `#prompt:prd-validator`
+- `#prompt:prd-validate`
 - `#prompt:ba-problem-refiner`
 - `#prompt:ba-spec-engineer`
 
 Use the lightest workflow that fits:
 
-- `prd-validator` when an existing artifact needs to become an AERS
+- `prd-validate` when an existing artifact needs to become an AERS
 - `ba-problem-refiner` when the problem statement itself is still vague
 - `ba-spec-engineer` when the user needs a fuller executable spec for handoff
 
@@ -91,7 +91,7 @@ Tell me what you want to achieve in plain language. You do not need to format it
 - Prefer multiple-choice with a recommended default
 - Explain why the question matters
 - Challenge ambiguity instead of smoothing over it
-- If the user says "you choose", propose a default and ask for confirmation
+- If the user says "you choose", select a supported routine default; ask only for a material unresolved decision
 
 ## Examples
 
@@ -445,3 +445,11 @@ This skill succeeds when:
 - downstream planning no longer needs to re-derive core decisions
 - test and UX expectations are clear enough to verify implementation later
 - the output is clearly an AERS, not just a business PRD with nicer wording
+
+## Automated caller gate
+
+Use the shared requirements readiness score in the sibling validate-plan/references/prd-planning.md
+when called by execute-prd or kickoff. Score substantive/stub/missing sections 0/1/2,
+plus 2 for each unresolved high-risk ambiguity. Ready 0–2; partially ready 3–6;
+not ready 7+. An automated gate is distinct from this interactive interview.
+Never auto-invoke an interview in batch mode or guess a blocking product decision.

@@ -57,13 +57,57 @@ stay single-sourced under `claude/`. Slash invocation differs from Claude:
 │   ├── blazorstack/       #   .NET scaffold template
 │   └── ts-monorepo/       #   TypeScript scaffold template
 ├── docs/                  # Design and planning docs
-└── cli/                   # skill.sh installer, driven by manifest.json
+├── install.sh             # Installs the skills command in ~/.local/bin
+└── cli/                   # Implementation of skills, driven by manifest.json
 ```
+
+## Installation
+
+Clone this repository wherever you keep your source code, then run `install.sh`:
+
+```bash
+git clone https://github.com/garyld1962/savviety-skills.git
+cd savviety-skills
+./install.sh
+```
+
+The installer creates `~/.local/bin/skills` as a symlink to this checkout's
+`cli/skill.sh` and adds `~/.local/bin` to PATH in your shell startup files.
+It supports Bash, Zsh (including `ZDOTDIR`), and POSIX login shells (`sh`,
+`dash`, `ksh`). Rerunning it does not duplicate the PATH setup or replace an
+existing regular file or directory named `skills`.
+
+Open a new terminal after installation. To use the command immediately in the
+current terminal, run:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+skills --help
+```
+
+Keep the checkout: the command runs directly from it, so pulling updates also
+updates `skills`. If you move the checkout, rerun `./install.sh` from its new
+location. `REPO_SKILLS_HOME` remains available to override the source repository.
 
 ## Deployment
 
-Deployment into a target repository is handled by `cli/skill.sh` using
+Deployment into a target repository is handled by `skills` using
 `manifest.json`. The legacy `deploy.sh` script has been archived.
+
+The target must already be a Git repository. Deployment requires Bash, Git,
+`jq`, and `rsync` on PATH. Choose your platform:
+
+```bash
+skills --claude --init /path/to/project
+skills --copilot --init /path/to/project
+skills --codex --init /path/to/project
+# For Kimi, first run bin/build-kimi-plugin from the source checkout:
+skills --kimi --init /path/to/project
+```
+
+To refresh an existing install, use `--update` with the same platform flag.
+Omit the target path to use the current directory. Run `skills --help` for
+all options, including `--dry-run`.
 
 For Claude Code, user-facing skill directories and `_internal/` map into
 `.claude/skills/`, while runtime project files such as `.claude/settings.json`

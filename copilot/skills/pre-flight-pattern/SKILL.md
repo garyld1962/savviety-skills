@@ -66,7 +66,7 @@ When embedding this pattern, fill in:
 | Placeholder | What to substitute |
 |---|---|
 | `<config_path>` | The destination path (e.g., `~/.copilot/env.config.md`) |
-| `<template_path>` | The template source path (e.g., `.github/skills/env-check/env.config.template.md`) |
+| `<template_path>` | The template source path (e.g., `.github/templates/env.config.template.md`) |
 | `<target>` | The configure target name (e.g., `env`) |
 | Required fields list | The specific `required_fields` or `required_sections` for the prompt |
 
@@ -98,7 +98,7 @@ All templates shipped with prompts use these markers:
 Before proceeding, verify:
 
 1. Check `~/.copilot/env.config.md` exists.
-   If not: "Run `/configure env` or copy `.github/skills/env-check/env.config.template.md`."
+   If not: "Run `/configure env` or copy `.github/templates/env.config.template.md`."
 
 2. Scan for `<FILL IN>` placeholders in required sections: `shells`, `routing_rules`.
    If found: list unfilled fields and suggest `/configure env --recheck`.

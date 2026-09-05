@@ -39,7 +39,7 @@ When the ID matches the Linear format:
    - **URL** — `url`
 3. Note any missing fields explicitly; do not infer them.
 4. Present the normalized output (see format below), then offer to hand off to
-   `prd-validator`, BA prompts, or built-in `/plan`.
+   `prd-validate`, BA prompts, or built-in `/plan`.
 
 ## ADO path
 
@@ -48,7 +48,7 @@ When the ID is numeric:
 Follow the skill: `.github/skills/ado-work-items/SKILL.md`
 
 - Resolve org and project config before fetching.
-- Use the retrieved item as input to `prd-validator`, BA prompts, or built-in
+- Use the retrieved item as input to `prd-validate`, BA prompts, or built-in
   `/plan`.
 
 ## Normalized output format

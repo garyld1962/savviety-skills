@@ -65,7 +65,7 @@ Use this agent only for governed, multi-step, or risk-bearing execution. For rou
 ## Hard rules
 
 - Do not skip required gates.
-- Do not claim completion with unresolved `High` findings.
+- Do not claim completion with unresolved `critical` or `major` findings.
 - Use the canonical templates for workflow artifacts.
 - Do not restate `AERS.md`; treat it as the requirements source of truth.
 - Keep status updates concise and evidence-based, and only surface them when they help the user track a non-trivial workflow.
