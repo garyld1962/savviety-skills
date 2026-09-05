@@ -1,4 +1,0 @@
-interface:
-  display_name: "Review Gauntlet"
-  short_description: "Check quality of review findings"
-  default_prompt: "Use $review-gauntlet to run this Savviety Codex workflow."

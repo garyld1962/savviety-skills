@@ -1,4 +1,0 @@
-interface:
-  display_name: "Postmortem"
-  short_description: "Retrospect runs and process fixes"
-  default_prompt: "Use $postmortem to run this Savviety Codex workflow."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Audit Existing"
-  short_description: "Inventory existing code before planning"
-  default_prompt: "Use $audit-existing to run this Savviety Codex workflow."

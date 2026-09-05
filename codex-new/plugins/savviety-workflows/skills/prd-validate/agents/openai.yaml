@@ -1,4 +1,0 @@
-interface:
-  display_name: "Prd Validate"
-  short_description: "Turn rough requirements into AERS"
-  default_prompt: "Use $prd-validate to run this Savviety Codex workflow."

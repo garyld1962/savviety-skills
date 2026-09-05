@@ -1,4 +1,0 @@
-interface:
-  display_name: "Code Review Professional"
-  short_description: "Grade engineering craft and readiness"
-  default_prompt: "Use $code-review-professional to run this Savviety Codex workflow."

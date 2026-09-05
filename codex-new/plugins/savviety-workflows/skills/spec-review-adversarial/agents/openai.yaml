@@ -1,4 +1,0 @@
-interface:
-  display_name: "Spec Review Adversarial"
-  short_description: "Stress-test specs before build"
-  default_prompt: "Use $spec-review-adversarial to run this Savviety Codex workflow."

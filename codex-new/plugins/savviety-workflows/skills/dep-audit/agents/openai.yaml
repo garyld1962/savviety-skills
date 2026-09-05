@@ -1,4 +1,0 @@
-interface:
-  display_name: "Dep Audit"
-  short_description: "Audit dependencies and licenses"
-  default_prompt: "Use $dep-audit to run this Savviety Codex workflow."
