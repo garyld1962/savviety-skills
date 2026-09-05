@@ -1,6 +1,6 @@
 ---
 name: triage
-description: "Investigate a bug from reproduction through root cause analysis and produce a structured triage report (classification, risk, recommended next step) — the deliverable is the report, not a fix. Preferred over superpowers:systematic-debugging when the goal is a handoff document for /hotfix, /plan, or a human decision rather than an in-session fix."
+description: "Investigate a bug from reproduction through root cause analysis and produce a structured triage report (classification, risk, recommended next step) — the deliverable is the report, not a fix. Preferred over superpowers:systematic-debugging when the goal is a handoff document for /hotfix, /execute-prd, or a human decision rather than an in-session fix."
 model: opus
 ---
 
@@ -13,11 +13,11 @@ model: opus
 - A bug report comes in and you need to understand what is happening
 - Something broke and you do not know why
 - You need to assess severity and blast radius before deciding how to fix
-- You want a structured handoff to /hotfix or /plan
+- You want a structured handoff to /hotfix or /execute-prd
 
 ## When NOT to Use
 
-- You already know the root cause and just need to fix it -- use /hotfix or /plan
+- You already know the root cause and just need to fix it -- use /hotfix or /execute-prd
 - The issue is a feature request, not a bug
 - The issue is purely cosmetic with no functional impact -- just fix it directly
 
@@ -142,7 +142,7 @@ Based on the assessment, recommend one of:
 | Recommendation | When |
 |----------------|------|
 | **/hotfix** | Blast radius is Wide or Moderate AND fix complexity is Simple or Moderate |
-| **/plan** | Fix complexity is Complex OR regression risk is High |
+| **/execute-prd** | Fix complexity is Complex OR regression risk is High |
 | **Direct fix** | Blast radius is Isolated AND fix complexity is Simple AND test coverage is Good |
 | **Needs more investigation** | Root cause is still unclear or there may be multiple contributing factors |
 

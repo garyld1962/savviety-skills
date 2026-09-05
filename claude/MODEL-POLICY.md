@@ -30,11 +30,15 @@ Currently pinned to `opus`:
 - `kickoff`
 - `grill-me`
 - `ideate`
+- `prd-create`
 - `prd-validate`
 - `spec-review-adversarial`
 - `triage`
 - `dep-migrate`
 - `code-investigate`
+- `design-twice`
+- `feature-sweep`
+- `goal`
 
 ### `model: haiku` — lookup, routing, high frequency
 

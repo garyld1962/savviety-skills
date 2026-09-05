@@ -3,7 +3,7 @@ name: dependency-classification
 description: "Reusable taxonomy for classifying code dependencies by their testability and trust boundary. Drives test strategy and audit judgments. Embedded by /test-plan, /audit-existing, and any skill that needs to reason about how a dependency should be tested or treated."
 user-invocable: false
 internal: true
-kind: reference
+kind: embedded
 ---
 
 # Dependency Classification

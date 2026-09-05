@@ -5,13 +5,13 @@ description: 'Interactive bug-reporting session: user describes problems convers
   Use when user wants to report bugs, do QA testing, capture defects — phrases like
   ''let''s do a bug session'', ''I found some issues'', ''QA session'', ''help me
   file these bugs''. When NOT to Use: single known bug to investigate (use /triage);
-  existing issue to fix (use /hotfix or /plan).'
+  existing issue to fix (use /hotfix or /execute-prd).'
 whenToUse: 'Interactive bug-reporting session: user describes problems conversationally,
   agent explores the codebase for domain context, and files durable GitHub issues.
   Use when user wants to report bugs, do QA testing, capture defects — phrases like
   ''let''s do a bug session'', ''I found some issues'', ''QA session'', ''help me
   file these bugs''. When NOT to Use: single known bug to investigate (use /triage);
-  existing issue to fix (use /hotfix or /plan).'
+  existing issue to fix (use /hotfix or /execute-prd).'
 arguments:
 - context
 ---
@@ -31,7 +31,7 @@ arguments:
 ## When NOT to Use
 
 - One known bug that needs investigation — use `/skill:triage`
-- Already have a GitHub issue and need to fix it — use `/skill:hotfix` or `/plan`
+- Already have a GitHub issue and need to fix it — use `/skill:hotfix` or `/skill:execute-prd`
 
 ## Per-Issue Workflow
 

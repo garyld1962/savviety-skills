@@ -55,7 +55,7 @@ Code files never auto-resolve. The `--theirs` / `--ours` shortcut applies only t
 
 ## Skills that reference this decision
 
-- `dev/sync-main`
-- `dev/pr` (when sync-main is invoked as a subroutine before push)
-- `dev/ship` (when sync-main is invoked as a subroutine before release)
-- `dev/execute-plan` (multi-worktree merge phase — sequential rebases of lane branches)
+- `/sync-main`
+- `/pr` (when sync-main is invoked as a subroutine before push)
+- `/ship` (when sync-main is invoked as a subroutine before release)
+- `/execute-plan` (multi-worktree merge phase — sequential rebases of lane branches)

@@ -44,7 +44,7 @@ code-investigate:
 
 copilot-env:
   description: "Shell and host routing for Copilot CLI (parallel to env)"
-  template: copilot-native/templates/env.config.template.md
+  template: copilot/templates/env.config.template.md
   destination: $HOME/.copilot/env.config.md
   scope: per-user-global
   required_sections:

@@ -1,29 +1,48 @@
 ---
 name: kickoff
-description: "Use for standard feature work to autonomously ship a PRD/story/AERS: readiness → plan → implement → review. Does not produce audit-grade governed artifacts."
+description: "Use for operator-supervised feature work from a PRD/story/AERS: readiness → plan → implement → review, with the operator at the keyboard. Does not produce audit-grade governed artifacts; for an unattended run use /execute-prd."
 model: opus
 ---
 
-# /kickoff — Autonomous Development Start
+# /kickoff — Interactive Development Start
 
-**Purpose:** Begin implementation work from a requirements artifact, following a built-in-first flow: readiness check → plan → implement → review. Does NOT produce audit-grade governed artifacts.
+**Purpose:** Begin implementation work from a requirements artifact with the operator at the keyboard, following a built-in-first flow: readiness check → plan → implement → review. Does NOT produce audit-grade governed artifacts; for an unattended run, use `/execute-prd`.
 
 ## When to Use
 
 - Starting standard feature work from an AERS, PRD, story, or spec
 - Work is routine enough that governed artifacts aren't required
-- You want an autonomous readiness → plan → implement → review flow
+- You want an operator-supervised readiness → plan → implement → review flow
 
 ## When NOT to Use
 
 - Work needs audit-grade traceable review artifacts — use a project-specific governed workflow
 - You already have a written plan — use `/execute-plan`
-- You only need planning, not implementation — use `/plan`
+- You only need planning, not implementation — use `superpowers:writing-plans`
 
 ## Arguments
 
-- `<path>` — path to the requirements artifact (AERS, PRD, spec, story). Defaults to `AERS.md` if it exists.
-- `--skip-readiness` — skip the readiness gate
+- `<path>` — path to the requirements artifact (AERS, PRD, spec, story). If not provided, resolve it by the order below.
+- `--skip-readiness` — skip the readiness scoring and the ontology halt.
+  It never skips the ontology revision halt, which is a reopened-decision
+  guard rather than a scoring step.
+
+Resolution order — first match wins:
+
+1. The explicit `<path>` argument, if one was supplied.
+2. The most recently modified `docs/prds/*/AERS.md`.
+3. `./AERS.md` (legacy root location).
+4. The most recently modified `docs/prds/*/PRD.md`.
+5. `./PRD.md`.
+6. `./prompt.md`.
+
+If two or more candidates tie within the same tier, do not guess: ask the
+operator which is canonical (interactive) or emit a `plan-ambiguity` finding
+and stop (autonomous).
+
+Sibling artifacts — `ONTOLOGY.md`, `UBIQUITOUS_LANGUAGE.md`, and `PRD.md` —
+resolve relative to the directory of the resolved requirements file, not the
+repo root.
 
 ## Workflow
 
@@ -38,25 +57,96 @@ When the ask is a routine, low-risk, convention-bound edit (single-file change, 
 
 0. **Load project memory.** Check `~/.claude/agent-memory/<repo-slug>/` for a `kickoff-context.md` file, where `<repo-slug>` is the current repo's directory name. If it exists, read it — it contains architectural decisions, patterns, and constraints from prior sessions. Surface any relevant entries as "Loaded from project memory: ..." before proceeding. If the directory doesn't exist, skip silently.
 
-1. **Read the artifact.** Read the exact artifact or files the user supplied. If no path is given and `AERS.md` exists, use it. Prefer reading actual files over guessing content.
+1. **Read the artifact.** Read the exact artifact or files the user supplied. Prefer reading actual files over guessing content. If no path is given, resolve one:
+
+   Resolution order — first match wins:
+
+   1. The explicit `<path>` argument, if one was supplied.
+   2. The most recently modified `docs/prds/*/AERS.md`.
+   3. `./AERS.md` (legacy root location).
+   4. The most recently modified `docs/prds/*/PRD.md`.
+   5. `./PRD.md`.
+   6. `./prompt.md`.
+
+   If two or more candidates tie within the same tier, do not guess: ask the
+   operator which is canonical (interactive) or emit a `plan-ambiguity` finding
+   and stop (autonomous).
+
+   Sibling artifacts — `ONTOLOGY.md`, `UBIQUITOUS_LANGUAGE.md`, and `PRD.md` —
+   resolve relative to the directory of the resolved requirements file, not the
+   repo root.
 
 2. **Check readiness.** Unless `--skip-readiness`, score the artifact
    with the **Automated readiness check** in
-   `_internal/aers-readiness/SKILL.md`. Behaviour by verdict:
-   - **Ready (0–2 pts)** → proceed to step 3.
-   - **Partially ready (3–6 pts)** → ask gap questions inline (one at
+   `_internal/aers-readiness/SKILL.md`. That check is a **composite**:
+   structural points plus the ontology contribution produced by
+   `_internal/ontology-readiness/SKILL.md` over the sibling
+   `ONTOLOGY.md`. Report both the structural verdict and the
+   `Ontology:` line — the point values live in those rubrics and are
+   not restated here:
+
+   ```
+   Readiness: Not ready / Partially ready / Ready
+   Ontology: Ready / Partial / Absent
+
+   Structural score: <n>
+   Ontology contribution: <0 | +2 | +4>
+   Composite: <n>
+
+   Gaps:
+   - ...
+   ```
+
+   Both lines are always emitted, even when the ontology contribution
+   is 0. The structural verdict is the structural score read against the
+   same bands (see `_internal/aers-readiness`).
+
+   Behaviour by composite verdict:
+   - **Ready** → proceed to step 3.
+   - **Partially ready** → ask gap questions inline (one at
      a time); record as proposed closed decisions; offer `/prd-validate`
      for a structured interview. Do not auto-invoke it.
-   - **Not ready (7+ pts)** → halt. Surface the rubric points and
+   - **Not ready** → halt. Surface the rubric points and
      suggest `/prd-validate` for the operator to close gaps; do NOT
      start coding.
+
+   **Ontology halt.** Halt only when the ontology line is a bare
+   `Ontology: Absent` **and** the structural verdict is
+   `Partially ready` or worse. A structural verdict of `Ready` with a
+   bare `Absent` proceeds and logs the missing ontology as a known
+   risk. `Ontology: Absent (trivial domain)` never halts.
+
+   On a halt, suggest `/prd-create` to the operator and stop. Do not
+   auto-invoke `/prd-create` — it is an interview, the same interaction
+   boundary as `/prd-validate`. When the run proceeds on a bare
+   `Absent`, tell the operator the ontology is missing and carry it as
+   a known risk.
 
    Produce only the lightest useful additions: gap report, proposed
    closed decisions, contract examples. For the small change fast
    path, do not reopen routine defaults already implied by repo
    conventions.
 
-3. **Plan.** Once the artifact is ready enough to build, use `superpowers:writing-plans` or `/plan` for implementation planning. Skip for the small change fast path unless the user asks for a plan or the work expands.
+   **Ontology revision halt.** The reopened-decision halt extends to
+   the ontology. It is a reopened-decision guard, not a scoring step, so
+   it runs regardless of `--skip-readiness`. An `addition` entry in the
+   `ONTOLOGY.md` Extension Log passes.
+
+   A **revision** — one of exactly five kinds per
+   `_internal/ontology-readiness` § *Completeness and Extension* Rule 4:
+   changed reference scheme, homonym split, tightened constraint,
+   reclassified modality, retrofitted temporality — is mode-dependent, and
+   the mode is read from the `mode:` header of `ONTOLOGY.md`: in `feature`
+   mode any `revision` entry in the Extension Log is a halt condition and
+   halts with an `ontology-revision` finding; `refresh` mode follows the
+   `feature` rule, so any `revision` entry halts the same way; in
+   `greenfield` mode a `revision` entry is itself a defect — nothing
+   existed to revise — and halts the same way; in `rewrite` mode a
+   `revision` entry must be matched by a confirmed closed decision in the
+   PRD, and is a halt — the same `ontology-revision` finding — only if it
+   is not.
+
+3. **Plan.** Once the artifact is ready enough to build, use `superpowers:writing-plans` for implementation planning. Skip for the small change fast path unless the user asks for a plan or the work expands.
 
 4. **Implement.** After planning:
    - Inspect the repo structure and relevant files
@@ -97,7 +187,7 @@ This skill references:
 
 ## CRITICAL: Do Not Guess
 
-- Do NOT reopen closed decisions already settled in the artifact.
+- Do NOT reopen closed decisions already settled in the artifact, including `settled` rows in its `ONTOLOGY.md`.
 - Do NOT skip readiness checks when requirements are still ambiguous.
 - Do NOT replace built-in planning/review with a custom prompt workflow.
 - Do NOT claim completion without running the repo's existing validation steps.
@@ -105,8 +195,8 @@ This skill references:
 
 ## Contract
 
-- **Inputs:** path to a requirements artifact (or `AERS.md` by default if it exists); optional `--skip-readiness`. Calls `_internal/aers-readiness` (readiness scoring), `/prd-validate` (only when operator opts in interactively), `superpowers:writing-plans` or `/plan` (planning), `superpowers:requesting-code-review` or `/domain-review` (review). Consults `_internal/disposition` and `_internal/repo-delivery`.
+- **Inputs:** path to a requirements artifact (or the resolution order under `## Arguments` when no path is given); optional `--skip-readiness`. Calls `_internal/aers-readiness` (composite readiness scoring), `_internal/ontology-readiness` (the `Ontology:` verdict line, reached through aers-readiness), `/prd-validate` and `/prd-create` (only when the operator opts in interactively), `superpowers:writing-plans` (planning), `superpowers:requesting-code-review` or `/domain-review` (review). Consults `_internal/disposition` and `_internal/repo-delivery`.
 - **Preconditions:** in a git repo; artifact exists and is readable; operator is at the keyboard (kickoff is interactive by design — for autonomous flow, use `/execute-prd`).
 - **Outputs:** code committed for the requested change; review pass recorded; concise progress updates per the output contract above (decision context, edits, validation, blockers).
 - **Postconditions:** repo's existing validation steps (lint/build/test) have actually run; closed decisions added to the artifact when the operator confirms; no audit-grade governed artefacts (those belong to `/execute-prd`).
-- **Failure modes:** readiness `Not ready` (7+ pts) → halt before coding; blocking ambiguity remaining → halt and ask; any closed decision in the artifact reopened → halt and surface the conflict.
+- **Failure modes:** readiness `Not ready` → halt before coding; blocking ambiguity remaining → halt and ask; any closed decision in the artifact reopened → halt and surface the conflict; a bare `Ontology: Absent` with a structural verdict of `Partially ready` or worse → halt and suggest `/prd-create` to the operator, never auto-invoke `/prd-create` (a structural `Ready` with a bare `Absent` proceeds and logs a known risk, and `Absent (trivial domain)` never halts); an ontology revision — changed reference scheme, homonym split, tightened constraint, reclassified modality, retrofitted temporality — in `feature` mode → halt with an `ontology-revision` finding, and in `rewrite` mode → the same halt unless the `revision` entry is matched by a confirmed closed decision in the PRD (mode read from the `mode:` header of `ONTOLOGY.md`), while `addition` entries pass; this revision halt runs even under `--skip-readiness`.

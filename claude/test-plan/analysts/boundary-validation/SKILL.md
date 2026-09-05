@@ -22,8 +22,23 @@ From the orchestrator:
 - DB schema (nullable columns, defaults, unique constraints)
 - Error handling pattern from CLAUDE.md (AppError, ErrorCode)
 - Target entity, package, and layer
+- Ontology slice (optional): the `## Fact Types` rows whose Constraints cell
+  names a value domain (`value domain: …`), copied verbatim with their `#`
 
 ## Process
+
+### Derive from ontology
+
+When the ontology slice is present, derive test specs from its constraints
+first. Each value-domain constraint in the slice yields at least one spec — an
+in-domain value accepted and an out-of-domain value rejected — and the spec's
+rationale (`traceability`) cites the row it came from, e.g.
+`ONTOLOGY.md F7 — value domain: ISO-4217 currency code`. The slice carries only
+`settled` rows; do not invent specs for a domain the ontology has not settled.
+
+Prose re-derivation — the Zod- and DB-driven process below — is used only for
+entities and fields the slice does not cover. When no slice is present, the
+process below is the whole job.
 
 ### 1. Required Field Enforcement
 
@@ -213,7 +228,7 @@ Testing that error messages include helpful context (IDs, field names) is nice b
 
 ## Contract
 
-- **Inputs:** entity Zod input schemas (with constraints), DB schema (nullable / defaults / unique), task context, CLAUDE.md conventions.
+- **Inputs:** entity Zod input schemas (with constraints), DB schema (nullable / defaults / unique), task context, CLAUDE.md conventions; ontology slice (optional): `## Fact Types` rows whose Constraints cell names a value domain.
 - **Preconditions:** invoked from `/test-plan` State 4; schemas readable; analyst is enabled in `.test-plan/config.json`.
 - **Outputs:** `TestSpecification[]` conforming to `test-plan/foundations/test-case-schema.md`, with `analyst: "boundary-validation"`. Distribution skews error-path / edge-case.
 - **Postconditions:** orchestrator (State 5) validates, dedupes, and merges with other analysts' specs.

@@ -77,6 +77,7 @@ After all stubs pass, check for refactor candidates:
 
 ```
 /test-plan --task="Implement vendor CRUD service"   # Plan + generate test files
+/test-plan --task="..." --ontology docs/prds/vendors/ONTOLOGY.md   # Use an explicit ontology
 /test-plan --validate                                # Run tests, report pass/fail
 /test-plan --refresh                                 # Update plan after implementation changes
 ```
@@ -102,6 +103,27 @@ Re-analyzes the task after implementation changes:
 - Updates specs for evolved code
 - Generates updated test files
 - Archives old plan, writes new `plan-latest.json` and markdown report
+
+### Ontology input (`--ontology <path>`)
+
+Optional in every mode. Points at an `ONTOLOGY.md` whose format is defined in
+`_internal/ontology-readiness/SKILL.md`. When one resolves, its settled rows
+become the primary source of test specs and prose re-derivation becomes the
+fallback.
+
+**Default resolution when the flag is omitted:**
+
+1. The sibling `ONTOLOGY.md` of the requirements artifact, when the task names
+   one or one is discoverable (`docs/prds/<slug>/PRD.md` →
+   `docs/prds/<slug>/ONTOLOGY.md`).
+2. Otherwise the most recently modified `docs/prds/*/ONTOLOGY.md`.
+3. Otherwise none — analysts re-derive constraints from prose exactly as they
+   do today. Absence of an ontology is not an error and never `BLOCKED`.
+
+Only rows whose `Status` column reads `settled` are used. `deferred` and
+`unknown` rows are ignored with a logged note in the report naming the row and
+its state — see `_internal/ontology-readiness/SKILL.md` `### Item states`. An
+unsettled row is an open decision, not a test target.
 
 ## Project Discovery (Run Once at Start)
 
@@ -143,6 +165,12 @@ Parse the task description to understand what's being built.
 Read all relevant source files to build the specification context.
 
 **Read in order:**
+0. **`ONTOLOGY.md`** — the path from `--ontology`, or the default resolution in
+   `## Modes` above. Read it first when one resolves: its settled rows
+   constrain how every schema below is interpreted. Parse `## Entity Types`
+   (reference schemes), `## Fact Types` (Constraints and Modality),
+   `## Lifecycles` (Total flag and transition rows), and `## Temporality`.
+   Keep each row's `Status`; drop anything that is not `settled` and log it.
 1. **Validation schemas** from the project's shared/types package for the target entity — input schemas, output types, enums
 2. **DB schema** from the database package for the target entity — columns, types, defaults, relations, status enums
 3. **Enum definitions** from the shared package — status values, categories
@@ -152,6 +180,23 @@ Read all relevant source files to build the specification context.
 6. **Classify dependencies** using `_internal/dependency-classification/SKILL.md`.
 
    For each dependency in scope of the target, record `<name> — <category> — <chosen test approach>` in the plan output. Flag miscategorizations (e.g., Postgres mocked rather than substituted with PGLite) as findings. Never mock in-process or local-substitutable dependencies — the rubric explains why.
+
+**Ontology slicing.** When step 0 produced an ontology, split its settled rows
+into one slice per analyst. A row may land in more than one slice; a row that
+lands in none is carried into the report as unsliced context.
+
+| Ontology rows | Selector | Slice goes to |
+|---|---|---|
+| `## Fact Types` rows | Constraints cell names a value domain — `value domain: …` is the prefix `/prd-create` emits, and a free-text range or enumeration in the cell without that prefix is still recognised | boundary-validation |
+| `## Lifecycles` sections (heading with its `Total:` flag, transition rows, `Terminal:` line) | any lifecycle for an in-scope entity | state-lifecycle |
+| `## Fact Types` rows | Constraints cell declares uniqueness, a mandatory role, or fact-type arity | contract-compliance |
+| `## Fact Types` rows **plus the `## Entity Types` rows (reference schemes) of every entity those fact types name** | the fact crosses a system edge — an entity on one side is external, or the fact is exchanged over an API | integration-surface |
+
+Each slice is a verbatim copy of the matching rows with their `#` or heading, so
+the analyst can cite the row a spec came from. The integration-surface slice is
+the only one that carries rows from two sections: its edge-crossing fact-type
+rows travel with the `## Entity Types` row of every entity they name, so the
+analyst has each entity's reference scheme alongside the fact.
 
 **For `--validate` mode:** Skip. Context already in plan file.
 
@@ -168,7 +213,11 @@ Choose which analysts to run based on the target layer:
 
 Check `.test-plan/config.json` `analysts` field for overrides (enabled/disabled).
 
-**State-lifecycle exception:** Only include `state-lifecycle` if the entity has a status enum. If no status field exists, skip even for service layer.
+**State-lifecycle exception:** Include `state-lifecycle` if the entity has a
+status enum, **or** if the ontology declares a `## Lifecycles` section for the
+target entity — an ontology-declared lifecycle selects the analyst even when no
+status enum exists in code yet, and its specs then define the enum the
+implementation must add. If neither holds, skip even for service layer.
 
 **For `--validate` mode:** Skip. Analysts determined by existing plan.
 
@@ -177,7 +226,12 @@ Check `.test-plan/config.json` `analysts` field for overrides (enabled/disabled)
 For each selected analyst:
 1. Read `test-plan/analysts/{name}/SKILL.md`
 2. Pass the task context, Zod schemas, DB schema, reference implementation, and CLAUDE.md conventions
-3. Analyst produces `TestSpecification[]` conforming to the canonical
+3. Pass that analyst's **ontology slice** from State 2, when an ontology
+   resolved — for integration-surface that is the edge-crossing `## Fact Types`
+   rows plus the `## Entity Types` rows (reference schemes) of every entity
+   those fact types name. Omit the item when no ontology resolved or the
+   analyst's slice is empty — the analyst then re-derives from prose as before.
+4. Analyst produces `TestSpecification[]` conforming to the canonical
    schema in `foundations/test-case-schema.md`. Specs that violate the
    schema are dropped at State 5 with a warning — the analyst is
    responsible for valid output.
@@ -327,8 +381,8 @@ This skill generates the stubs that superpowers:test-driven-development's red ph
 
 ## Contract
 
-- **Inputs:** task description and target entity name; optional `.test-plan/config.json` (analyst overrides, team mappings, paths); Zod schemas, DB schema, reference implementation, CLAUDE.md conventions. Calls each `test-plan/analysts/<name>/SKILL.md` selected by State 3 and `test-plan/test-writer/SKILL.md` in State 6. Spec schema canonical at `test-plan/foundations/test-case-schema.md`.
+- **Inputs:** task description and target entity name; optional `.test-plan/config.json` (analyst overrides, team mappings, paths); optional `--ontology <path>` (an `ONTOLOGY.md` in the format defined by `_internal/ontology-readiness/SKILL.md`, defaulting to the requirements artifact's sibling then the most recently modified `docs/prds/*/ONTOLOGY.md`); Zod schemas, DB schema, reference implementation, CLAUDE.md conventions. Calls each `test-plan/analysts/<name>/SKILL.md` selected by State 3 and `test-plan/test-writer/SKILL.md` in State 6. Spec schema canonical at `test-plan/foundations/test-case-schema.md`.
 - **Preconditions:** TypeScript monorepo with a Vitest-shaped test convention; `foundations/*` files readable; `.test-plan/` directory writable; entity exists in repo (DB and Zod schemas locatable).
 - **Outputs:** `.test-plan/plan-latest.json` (conforming to `foundations/plan-schema.md`); markdown report under `docs/test-plans/` (per `foundations/report-template.md`); `.test.ts` files with `it.todo()` stubs from `test-writer` (does not overwrite existing files).
 - **Postconditions:** plan verdict is `READY`, `PARTIAL`, or `BLOCKED`; existing tests are preserved; index `docs/test-plans/index.md` and `latest.md` updated.
-- **Failure modes:** critical context missing (no entity / schemas / layer) → `BLOCKED`; analyst disabled in `.test-plan/config.json` → continue and downgrade to `PARTIAL` if its P1s are missed; spec violating canonical schema → drop at State 5 with a logged note (do not silently keep).
+- **Failure modes:** no ontology resolves → analysts re-derive from prose, plan proceeds (not an error); `deferred` / `unknown` ontology rows → ignored with a logged note naming the row and its state, per `_internal/ontology-readiness/SKILL.md` `### Item states`; critical context missing (no entity / schemas / layer) → `BLOCKED`; analyst disabled in `.test-plan/config.json` → continue and downgrade to `PARTIAL` if its P1s are missed; spec violating canonical schema → drop at State 5 with a logged note (do not silently keep).

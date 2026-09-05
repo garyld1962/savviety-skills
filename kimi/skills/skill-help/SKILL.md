@@ -42,17 +42,17 @@ disableModelInvocation: true
 
    | Category | Skills |
    |----------|--------|
-	   | **Planning & Design** | grill-me, ideate, thesis, ubiquitous-language, what-is-it-about |
-	   | **Development** | audit-existing, execute-prd, execute-plan, kickoff, validate-plan, test-plan, hotfix, triage, parallel-optimization, process-tune |
+	   | **Planning & Design** | grill-me, ideate, thesis, ubiquitous-language, what-is-it-about, goal, design-twice, refactor-brief, drawio |
+	   | **Development** | audit-existing, execute-prd, execute-plan, kickoff, validate-plan, test-plan, hotfix, triage, parallel-optimization, process-tune, issue-slices, modernize |
 	   | **Quality** | domain-review, code-review-professional, review-gauntlet, review-adversarial, checkpoint |
-   | **Specs & Requirements** | spec-review-adversarial, prd-acceptance, prd-validate (rubric: aers-readiness) |
-   | **Investigation** | code-investigate, postmortem |
+   | **Specs & Requirements** | spec-review-adversarial, prd-acceptance, prd-create, prd-validate |
+   | **Investigation** | code-investigate, postmortem, bug-session |
    | **Source Control** | pr, ship, sync-main, changelog |
-   | **Operations** | k8s-verify, dep-audit, dep-migrate, env-check |
+   | **Operations** | k8s-verify, dep-audit, dep-migrate, env-check, gh-readiness |
 	   | **Team & Workflow** | work-item |
 	   | **Session** | repo-status |
    | **Configuration** | configure |
-   | **Meta** | skill-help, skill-audit |
+   | **Meta** | skill-help, skill-audit, feature-sweep, vault |
 
    This table is a suggested default. **Always read the filesystem first** — any skill not in the table goes to an "Other" category. If a project has skills in `.claude/skills/_project/`, include them under "Project-Specific". Non-skill assets (e.g. `pr-guardrail/` — a hook utility with no SKILL.md) should be excluded, not categorized.
 

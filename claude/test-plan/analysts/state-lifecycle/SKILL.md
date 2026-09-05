@@ -7,7 +7,7 @@ private-resource: true
 
 # State Lifecycle Analyst
 
-> **Sub-skill of `/test-plan`.** Invoke this via `/test-plan` (State 4 dispatches it only when the entity has a status/state column; State 3 skips it otherwise). Direct invocation is unsupported — without the orchestrator's status-field detection and State 5 deduplication, the output will be incomplete and may collide with contract-compliance specs.
+> **Sub-skill of `/test-plan`.** Invoke this via `/test-plan` (State 4 dispatches it when the entity has a status/state column or the ontology declares a lifecycle for it; State 3 skips it otherwise). Direct invocation is unsupported — without the orchestrator's status-field detection and State 5 deduplication, the output will be incomplete and may collide with contract-compliance specs.
 
 **"Do state transitions work correctly?"** — For entities with status fields.
 
@@ -21,8 +21,10 @@ This analyst is selected when:
 - The target entity has a status/state column in the DB schema
 - The Zod schema includes a status enum field
 - The task mentions transitions, workflows, or status changes
+- The ontology declares a `## Lifecycles` section for the entity — this selects
+  the analyst even when no status enum exists in code yet
 
-**Skip this analyst** for entities without status fields (e.g., pure CRUD with no lifecycle).
+**Skip this analyst** for entities with no status field and no ontology-declared lifecycle (e.g., pure CRUD with no lifecycle).
 
 ## Input
 
@@ -31,8 +33,28 @@ From the orchestrator:
 - DB schema showing the status column and its type
 - Task description mentioning transition behavior
 - Reference implementation of transition methods (if any exist for similar entities)
+- Ontology slice (optional): the `## Lifecycles` sections for the entity — each
+  heading with its `Total: yes | no (missing exits: …)` flag, every
+  `| From | Event | To | Guard | Status |` transition row, and the `Terminal:` line
 
 ## Process
+
+### Derive from ontology
+
+When the ontology slice is present, its transition table is the source of
+truth. Derive specs from its rows first: every settled transition row yields at
+least one spec, and the spec's rationale (`traceability`) cites the row, e.g.
+`ONTOLOGY.md ## Lifecycles → Order: pending --submit--> open`. Prose or code
+re-derivation is used only for entities the slice does not cover; when no slice
+is present, the process below is the whole job.
+
+**Non-total lifecycles get a P1 rejection spec.** A lifecycle heading reading
+`Total: no` means the table does not define an exit for every state, so an
+undeclared transition is the interesting failure. For each non-total lifecycle
+in the slice, emit a P1 spec asserting that a transition absent from the table
+is rejected rather than silently applied, citing the heading's
+`missing exits: …` list in `traceability`. Total lifecycles need only the
+ordinary invalid-transition coverage in Rule 2 below.
 
 ### 1. Enumerate Status Values
 
@@ -201,8 +223,8 @@ This analyst focuses on the state machine mechanics. Contract compliance handles
 
 ## Contract
 
-- **Inputs:** DB schema column for status, Zod enum for status, business rules describing valid transitions, CLAUDE.md conventions.
-- **Preconditions:** invoked from `/test-plan` State 4 only when the entity has a status/state column (otherwise State 3 skips this analyst).
+- **Inputs:** DB schema column for status, Zod enum for status, business rules describing valid transitions, CLAUDE.md conventions; ontology slice (optional): the entity's `## Lifecycles` sections with their `Total:` flag, transition rows, and `Terminal:` line.
+- **Preconditions:** invoked from `/test-plan` State 4 when the entity has a status/state column or the ontology declares a lifecycle for it (otherwise State 3 skips this analyst).
 - **Outputs:** `TestSpecification[]` conforming to `test-plan/foundations/test-case-schema.md`, with `analyst: "state-lifecycle"` and `category: "state-transition"` for the majority.
 - **Postconditions:** orchestrator validates, dedupes, and merges with other analysts' specs; status assertions stay in this analyst's specs.
-- **Failure modes:** no status field detected → analyst not selected by State 3; ambiguous transition rules → emit specs only for the rules the schema/code enforces and cite the gap in `traceability`.
+- **Failure modes:** no status field and no ontology lifecycle → analyst not selected by State 3; non-total lifecycle in the slice without a P1 undeclared-transition spec → incomplete output; ambiguous transition rules → emit specs only for the rules the schema/code enforces and cite the gap in `traceability`.

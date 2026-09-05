@@ -10,20 +10,20 @@ whenToUse: Structured retrospective over a completed execute-plan run. Reads the
 
 # /skill:postmortem — Retroactive Retrospective for an `/skill:execute-plan` Run
 
-**Purpose:** produce the same Phase 5 postmortem `/skill:execute-plan`
+**Purpose:** produce the same postmortem `/skill:execute-plan`
 auto-fires, but on demand against a previously-completed run folder.
 Every recommendation is tagged with the postmortem taxonomy so it
 aggregates across runs and feeds `/skill:process-tune`.
 
-This skill is the read-only counterpart of execute-plan's Phase 5.
-The implementation, schemas, taxonomy, and hard rules live in
-`dev/execute-plan/SKILL.md` under `### Phase 5: Postmortem`. This
+This skill is the read-only counterpart of execute-plan's postmortem
+step. The implementation, schemas, taxonomy, and hard rules live in
+the `## Postmortem` section of `claude/execute-plan/SKILL.md`. This
 skill defers to that section — do not duplicate the rules here.
 
 ## When to Use
 
-- A past `/skill:execute-plan` run completed without firing Phase 5 (clean
-  `PASS`) and you want to learn from it anyway.
+- A past `/skill:execute-plan` run completed without firing the postmortem
+  (clean `PASS`) and you want to learn from it anyway.
 - You want to re-run the postmortem after editing the run's artefacts
   (e.g. you added evidence to a finding, or the source PRD was
   updated and you want the requirements-fit lens re-applied).
@@ -33,8 +33,8 @@ skill defers to that section — do not duplicate the rules here.
 
 ## When NOT to Use
 
-- The run hasn't completed yet — `/skill:execute-plan`'s Phase 5 will fire
-  if the trigger rules match. Don't pre-empt it.
+- The run hasn't completed yet — `/skill:execute-plan`'s postmortem step
+  will fire if the trigger rules match. Don't pre-empt it.
 - You want to re-review code quality — use `/skill:domain-review` or
   `/skill:review-adversarial`.
 - Production-incident retrospective — this skill is for
@@ -78,10 +78,10 @@ Read every artefact present:
 - the source PRD/AERS, if discoverable from the plan's frontmatter
   (`source_prd:`)
 
-### 3. Apply Phase 5 logic
+### 3. Apply the postmortem logic
 
-Run the postmortem analysis exactly as defined in
-`dev/execute-plan/SKILL.md` → `### Phase 5: Postmortem`. That section
+Run the postmortem analysis exactly as defined in the `## Postmortem`
+section of `claude/execute-plan/SKILL.md`. That section
 is the single source of truth for:
 
 - mode resolution
@@ -92,15 +92,16 @@ is the single source of truth for:
 - the hard rules
 - the headline-recommendation rule
 
-The only difference between Phase 5 (auto-fired) and this skill
+The only difference between the auto-fired postmortem and this skill
 (invoked on demand):
 
-- **Trigger source.** Phase 5 fires automatically based on the run's
-  verdict and gate state. This skill fires because the operator asked.
-  Record the operator's `--reason` (or `"manual: <run-folder>"` when
-  none was given) in the JSON `trigger` field.
-- **Output location.** Phase 5 writes adjacent to the execution
-  report. This skill writes into the same folder. If a previous
+- **Trigger source.** The auto-fired postmortem runs automatically
+  based on the run's verdict and gate state. This skill fires because
+  the operator asked. Record the operator's `--reason` (or
+  `"manual: <run-folder>"` when none was given) in the JSON `trigger`
+  field.
+- **Output location.** The auto-fired postmortem writes adjacent to
+  the execution report. This skill writes into the same folder. If a previous
   `postmortem.md`/`.json` already exists, write to
   `postmortem-<YYYYMMDDHHMMSS>.md`/`.json` instead — never
   overwrite. The index gets one row per file.
@@ -108,8 +109,9 @@ The only difference between Phase 5 (auto-fired) and this skill
 ### 4. Append to the index
 
 Unless `--no-index` is set, append a row to
-`docs/postmortems/index.json` per the schema in execute-plan's Phase 5
-"Cross-run aggregation" subsection. Create the file as `[]` if it does
+`docs/postmortems/index.json` per the schema in the `### Cross-run
+aggregation` subsection of `claude/execute-plan/SKILL.md`'s
+`## Postmortem` section. Create the file as `[]` if it does
 not exist.
 
 ### 5. Report
@@ -130,7 +132,8 @@ Index: skipped (--no-index)
 
 ## Hard rules
 
-All hard rules from execute-plan's Phase 5 apply unchanged:
+All hard rules from the `## Postmortem` section of
+`claude/execute-plan/SKILL.md` apply unchanged:
 
 - not a second requirements document
 - not a chat-transcript summary
@@ -148,7 +151,8 @@ Plus one additional rule specific to this skill:
 ## Things you must not do
 
 - Do not invent a different schema or taxonomy. The taxonomy is
-  centralised in execute-plan's Phase 5 so that `/skill:process-tune` can
+  centralised in the `## Postmortem` section of
+  `claude/execute-plan/SKILL.md` so that `/skill:process-tune` can
   group recommendations across runs.
 - Do not skip the index append unless `--no-index` is explicit. Silent
   index skips defeat the auto-improve loop this skill exists to feed.

@@ -210,7 +210,7 @@ If applicable, append the Contract Compliance table after `## Overall read`.
 
 ## Self-audit before delivery
 
-Before returning the report, run a three-lens pass on your own grades. Adapted from `dev/review-gauntlet/SKILL.md`. The goal is to catch the failure modes most common in seniority grading: citations that don't say what you claim, axes graded without sufficient evidence, and judgments that punish the author rather than the code.
+Before returning the report, run a three-lens pass on your own grades. Adapted from `claude/review-gauntlet/SKILL.md`. The goal is to catch the failure modes most common in seniority grading: citations that don't say what you claim, axes graded without sufficient evidence, and judgments that punish the author rather than the code.
 
 Run silently — do not include the audit in the output. Use it to revise the report. If a finding cannot be revised to pass the audit, drop it.
 

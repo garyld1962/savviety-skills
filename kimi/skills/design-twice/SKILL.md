@@ -5,13 +5,13 @@ description: 'Explore multiple radically different API/module designs using para
   surface — phrases like ''design it twice'', ''explore the design space'', ''what
   are my options for this interface'', ''compare API shapes'', ''how should this module
   look''. When NOT to Use: implementation details inside an existing interface (use
-  /plan); evaluating existing code (use /code-review).'
+  superpowers:writing-plans); evaluating existing code (use /code-review).'
 whenToUse: 'Explore multiple radically different API/module designs using parallel
   agents before committing. Use when designing a new interface, module API, or public
   surface — phrases like ''design it twice'', ''explore the design space'', ''what
   are my options for this interface'', ''compare API shapes'', ''how should this module
   look''. When NOT to Use: implementation details inside an existing interface (use
-  /plan); evaluating existing code (use /code-review).'
+  superpowers:writing-plans); evaluating existing code (use /code-review).'
 ---
 
 
@@ -28,7 +28,7 @@ whenToUse: 'Explore multiple radically different API/module designs using parall
 
 ## When NOT to Use
 
-- Implementation details inside an existing interface — use `/plan`
+- Implementation details inside an existing interface — use `superpowers:writing-plans`
 - Evaluating existing code quality — use `/code-review`
 - UI/visual layout — use `/review-design`
 

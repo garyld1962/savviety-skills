@@ -2,7 +2,7 @@
 
 Adversarial, domain-based code review. Each domain is a **separate pass with its own context window**. The combined-prompt failure mode is shallow bullet-per-domain output; separate passes force depth.
 
-This pruned variant (in `claude-working/`) supports two profiles from one domain library. Dialect and platform overlays are intentionally out of scope here — add them later if the team's stack requires them.
+This pruned variant (in `claude/`) supports two profiles from one domain library. Dialect and platform overlays are intentionally out of scope here — add them later if the team's stack requires them.
 
 ## Profiles
 
@@ -43,7 +43,7 @@ Conditional domains only fire when the diff touches persistence (data-integrity)
 - **plan-deviation** — execution made an unplanned change (e.g. a
   dep-bump needed to unblock the build). Requires explicit disposition
   (`disagree-with-evidence` / `defer` / `accepted-risk`); never
-  auto-fixed. See Task 13 of `claude-working-hardening.md`.
+  auto-fixed. See Task 13 of `claude-hardening.md`.
 
 ## Output format
 

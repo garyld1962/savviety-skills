@@ -24,8 +24,29 @@ From the orchestrator:
 - DB schema for the entity (columns, types, defaults)
 - Reference implementation (if any existing service/router for a similar entity)
 - Project conventions from CLAUDE.md
+- Ontology slice (optional): the `## Fact Types` rows whose Constraints cell
+  declares uniqueness, a mandatory role, or fact-type arity, copied verbatim
+  with their `#`
 
 ## Process
+
+### Derive from ontology
+
+When the ontology slice is present, derive test specs from its constraints
+first — each constraint yields at least one spec:
+
+- **uniqueness** (`unique: Order.number`) → a spec asserting a duplicate is rejected
+- **mandatory role** (`mandatory: Order→Customer`) → a spec asserting the fact
+  cannot be recorded with that role unfilled
+- **fact-type arity** → a spec asserting the operation binds exactly the roles
+  the verbalized fact type names, no more and no fewer. Read the arity from the
+  bold role mentions in the row's "Verbalized fact type" cell — each **bolded**
+  entity in the verbalization is one role.
+
+Each spec's rationale (`traceability`) cites the row, e.g.
+`ONTOLOGY.md F1 — mandatory: Order→Customer`. Prose re-derivation from the task
+description and schemas covers only the entities the slice does not; when no
+slice is present, the process below is the whole job.
 
 ### 1. Parse the Task Description
 
@@ -156,7 +177,7 @@ Each `testName` should read like a requirement statement. If you can't express i
 
 ## Contract
 
-- **Inputs:** task description; entity Zod input/output schemas; DB schema; reference implementation if present; CLAUDE.md conventions.
+- **Inputs:** task description; entity Zod input/output schemas; DB schema; reference implementation if present; CLAUDE.md conventions; ontology slice (optional): `## Fact Types` rows declaring uniqueness, mandatory roles, or fact-type arity.
 - **Preconditions:** invoked from `/test-plan` State 4; task description present; at least one schema readable.
 - **Outputs:** `TestSpecification[]` conforming to `test-plan/foundations/test-case-schema.md`, with `analyst: "contract-compliance"`. Every stated requirement gets at least one P1 spec.
 - **Postconditions:** orchestrator validates, dedupes, and merges with other analysts' specs.

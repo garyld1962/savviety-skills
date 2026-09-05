@@ -22,7 +22,7 @@ The key question this skill answers: **is this describing an outcome (what chang
 - Requirements are already written → `/prd-validate`
 - A specific bug is known → `/triage`
 - Exploring API/interface shape → `/design-twice`
-- A goal is already clear and you're ready to write the AERS → skip to `/prd-validate`
+- A goal is already clear and you're ready to write the PRD, ontology, and AERS → `/prd-create`
 
 ## Arguments
 
@@ -135,23 +135,25 @@ End with:
 
 ```
 Goal validated. Recommended next step:
-  /prd-validate   — write requirements against this goal
+  /prd-create     — write the PRD, ontology, and AERS against this goal
   /design-twice   — explore solution space before committing to an approach (if solution shape is uncertain)
   /issue-slices   — if you already have a PRD and want to slice it into tickets
+  /prd-validate   — if a PRD already exists and needs validating
 ```
 
 ## CRITICAL: Do Not
 
 - Do NOT accept a solution as a goal without surfacing the reframe
-- Do NOT write requirements — that belongs in `/prd-validate`
+- Do NOT write requirements — that belongs in `/prd-create`
 - Do NOT ask more than 3 clarifying questions
 - Do NOT skip the stress-test reasoning even when the intent seems obvious — the reframe often surfaces in step 2
 - Do NOT persist without confirmation when the default file doesn't exist
+- Do NOT run from a non-interactive context — refuse; this is an interview.
 
 ## Contract
 
 - **Inputs:** plain-language description (optional arg or conversational). Flags: `--linear`, `--append <file>`, `--no-persist`.
 - **Preconditions:** interactive session — this is a conversation, not a batch step. Never auto-invoke from non-interactive callers.
-- **Outputs:** validated goal statement in the structured format above. Optionally: a Linear issue or appended `goals.md` entry.
+- **Outputs:** validated goal statement in the structured format above — this is the input `/prd-create --from` consumes. Optionally: a Linear issue or appended `goals.md` entry.
 - **Postconditions:** user has confirmed the goal statement reflects the intended outcome. A persist artifact exists unless `--no-persist` was passed.
 - **Failure modes:** user insists on a solution-shaped goal → document it as-is with a note flagging the risk; don't refuse to proceed. User says "just write the requirements" → surface that goal validation is fast and prevents wasted work, offer to skip if they insist.

@@ -13,12 +13,12 @@ arguments:
 
 # /skill:work-item -- Retrieve Work Item
 
-**Purpose:** Fetch a work item from Azure DevOps (ADO) or Linear and present it in a clean, structured format. Used standalone or called by other skills (/skill:triage, /skill:hotfix, /plan) when they need to pull in requirements or bug details from a tracker.
+**Purpose:** Fetch a work item from Azure DevOps (ADO) or Linear and present it in a clean, structured format. Used standalone or called by other skills (/skill:triage, /skill:hotfix, /skill:execute-prd) when they need to pull in requirements or bug details from a tracker.
 
 ## When to Use
 
 - Pull a ticket's details into the conversation by ID (ADO or Linear)
-- Upstream of `/plan`, `/skill:triage`, `/skill:hotfix` when requirements live in a tracker
+- Upstream of `/skill:execute-prd`, `/skill:triage`, `/skill:hotfix` when requirements live in a tracker
 - You want a clean markdown summary rather than raw API JSON
 
 ## When NOT to Use
@@ -155,7 +155,7 @@ Error: Not authenticated to <ADO|Linear>. <specific instructions for the platfor
 ## Key Rules
 
 1. **Read-only on the tracker.** This skill fetches and displays. It does not modify work items.
-2. **Stdout-only output. Does not write to disk.** Renders the work item to stdout in the format above. Persisting the rendered markdown to a file (e.g. `docs/plans/PRD-<slug>.md`) is the caller's responsibility. `/skill:triage`, `/skill:hotfix`, and `/skill:execute-prd` each handle persistence on their own terms.
+2. **Stdout-only output. Does not write to disk.** Renders the work item to stdout in the format above. Persisting the rendered markdown to a file (e.g. `docs/prds/<slug>/PRD.md`) is the caller's responsibility. `/skill:triage`, `/skill:hotfix`, and `/skill:execute-prd` each handle persistence on their own terms.
 3. **Clean output.** Strip HTML, decode entities, preserve logical structure. The output must be readable as plain text and parseable by callers.
 4. **Fail clearly.** If the tool or CLI is not available, say so with specific setup instructions. Do not guess at work item contents.
 5. **Stable output format.** When /skill:triage, /skill:hotfix, or /skill:execute-prd pass `--ado` or `--linear`, they call this skill internally and parse the output. Changes to the format are breaking changes to all callers.
@@ -165,5 +165,5 @@ Error: Not authenticated to <ADO|Linear>. <specific instructions for the platfor
 - **Inputs:** exactly one of `--ado <work-item-id>` or `--linear <issue-id>`.
 - **Preconditions:** Azure CLI installed and authenticated (`az login`, `az devops configure`) for ADO; Linear MCP server configured for Linear.
 - **Outputs:** rendered markdown to **stdout** in the fixed format under "Output Format". No file writes; no tracker mutations.
-- **Postconditions:** caller receives parseable markdown and is responsible for any persistence (e.g. `/skill:execute-prd` writes it to `docs/plans/PRD-<slug>.md`).
+- **Postconditions:** caller receives parseable markdown and is responsible for any persistence (e.g. `/skill:execute-prd` writes it to `docs/prds/<slug>/PRD.md`).
 - **Failure modes:** auth/CLI/MCP unavailable → write `Error: …` to stdout with platform-specific setup instructions and exit non-zero. Item not found → `Error: Work item <id> not found.` Never invent content.
