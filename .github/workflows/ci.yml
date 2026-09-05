@@ -22,7 +22,7 @@ jobs:
       - run: jq empty manifest.json
       - run: jq empty claude/settings.template.json
       - run: jq empty kimi/kimi.plugin.json
-      - run: bash -n cli/skill.sh
+      - run: bash -n install.sh && bash -n cli/skill.sh
       - run: for f in kimi/hooks/*.sh; do bash -n "$f"; done
       - run: bin/build-kimi-plugin --check
       - run: python3 codex/scripts/validate_codex_assets.py

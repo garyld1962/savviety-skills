@@ -12,6 +12,14 @@ Codex-native source assets for Savviety workflows.
 
 ## Install For Local Testing
 
+First run `./install.sh` from the source repo and open a new terminal; see the
+[installation instructions](../README.md#installation). To deploy into a project:
+
+```bash
+skills --codex --init /path/to/project
+skills --codex --update /path/to/project
+```
+
 The repo marketplace is `.claude-plugin/marketplace.json`; it points at `./codex/plugins/savviety-workflows`.
 
 Restart Codex after changing plugin contents so the installed local plugin cache is refreshed.

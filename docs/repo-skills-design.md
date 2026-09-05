@@ -1,4 +1,4 @@
-# `skill.sh` — Design
+# `skills` — Design
 
 > Status: draft, not implemented.
 > Owner: Gary.
@@ -29,7 +29,7 @@ These are decided. The implementation should not relitigate them.
 
 ### 2.1. Source
 
-Read directly from `~/repos/savviety-skills` (overridable via
+Read directly from the checkout containing the installed command (overridable via
 `REPO_SKILLS_HOME`). Not skill-factory output.
 
 **Why:** simpler today, single source of truth, no publish step in the loop.
@@ -38,7 +38,9 @@ factory-aware mode behind a flag.
 
 ### 2.2. Copy, not symlink
 
-The script copies files. It never creates symlinks.
+Deployment copies assets into the target repository. The command itself is
+installed separately by `./install.sh` as `~/.local/bin/skills`, a symlink to
+the checkout's `cli/skill.sh`.
 
 **Why:** the most common downstream pattern is committing `.claude/` and
 `.github/` into the consumer repo. Symlinks don't survive that. Copy makes
@@ -150,14 +152,14 @@ live directly under `.claude/` (for example `.claude/pr-guardrail/` and
 ## 4. Command surface
 
 ```
-cli/skill.sh --claude   --init    [<target-path>] [--force] [--dry-run]
-cli/skill.sh --claude   --update  [<target-path>] [--prune [--yes]] [--dry-run]
-cli/skill.sh --copilot  --init    [<target-path>] [--force] [--dry-run]
-cli/skill.sh --copilot  --update  [<target-path>] [--prune [--yes]] [--dry-run]
-cli/skill.sh --codex    --init    [<target-path>] [--force] [--dry-run]
-cli/skill.sh --codex    --update  [<target-path>] [--dry-run]
-cli/skill.sh --version
-cli/skill.sh --help
+skills --claude   --init    [<target-path>] [--force] [--dry-run]
+skills --claude   --update  [<target-path>] [--prune [--yes]] [--dry-run]
+skills --copilot  --init    [<target-path>] [--force] [--dry-run]
+skills --copilot  --update  [<target-path>] [--prune [--yes]] [--dry-run]
+skills --codex    --init    [<target-path>] [--force] [--dry-run]
+skills --codex    --update  [<target-path>] [--dry-run]
+skills --version
+skills --help
 ```
 
 - `<target-path>` defaults to `.` (current directory).
@@ -185,7 +187,7 @@ Mutually exclusive: `--claude` xor `--copilot` xor `--codex`. Mutually exclusive
 ### 5.1. `--claude --init <target>`
 
 Pre-flight:
-- Verify `REPO_SKILLS_HOME` (or `~/repos/savviety-skills`) exists and looks
+- Verify `REPO_SKILLS_HOME` (or the installed checkout) exists and looks
   like the right repo (presence of `claude/README.md`).
 - Verify `<target>` is a git repo.
 - If `<target>/.claude/skills/` exists: refuse unless `--force`. With
@@ -363,8 +365,8 @@ updating the manifest, not the script.
 
 ## 7. Implementation notes
 
-- **Language:** bash. Lives in `~/.local/bin/skill.sh`. Mirrors the `run`
-  pattern from your global `CLAUDE.md`.
+- **Language:** bash. `./install.sh` links `~/.local/bin/skills` to
+  `cli/skill.sh` and configures the user's shell PATH.
 - **Dependencies:** `rsync` for copy + delete semantics, `jq` for the manifest.
   Both standard on Linux/macOS dev machines.
 - **Verbosity:** quiet by default (just the summary). `-v` for per-file
@@ -408,7 +410,7 @@ The script should pass these by-hand checks:
 
 - Should the script self-update? (Probably no — it's small enough that
   re-copying it from savviety-skills is fine.)
-- Should there be a `skill.sh doctor` subcommand that reports drift
+- Should there be a `skills doctor` subcommand that reports drift
   between target and source? (Probably yes, in v2.)
 - Should the script know about plugins (superpowers, ba-*, etc.) and warn
   when a target repo lacks one a shared skill depends on? (Maybe — but

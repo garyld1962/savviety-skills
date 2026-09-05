@@ -5,9 +5,12 @@ Canonical sources are `copilot/skills`, `prompts`, `agents`, `instructions`,
 paths in a consuming repository. Repository authoring rules live in the source
 repo's `.github/copilot-instructions.md`; consuming projects keep their own rules.
 
+First run `./install.sh` from the source repo and open a new terminal, as described
+in the [installation instructions](../README.md#installation). Then run:
+
 ```bash
-REPO_SKILLS_HOME=/path/to/savviety-skills cli/skill.sh --copilot --init /path/to/project
-REPO_SKILLS_HOME=/path/to/savviety-skills cli/skill.sh --copilot --update /path/to/project
+skills --copilot --init /path/to/project
+skills --copilot --update /path/to/project
 ```
 
 The project must already be a Git repository; the installer requires Bash, jq and

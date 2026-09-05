@@ -1,28 +1,37 @@
 #!/usr/bin/env bash
-# skill.sh — install savviety-skills into a target repo.
+# skills — install savviety-skills into a target repo.
 #
 # Source of truth: docs/repo-skills-design.md and manifest.json in the
-# REPO_SKILLS_HOME directory (defaults to ~/repos/savviety-skills).
+# REPO_SKILLS_HOME directory (defaults to this script's checkout).
 #
 # For --kimi, the native skill tree in kimi/skills/ is generated from claude/
 # by bin/build-kimi-plugin. Run that script before --init/--update so Kimi
 # receives native frontmatter (type, whenToUse, arguments, flow).
 #
 # Usage:
-#   cli/skill.sh --claude  --init   [<target>] [--force] [--dry-run]
-#   cli/skill.sh --claude  --update [<target>] [--prune [--yes]] [--dry-run]
-#   cli/skill.sh --copilot --init   [<target>] [--force] [--dry-run]
-#   cli/skill.sh --copilot --update [<target>] [--prune [--yes]] [--dry-run]
-#   cli/skill.sh --codex   --init   [<target>] [--force] [--dry-run]
-#   cli/skill.sh --codex   --update [<target>] [--dry-run]
-#   cli/skill.sh --kimi    --init   [<target>] [--force] [--dry-run]
-#   cli/skill.sh --kimi    --update [<target>] [--prune [--yes]] [--dry-run]
-#   cli/skill.sh --version | --help
+#   skills --claude  --init   [<target>] [--force] [--dry-run]
+#   skills --claude  --update [<target>] [--prune [--yes]] [--dry-run]
+#   skills --copilot --init   [<target>] [--force] [--dry-run]
+#   skills --copilot --update [<target>] [--prune [--yes]] [--dry-run]
+#   skills --codex   --init   [<target>] [--force] [--dry-run]
+#   skills --codex   --update [<target>] [--dry-run]
+#   skills --kimi    --init   [<target>] [--force] [--dry-run]
+#   skills --kimi    --update [<target>] [--prune [--yes]] [--dry-run]
+#   skills --version | --help
 
 set -euo pipefail
 
 VERSION="0.1.0"
-REPO_SKILLS_HOME="${REPO_SKILLS_HOME:-$HOME/repos/savviety-skills}"
+if [[ -z "${REPO_SKILLS_HOME:-}" ]]; then
+  # Resolve ~/.local/bin/skills back to this checkout, including relative links.
+  script_path="${BASH_SOURCE[0]}"
+  while [[ -L "$script_path" ]]; do
+    script_dir="$(cd -P -- "$(dirname -- "$script_path")" && pwd)"
+    script_path="$(readlink -- "$script_path")"
+    [[ "$script_path" == /* ]] || script_path="$script_dir/$script_path"
+  done
+  REPO_SKILLS_HOME="$(cd -P -- "$(dirname -- "$script_path")/.." && pwd)"
+fi
 
 # ---- output helpers ----------------------------------------------------------
 c_dim()  { printf '\033[2m%s\033[0m'  "$*"; }
@@ -39,17 +48,21 @@ done_()  { echo "$(c_grn '✓')    $*"; }
 # ---- usage -------------------------------------------------------------------
 usage() {
   cat <<'EOF'
-skill.sh — install savviety-skills into a target repo
+skills — install savviety-skills into a target repo
+
+SETUP
+  Run ./install.sh from the savviety-skills checkout, then open a new terminal.
 
 USAGE
-  cli/skill.sh --claude  --init   [<target>] [--force] [--dry-run]
-  cli/skill.sh --claude  --update [<target>] [--prune [--yes]] [--dry-run]
-  cli/skill.sh --copilot --init   [<target>] [--force] [--dry-run]
-  cli/skill.sh --copilot --update [<target>] [--prune [--yes]] [--dry-run]
-  cli/skill.sh --codex   --init   [<target>] [--force] [--dry-run]
-  cli/skill.sh --codex   --update [<target>] [--dry-run]
-  cli/skill.sh --kimi    --init   [<target>] [--force] [--dry-run]
-  cli/skill.sh --kimi    --update [<target>] [--prune [--yes]] [--dry-run]
+  skills --claude  --init   [<target>] [--force] [--dry-run]
+  skills --claude  --update [<target>] [--prune [--yes]] [--dry-run]
+  skills --copilot --init   [<target>] [--force] [--dry-run]
+  skills --copilot --update [<target>] [--prune [--yes]] [--dry-run]
+  skills --codex   --init   [<target>] [--force] [--dry-run]
+  skills --codex   --update [<target>] [--dry-run]
+  skills --kimi    --init   [<target>] [--force] [--dry-run]
+  skills --kimi    --update [<target>] [--prune [--yes]] [--dry-run]
+  skills --version | --help
 
 PLATFORM (one required)
   --claude    install Claude Code assets into <target>/.claude
@@ -72,7 +85,7 @@ OPTIONS
   --help      print this help and exit
 
 ENVIRONMENT
-  REPO_SKILLS_HOME  source repo path (default: ~/repos/savviety-skills)
+  REPO_SKILLS_HOME  override the source repo (default: the installed checkout)
   REPO_SKILLS_NO_RTK  if set, skip the post-install RTK prompt entirely
 
 RTK INTEGRATION
@@ -110,7 +123,7 @@ while [[ $# -gt 0 ]]; do
     --prune)    PRUNE=1 ;;
     --yes|-y)   YES=1 ;;
     --dry-run)  DRY_RUN=1 ;;
-    --version)  echo "skill.sh $VERSION"; exit 0 ;;
+    --version)  echo "skills $VERSION"; exit 0 ;;
     --help|-h)  usage; exit 0 ;;
     -*)         die "unknown flag: $1" 1 ;;
     *)
@@ -790,7 +803,7 @@ maybe_install_rtk() {
 
 # ---- main dispatch -----------------------------------------------------------
 echo
-echo "$(c_bld 'skill.sh') $VERSION"
+echo "$(c_bld 'skills') $VERSION"
 echo "  source:   $REPO_SKILLS_HOME"
 echo "  target:   $TARGET"
 echo "  platform: $PLATFORM"

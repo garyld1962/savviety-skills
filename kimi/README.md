@@ -39,10 +39,13 @@ Plugin install does **not** include lifecycle hooks, because Kimi plugins run ho
 
 Seeds a target repo with project-level skills, AGENTS.md, config.toml, and hook wiring:
 
+First run `./install.sh` from the source repo and open a new terminal; see the
+[installation instructions](../README.md#installation).
+
 ```
 # From the source repo
 bin/build-kimi-plugin
-cli/skill.sh --kimi --init <target>
+skills --kimi --init /path/to/project
 ```
 
 This deploys:
