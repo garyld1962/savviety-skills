@@ -81,14 +81,20 @@ PLATFORM (one required)
 
 ACTION (one required)
   --init      first-time install. Refuses if target assets already exist.
-  --update    refresh shared assets. Safe to re-run. Never touches user-owned files.
+  --update    refresh shared assets. User-owned settings are preserved unless
+              --clean-settings is explicitly selected.
 
 OPTIONS
   --force     allow --init over an existing install. Existing assets are
               moved aside to <name>.bak-<UTC-timestamp>/ before reinstall
-  --prune     with --update, prompt to delete shared skills no longer in source
+  --prune     Claude/Kimi compatibility flag; updates already offer orphan removal
+              interactively. Without a terminal, orphans are kept.
   --yes       with --prune, skip prompts and delete all orphans
   --dry-run   show what would change, write nothing
+  --clean-settings  Claude only: remove permissions from settings.json and
+              settings.local.json; ask whether to keep each existing hook.
+              Enter keeps a hook; n removes it; q cancels before settings writes.
+              Backs up changed files. Cannot be combined with --force.
   --version   print version and exit
   --help      print this help and exit
 
@@ -119,6 +125,7 @@ FORCE=0
 PRUNE=0
 YES=0
 DRY_RUN=0
+CLEAN_SETTINGS=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -133,6 +140,7 @@ while [[ $# -gt 0 ]]; do
     --prune)    PRUNE=1 ;;
     --yes|-y)   YES=1 ;;
     --dry-run)  DRY_RUN=1 ;;
+    --clean-settings) CLEAN_SETTINGS=1 ;;
     --version)  echo "skills $VERSION"; exit 0 ;;
     --help|-h)  usage; exit 0 ;;
     -*)         die "unknown flag: $1" 1 ;;
@@ -148,6 +156,12 @@ done
 [[ -z "$ACTION"   ]] && { usage; die "missing action flag (--init or --update)" 1; }
 [[ "$ACTION" == "init" && "$PRUNE" == 1 ]] && die "--prune is only valid with --update" 1
 [[ "$YES" == 1 && "$PRUNE" == 0 ]] && die "--yes is only valid with --prune" 1
+if (( CLEAN_SETTINGS )); then
+  [[ "$PLATFORM" == "claude" ]] || die "--clean-settings is only supported for Claude settings" 1
+  (( FORCE == 0 )) || die "--clean-settings cannot be combined with --force" 1
+  command -v python3 >/dev/null || die "python3 is required for --clean-settings" 3
+  [[ -f "$REPO_SKILLS_HOME/bin/clean-claude-settings" ]] || die "settings cleanup helper is missing from the source checkout" 3
+fi
 
 # Hermes installs to a profile, not a Git project. Its updater protects edits
 # made by the user or agent and has no settings, hooks, or RTK side effects.
@@ -328,17 +342,21 @@ apply_ensure() {
 
 # ---- extras (single-source → single-dest pairs) ------------------------------
 copy_claude_settings() {
-  # Refresh shared settings without importing permissions from the template.
-  # Existing project permissions belong to the project and must survive updates.
+  # Existing settings belong to the project. Hooks/permissions are never
+  # imported; optional cleanup runs before this merge, preserving kept hooks.
   local src="$1" dst="$2" existing=/dev/null content
   [[ ! -e "$dst" ]] || existing="$dst"
   content=$(jq --slurpfile existing "$existing" '
-    del(.permissions)
-    | if (($existing[0] // {}) | has("permissions"))
-      then .permissions = $existing[0].permissions
-      else . end
+    ($existing[0] // {}) + del(.permissions, .hooks)
   ' "$src") || die "cannot read Claude settings: $src or $dst" 1
   do_write_file "$content"$'\n' "$dst"
+}
+
+clean_claude_settings() {
+  (( CLEAN_SETTINGS )) || return 0
+  local args=(--target "$TARGET")
+  (( DRY_RUN == 0 )) || args+=(--dry-run)
+  python3 "$REPO_SKILLS_HOME/bin/clean-claude-settings" "${args[@]}"
 }
 
 apply_extras() {
@@ -402,7 +420,7 @@ apply_claude_skills() {
   done < <(jq -r '.claude.skills.preserve_subdirs[]' "$MANIFEST")
 
   # Protect orphan skill dirs (target-only) from --delete.
-  # Orphans are handled explicitly by prune_claude_orphans, never silently.
+  # Orphans are offered for removal after updates, never silently deleted.
   if [[ -d "$abs_to" ]]; then
     while IFS= read -r dir; do
       local name; name="$(basename "$dir")"
@@ -545,119 +563,73 @@ apply_kimi_trees() {
   done
 }
 
-# ---- orphan detection + interactive prune (Kimi skills) ----------------------
-# Same shape as prune_claude_orphans but reads from .kimi.skills.
-prune_kimi_orphans() {
-  local from to
-  from=$(jq -r '.kimi.skills.from' "$MANIFEST")
-  to=$(jq -r   '.kimi.skills.to'   "$MANIFEST")
+# ---- orphan detection + interactive prune (Claude and Kimi skills) -----------
+prune_skill_orphans() {
+  local platform="$1" from to
+  from=$(jq -r --arg p "$platform" '.[$p].skills.from' "$MANIFEST")
+  to=$(jq -r --arg p "$platform" '.[$p].skills.to' "$MANIFEST")
   local abs_from="$REPO_SKILLS_HOME/$from"
   local abs_to="$TARGET/$to"
 
   [[ -d "$abs_to" ]] || return 0
 
   local -A skip_set=()
-  while IFS= read -r e; do skip_set["$e"]=1; done < <(jq -r '.kimi.skills.skip[]' "$MANIFEST")
-  while IFS= read -r e; do skip_set["$e"]=1; done < <(jq -r '.kimi.skills.preserve_subdirs[]' "$MANIFEST")
+  while IFS= read -r e; do skip_set["$e"]=1; done < <(jq -r --arg p "$platform" '.[$p].skills.skip[]' "$MANIFEST")
+  while IFS= read -r e; do skip_set["$e"]=1; done < <(jq -r --arg p "$platform" '.[$p].skills.preserve_subdirs[]' "$MANIFEST")
 
   local -a orphans=()
   while IFS= read -r dir; do
     local name; name="$(basename "$dir")"
-    [[ -n "${skip_set[$name]:-}" ]] && continue
+    # Private/local support directories are never removal candidates.
+    [[ "$name" == _* || "$name" == .* || -n "${skip_set[$name]:-}" ]] && continue
     [[ ! -e "$abs_from/$name" ]] && orphans+=("$name")
   done < <(find "$abs_to" -mindepth 1 -maxdepth 1 -type d | sort)
 
-  if (( ${#orphans[@]} == 0 )); then
+  (( ${#orphans[@]} > 0 )) || return 0
+  warn "skills present in the target but absent from the source: ${orphans[*]}"
+
+  if (( DRY_RUN )); then
+    local action="would ask whether to remove"
+    (( YES == 0 )) || action="would remove"
+    for o in "${orphans[@]}"; do
+      info "[dry-run] $action: $to/$o/"
+      record "orphan:preview      $to/$o/"
+    done
     return 0
   fi
 
-  if (( PRUNE == 0 )); then
-    warn "orphans (in target but not in source): ${orphans[*]}"
-    info "re-run with --prune to delete (or --prune --yes to skip prompts)"
-    for o in "${orphans[@]}"; do record "orphan:left-alone   $to/$o/"; done
+  # Normal interactive updates offer removal automatically. In scripts, only
+  # explicit --prune --yes authorizes deletion; never consume piped input.
+  if [[ ! -t 0 && "$YES" == 0 ]]; then
+    info "No interactive input; keeping orphaned skills. Use --prune --yes to remove them explicitly."
+    for o in "${orphans[@]}"; do record "orphan:kept         $to/$o/"; done
     return 0
   fi
 
   local yes_to_all=$YES
   for o in "${orphans[@]}"; do
-    local choice="N"
+    local choice=""
     if (( yes_to_all )); then
       choice="y"
     else
-      printf "Skill '%s' exists in target but not in source. Delete? [y/N/a/q] " "$o" >&2
-      read -r choice </dev/tty || choice="q"
+      while true; do
+        printf "Remove orphaned skill '%s'? [y/N/a/q] " "$o" >&2
+        read -r choice || choice="q"
+        case "$choice" in
+          y|Y|yes|YES|n|N|no|NO|""|a|A|q|Q) break ;;
+          *) info "Enter y to remove, n to keep, a to remove all remaining, or q to stop pruning." ;;
+        esac
+      done
     fi
     case "$choice" in
-      y|Y) ;;
+      y|Y|yes|YES) ;;
       a|A) yes_to_all=1 ;;
-      q|Q) info "prune cancelled by user"; break ;;
-      *)   info "kept: $o"; record "orphan:kept         $to/$o/"; continue ;;
+      q|Q) info "Stopped pruning; remaining orphaned skills are kept."; break ;;
+      *) info "kept: $o"; record "orphan:kept         $to/$o/"; continue ;;
     esac
-    if (( DRY_RUN )); then
-      info "[dry-run] rm -rf $abs_to/$o"
-    else
-      rm -rf "${abs_to:?}/$o"
-    fi
+    rm -rf "${abs_to:?}/$o"
     record "orphan:deleted      $to/$o/"
-    done_ "deleted orphan: $to/$o/"
-  done
-}
-
-# ---- orphan detection + interactive prune (Claude skills) --------------------
-prune_claude_orphans() {
-  local from to
-  from=$(jq -r '.claude.skills.from' "$MANIFEST")
-  to=$(jq -r   '.claude.skills.to'   "$MANIFEST")
-  local abs_from="$REPO_SKILLS_HOME/$from"
-  local abs_to="$TARGET/$to"
-
-  [[ -d "$abs_to" ]] || return 0
-
-  # Build skip + preserve set
-  local -A skip_set=()
-  while IFS= read -r e; do skip_set["$e"]=1; done < <(jq -r '.claude.skills.skip[]' "$MANIFEST")
-  while IFS= read -r e; do skip_set["$e"]=1; done < <(jq -r '.claude.skills.preserve_subdirs[]' "$MANIFEST")
-
-  local -a orphans=()
-  while IFS= read -r dir; do
-    local name; name="$(basename "$dir")"
-    [[ -n "${skip_set[$name]:-}" ]] && continue
-    [[ ! -e "$abs_from/$name" ]] && orphans+=("$name")
-  done < <(find "$abs_to" -mindepth 1 -maxdepth 1 -type d | sort)
-
-  if (( ${#orphans[@]} == 0 )); then
-    return 0
-  fi
-
-  if (( PRUNE == 0 )); then
-    warn "orphans (in target but not in source): ${orphans[*]}"
-    info "re-run with --prune to delete (or --prune --yes to skip prompts)"
-    for o in "${orphans[@]}"; do record "orphan:left-alone   $to/$o/"; done
-    return 0
-  fi
-
-  local yes_to_all=$YES
-  for o in "${orphans[@]}"; do
-    local choice="N"
-    if (( yes_to_all )); then
-      choice="y"
-    else
-      printf "Skill '%s' exists in target but not in source. Delete? [y/N/a/q] " "$o" >&2
-      read -r choice </dev/tty || choice="q"
-    fi
-    case "$choice" in
-      y|Y) ;;
-      a|A) yes_to_all=1 ;;
-      q|Q) info "prune cancelled by user"; break ;;
-      *)   info "kept: $o"; record "orphan:kept         $to/$o/"; continue ;;
-    esac
-    if (( DRY_RUN )); then
-      info "[dry-run] rm -rf $abs_to/$o"
-    else
-      rm -rf "${abs_to:?}/$o"
-    fi
-    record "orphan:deleted      $to/$o/"
-    done_ "deleted orphan: $to/$o/"
+    done_ "removed orphaned skill: $to/$o/"
   done
 }
 
@@ -853,6 +825,7 @@ echo
 case "$ACTION" in
   init)
     check_init_refusal "$PLATFORM"
+    clean_claude_settings
     case "$PLATFORM" in
       claude)
         apply_claude_skills
@@ -883,6 +856,7 @@ case "$ACTION" in
     ;;
   update)
     check_update_prereq "$PLATFORM"
+    clean_claude_settings
     case "$PLATFORM" in
       claude)
         apply_claude_skills
@@ -893,7 +867,7 @@ case "$ACTION" in
         apply_starters  "claude"
         # gitignore: idempotent — safe on update
         apply_gitignore "claude"
-        prune_claude_orphans
+        prune_skill_orphans "claude"
         ;;
       copilot)
         apply_copilot_trees
@@ -914,7 +888,7 @@ case "$ACTION" in
         apply_extras    "kimi"
         apply_starters  "kimi"
         apply_gitignore "kimi"
-        prune_kimi_orphans
+        prune_skill_orphans "kimi"
         ;;
     esac
     ;;

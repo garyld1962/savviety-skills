@@ -1,0 +1,166 @@
+#!/usr/bin/env python3
+"""Remove Claude permissions and interactively select hooks to retain."""
+import argparse
+import copy
+import json
+import os
+from pathlib import Path
+import stat
+import sys
+import tempfile
+
+
+def unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key: {key}")
+        result[key] = value
+    return result
+
+
+def invalid_constant(value):
+    raise ValueError(f"Invalid JSON constant: {value}")
+
+
+def read_settings(path):
+    if path.is_symlink():
+        raise ValueError(f"Settings file is a symlink: {path}; edit its destination explicitly")
+    if not path.exists():
+        return None
+    raw = path.read_bytes()
+    value = json.loads(raw, object_pairs_hook=unique_object, parse_constant=invalid_constant)
+    if not isinstance(value, dict):
+        raise ValueError(f"Settings must contain a JSON object: {path}")
+    hooks = value.get("hooks", {})
+    if not isinstance(hooks, dict):
+        raise ValueError(f"hooks must be an object: {path}")
+    for event, groups in hooks.items():
+        if not isinstance(groups, list):
+            raise ValueError(f"{path}: {event} must contain a list of hook groups")
+        for group in groups:
+            if (not isinstance(group, dict) or not isinstance(group.get("hooks"), list)
+                    or not all(isinstance(hook, dict) for hook in group["hooks"])):
+                raise ValueError(f"{path}: unsupported hook group in {event}; no cleanup applied")
+    return raw, value
+
+
+def keep_hook():
+    while True:
+        try:
+            choice = input("Keep this hook? [Y/n/q] ").strip().lower()
+        except EOFError:
+            raise ValueError("Hook answers ended; cleanup cancelled before settings writes") from None
+        if choice in ("", "y", "yes"):
+            return True
+        if choice in ("n", "no"):
+            return False
+        if choice in ("q", "quit"):
+            raise ValueError("Cleanup cancelled before settings writes")
+        print("Enter y to keep, n to remove, or q to cancel.")
+
+
+def clean(target, dry_run=False):
+    directory = target / ".claude"
+    if directory.is_symlink():
+        raise ValueError(f"Claude directory is a symlink: {directory}")
+    # Validate both files before asking or changing either one.
+    originals = {}
+    for name in ("settings.json", "settings.local.json"):
+        path = directory / name
+        data = read_settings(path)
+        if data is not None:
+            originals[path] = data
+    changes = {}
+    for path, (_, original) in originals.items():
+        updated = copy.deepcopy(original)
+        if "permissions" in updated:
+            del updated["permissions"]
+            print(f"{path}: {'would remove' if dry_run else 'will remove'} permissions")
+        kept_events = {}
+        for event, groups in original.get("hooks", {}).items():
+            kept_groups = []
+            for group in groups:
+                kept_hooks = []
+                for hook in group["hooks"]:
+                    print(f"\nFile: {path}\nEvent: {json.dumps(event)}")
+                    context = {key: value for key, value in group.items() if key != "hooks"}
+                    if context:
+                        print("Matching conditions: " + json.dumps(context, ensure_ascii=True))
+                    print("Hook: " + json.dumps(hook, ensure_ascii=True, indent=2))
+                    if dry_run:
+                        print("Would ask whether to keep this hook (default: keep).")
+                    elif keep_hook():
+                        kept_hooks.append(hook)
+                if kept_hooks:
+                    kept_groups.append({**group, "hooks": kept_hooks})
+            if kept_groups:
+                kept_events[event] = kept_groups
+        if kept_events:
+            updated["hooks"] = kept_events
+        else:
+            updated.pop("hooks", None)
+        if updated != original:
+            changes[path] = updated
+    if dry_run:
+        print("Settings cleanup preview complete; no answers requested or files written.")
+        return
+    if not changes:
+        print("Settings cleanup: no changes needed.")
+        return
+
+    # Collect every decision first, then back up original bytes and stage writes
+    # beside each destination. Keep backups even if a later write fails.
+    staged, backups, applied = {}, {}, []
+    try:
+        backup_dir = Path(tempfile.mkdtemp(prefix=".settings-backup-", dir=directory))
+        # Local settings can contain secrets. Keep backups private and prevent
+        # normal git add from publishing them alongside shared skills.
+        (backup_dir / ".gitignore").write_text("*\n")
+        for path, updated in changes.items():
+            raw = originals[path][0]
+            if path.is_symlink() or path.read_bytes() != raw:
+                raise ValueError(f"Settings changed while answering: {path}; retry")
+            mode = stat.S_IMODE(path.stat().st_mode)
+            fd, backup = tempfile.mkstemp(prefix=path.name + ".bak-", dir=backup_dir)
+            backups[path] = Path(backup)
+            with os.fdopen(fd, "wb") as stream:
+                stream.write(raw)
+            fd, pending = tempfile.mkstemp(prefix="." + path.name + "-", dir=directory)
+            staged[path] = Path(pending)
+            with os.fdopen(fd, "w") as stream:
+                os.fchmod(stream.fileno(), mode)
+                json.dump(updated, stream, ensure_ascii=True, indent=2)
+                stream.write("\n")
+        for path in changes:
+            if path.is_symlink() or path.read_bytes() != originals[path][0]:
+                raise ValueError(f"Settings changed while preparing cleanup: {path}; retry")
+            os.replace(staged[path], path)
+            applied.append(path)
+    except (OSError, ValueError, KeyboardInterrupt):
+        for path in reversed(applied):
+            path.write_bytes(originals[path][0])
+        raise
+    finally:
+        for pending in staged.values():
+            pending.unlink(missing_ok=True)
+        for path, backup in backups.items():
+            print(f"Original settings backup: {backup}")
+    print(f"Settings cleanup complete: updated {len(changes)} file(s).")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--target", type=Path, required=True)
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args()
+    try:
+        clean(args.target, args.dry_run)
+    except (OSError, ValueError, KeyboardInterrupt) as exc:
+        print(f"Settings cleanup stopped: {exc or 'cancelled'}", file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
