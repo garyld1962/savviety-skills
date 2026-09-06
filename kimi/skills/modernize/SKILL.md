@@ -37,7 +37,7 @@ whenToUse: 'Audit a codebase against current AI toolchain capability and produce
 - Codebase is actively being developed; no AI-time gap exists.
 - You have a specific bug or feature — use the relevant focused skill.
 - You suspect the project wants a fundamentally different stack — that's a human decision; this skill stays inside the current platform.
-- Single-file polish — use `/simplify`.
+- Single-file polish — make focused code edits directly.
 - Dependency-driven modernization (CVEs, package upgrades) — use `/skill:dep-audit` + `/skill:dep-migrate`.
 
 ## Scope Boundaries
@@ -73,7 +73,7 @@ Per the `_internal/modernization-rubric` contract §1, classify:
 - **Test coverage signal** — strong / present / thin / absent
 - **Detected patterns** — layered / hexagonal / MVC / functional core / none
 
-Halt if size class is **tiny** (<500 LOC). Modernization audits are not the right tool for that scale; recommend `/simplify` or direct edits.
+Halt if size class is **tiny** (<500 LOC). Modernization audits are not the right tool for that scale; recommend focused code edits directly.
 
 ### Phase 2: Repo state delegation
 
@@ -219,7 +219,7 @@ Otherwise, if `--handoff` (default), invoke:
 
 This skill is a project-tailored modernization orchestrator unique to savviety-skills. It composes `/skill:audit-existing` (descriptive state) with `_internal/modernization-rubric` (calibration) to produce a refactor plan that feeds `/skill:execute-prd --type=refactor` (execution).
 
-For ad-hoc single-file simplification, use `/simplify`. For dependency-driven modernization, use `/skill:dep-audit` + `/skill:dep-migrate`. For broader project-skills/plugin-ecosystem audit, use `/skill:skill-audit`. Native `superpowers:writing-plans` is the lighter alternative when you want to brainstorm refactor priorities without a structured rubric — but it produces a generic plan, not one calibrated to the AI-time-refresh framing.
+For ad-hoc single-file code simplification, make focused edits directly; `/skill:simplify` explains reports and does not refactor code. For dependency-driven modernization, use `/skill:dep-audit` + `/skill:dep-migrate`. For broader project-skills/plugin-ecosystem audit, use `/skill:skill-audit`. Native `superpowers:writing-plans` is the lighter alternative when you want to brainstorm refactor priorities without a structured rubric — but it produces a generic plan, not one calibrated to the AI-time-refresh framing.
 
 ## Key Rules
 

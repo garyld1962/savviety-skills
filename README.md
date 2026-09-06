@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/garyld1962/savviety-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/garyld1962/savviety-skills/actions/workflows/ci.yml)
 
-Cross-platform AI coding skills maintained across four canonical systems.
+Cross-platform AI coding skills, including an initial Hermes workflow package.
 
 ## Platforms
 
@@ -12,6 +12,7 @@ Cross-platform AI coding skills maintained across four canonical systems.
 | [Copilot](copilot/README.md) | `copilot/` | `.github/` (Copilot CLI + VS Code) | GPT 5.4, Gemini Pro |
 | [Codex](codex/README.md) | `codex/` | `.codex/`, `.claude-plugin/marketplace.json`, `AGENTS.md` | GPT-5 Codex family |
 | [Kimi](kimi/README.md) | `kimi/` | `.kimi/`, `AGENTS.md` (skills sourced from `claude/`) | Kimi K2.5/K2.6 |
+| [Hermes Agent](hermes/README.md) | `hermes/skills/` | `$HERMES_HOME/skills/` (default `~/.hermes/skills/`) | Configured Hermes model |
 
 **Claude Code** workflows are primarily modeled as `/name` skills. When Claude
 needs worker roles, they usually live **inside the skill package** as nested
@@ -26,6 +27,9 @@ as reusable workflow packages, `.codex/agents/*.toml` for custom subagents, and
 Kimi-specific YAML agents, hooks, and an `AGENTS.md` starter — skill bodies
 stay single-sourced under `claude/`. Slash invocation differs from Claude:
 `/skill:<name>` and `/flow:<name>` instead of `/<name>`.
+**Hermes Agent** has a four-skill pilot: `/simplify`, `/validate-plan`,
+`/execute-prd`, and `/execute-plan`. Thin Hermes entrypoints use the shared
+workflow instructions and validators. It does not yet have the full catalog.
 
 ## Repository Structure
 
@@ -57,6 +61,7 @@ stay single-sourced under `claude/`. Slash invocation differs from Claude:
 │   ├── blazorstack/       #   .NET scaffold template
 │   └── ts-monorepo/       #   TypeScript scaffold template
 ├── docs/                  # Design and planning docs
+├── hermes/                # Hermes entrypoints and packaged shared contracts
 ├── install.sh             # Installs the skills command in ~/.local/bin
 └── cli/                   # Implementation of skills, driven by manifest.json
 ```
@@ -89,12 +94,53 @@ Keep the checkout: the command runs directly from it, so pulling updates also
 updates `skills`. If you move the checkout, rerun `./install.sh` from its new
 location. `REPO_SKILLS_HOME` remains available to override the source repository.
 
+To repair the command, install missing utilities, and refresh a Claude project:
+
+```bash
+./update.sh /path/to/project
+```
+
+The target defaults to the current directory and must be a Git repository.
+Existing Claude installs are updated; new ones are initialized. Shared hook
+registrations are removed from `settings.json`, existing permissions are
+preserved, and an existing `settings.local.json` is left untouched.
+The script installs `uv`, Python if needed, and these utilities: `ripgrep`,
+`fd`, `jq`, `rsync`, `shellcheck`, `ast-grep`, `sd`, `gh`, `gh-axi`, `just`,
+`hyperfine`, and `xh`. Installing `gh-axi` requires Node.js 20+ and npm; its
+executable is installed into `~/.local/bin` without registering session hooks.
+Debian/Ubuntu package installation may require sudo. Failed installations
+stop the update and report what is still missing.
+
+For Hermes, use the same utility setup with a profile destination:
+
+```bash
+./update.sh --hermes
+# Or select a named profile explicitly:
+./update.sh --hermes "$HOME/.hermes/profiles/coder"
+```
+
+The destination defaults to `HERMES_HOME`, otherwise `~/.hermes`. Hermes
+configuration, hooks and unrelated skills are preserved. Updates stop before
+overwriting local skill edits. See [Hermes installation and validation](hermes/README.md).
+
+You can also run `bin/install-agentic-tools` separately. It
+installs missing `uv` using [Astral's installer](https://docs.astral.sh/uv/reference/installer/),
+then configures the tool directory's PATH and installs Python if needed.
+Use `bin/install-agentic-tools --check` to report missing prerequisites without
+installing anything.
+
+CI runs ShellCheck on the installer scripts. Run the same check locally with:
+
+```bash
+shellcheck install.sh update.sh cli/skill.sh bin/install-agentic-tools
+```
+
 ## Deployment
 
 Deployment into a target repository is handled by `skills` using
 `manifest.json`. The legacy `deploy.sh` script has been archived.
 
-The target must already be a Git repository. Deployment requires Bash, Git,
+For Claude, Copilot, Codex and Kimi, the target must already be a Git repository. Deployment requires Bash, Git,
 `jq`, and `rsync` on PATH. Choose your platform:
 
 ```bash
@@ -109,12 +155,39 @@ To refresh an existing install, use `--update` with the same platform flag.
 Omit the target path to use the current directory. Run `skills --help` for
 all options, including `--dry-run`.
 
+Hermes installs into a profile home and requires Bash and Python 3.9+, without
+a Git repository, jq or rsync requirement for the skill copy itself:
+
+```bash
+skills --hermes --init --dry-run
+skills --hermes --init
+skills --hermes --update
+```
+
 For Claude Code, user-facing skill directories and `_internal/` map into
 `.claude/skills/`, while runtime project files such as `.claude/settings.json`
 and hook utilities live at `.claude/` root. `claude/infra/` is source for those
 hook utilities, not a skill namespace. `claude/README.md`,
 `claude/MODEL-POLICY.md`, and `claude/SESSION-CONTEXT.md` are source/reference
 docs, not files to drop into `.claude/skills/`.
+
+The installer refreshes Claude's shared settings without importing template
+permissions. Existing permissions in `.claude/settings.json` are preserved;
+`.claude/settings.local.json` is created as `{}` only if absent.
+The template registers no hooks. Updating an existing install removes the
+previous template hooks from `.claude/settings.json`.
+
+## Clear progress updates
+
+PRD, kickoff, and plan execution apply a plain-language pass to assistant-written
+updates: what changed, what remains uncertain, why it matters, and the next action
+or decision. Detailed reports keep their technical findings and verdicts.
+
+Invoke `/simplify` to re-explain the latest update, or `/simplify <report-path>`
+to explain a specific report. Use `$simplify` in Codex and `/skill:simplify` in
+Kimi; Copilot also ships a `/simplify` prompt where prompt files are supported.
+This skill simplifies explanations, not code. It does not install hooks or
+intercept raw output rendered by the host's tools.
 
 ## Shared vs Local Convention
 

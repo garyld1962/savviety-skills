@@ -4,6 +4,12 @@ Read `plan-format.md`, `reporting.md`, and the repository command contract.
 Use native editing, shell, review and optional agent tools. This workflow has
 no dependency on another platform's orchestration host or scripts.
 
+Read [the simplify output guidance](../../simplify/references/output.md) before
+the first user update. Apply it to every assistant-written progress message,
+task/milestone summary, blocker, decision request, and final response throughout
+execution and resume. Internal check names and report schemas remain evidence;
+explain their effect on the user's goal in the console.
+
 ## Preflight and resume
 
 - Resolve one explicit plan. If omitted, use a unique execution plan candidate

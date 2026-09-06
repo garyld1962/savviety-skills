@@ -17,12 +17,16 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install pyyaml
+      - name: Install shell lint and installer test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck jq rsync
       # Check platform packaging as well as executable helper behavior.
       - run: find claude -name "*.mjs" -print0 | xargs -0 bin/check-workflow-syntax
       - run: jq empty manifest.json
       - run: jq empty claude/settings.template.json
       - run: jq empty kimi/kimi.plugin.json
-      - run: bash -n install.sh && bash -n cli/skill.sh
+      - run: shellcheck install.sh update.sh cli/skill.sh bin/install-agentic-tools
       - run: for f in kimi/hooks/*.sh; do bash -n "$f"; done
       - run: bin/build-kimi-plugin --check
       - run: python3 codex/scripts/validate_codex_assets.py

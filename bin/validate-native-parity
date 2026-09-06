@@ -44,6 +44,18 @@ for path in (root / "copilot/skills").glob("*/SKILL.md"):
 for path in (root / "copilot/prompts").rglob("*.prompt.md"):
     metadata(path)
 
+# Hermes is an explicit pilot, not a claim of full Claude workflow parity.
+hermes_source = root / manifest["hermes"]["skills"]["from"]
+hermes_skills = sorted(hermes_source.glob("*/SKILL.md"))
+if not hermes_skills:
+    errors.append("Hermes pilot has no installable skills")
+for path in hermes_skills:
+    meta = metadata(path)
+    if meta.get("name") != path.parent.name:
+        errors.append(f"Hermes skill name differs from directory: {path.relative_to(root)}")
+    if not meta.get("description", "").strip():
+        errors.append(f"Hermes skill lacks description: {path.relative_to(root)}")
+
 # These are explicitly user-created configuration destinations, not shipped assets.
 user_paths = {".github/instructions/env.config.md", ".github/instructions/project.instructions.md"}
 for path in (root / "copilot").rglob("*.md"):
@@ -55,8 +67,9 @@ for path in (root / "copilot").rglob("*.md"):
 # must resolve without a sibling platform source tree.
 paths = {root / row["codex"] for row in rows}
 paths.update(root / p for row in rows for p in row["copilot"])
+paths.update(hermes_source.rglob("*.md"))
 for platform in ("codex/plugins/savviety-workflows/skills", "copilot/skills"):
-    for skill in ("validate-plan", "drawio"):
+    for skill in ("validate-plan", "drawio", "simplify"):
         paths.update((root / platform / skill).rglob("*.md"))
 for path in paths:
     for target in re.findall(r"\[[^\]]*\]\(([^)\s]+)\)", path.read_text()):
@@ -69,4 +82,4 @@ for path in paths:
 if errors:
     print("Native parity validation failed:\n" + "\n".join(sorted(set(errors))))
     sys.exit(1)
-print(f"Native parity validated: {len(rows)} Claude workflows, install sources and active references.")
+print(f"Native parity validated: {len(rows)} Claude workflows, {len(hermes_skills)} Hermes pilot skills, install sources and active references.")

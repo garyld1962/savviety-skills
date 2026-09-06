@@ -5,15 +5,15 @@ description: 'Plan a refactor through structured interview, then file it as a Gi
   plan a refactor before implementing — phrases like ''plan a refactor'', ''create
   a refactor issue'', ''refactor RFC'', ''break this refactor into safe steps''. When
   NOT to Use: refactor already planned and ready to execute (use /execute-plan); quick
-  code cleanup (use /simplify); feature work disguised as a refactor (use /prd-validate
-  first).'
+  code cleanup (make focused edits directly); feature work disguised as a refactor
+  (use /prd-validate first).'
 whenToUse: 'Plan a refactor through structured interview, then file it as a GitHub
   issue RFC with a tiny-commit sequence and decision record. Use when user wants to
   plan a refactor before implementing — phrases like ''plan a refactor'', ''create
   a refactor issue'', ''refactor RFC'', ''break this refactor into safe steps''. When
   NOT to Use: refactor already planned and ready to execute (use /execute-plan); quick
-  code cleanup (use /simplify); feature work disguised as a refactor (use /prd-validate
-  first).'
+  code cleanup (make focused edits directly); feature work disguised as a refactor
+  (use /prd-validate first).'
 ---
 
 
@@ -30,7 +30,7 @@ whenToUse: 'Plan a refactor through structured interview, then file it as a GitH
 ## When NOT to Use
 
 - The refactor is already planned — use `/skill:execute-plan`
-- A quick cleanup — just do it with `/simplify`
+- A quick code cleanup — make focused edits directly
 - A feature change dressed up as a refactor — use `/skill:prd-validate` first
 
 ## Workflow

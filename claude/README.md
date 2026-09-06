@@ -20,7 +20,7 @@ real project, the deployed runtime layout is different:
 | `claude/<skill>/` | `.claude/skills/<skill>/` | Shared user-invokable skills |
 | `claude/_internal/` | `.claude/skills/_internal/` | Internal callable contracts and rubrics; hidden from normal help |
 | `claude/infra/<asset>/` | `.claude/<asset>/` | Hook and utility scripts; not installed as skills |
-| `claude/settings.template.json` | `.claude/settings.json` | Optional starter for permissions and hooks |
+| `claude/settings.template.json` | `.claude/settings.json` | Settings template; no hook registrations; installer excludes template permissions |
 | `templates/CLAUDE.local.md` | `CLAUDE.local.md` | Personal local overrides; never overwrite once created |
 | `claude/README.md`, `claude/MODEL-POLICY.md`, `claude/SESSION-CONTEXT.md` | Do not copy into `.claude/skills/` | Source docs and reference material |
 

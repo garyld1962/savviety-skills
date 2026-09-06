@@ -45,7 +45,7 @@ A project may be more than one (e.g. a service that exposes a CLI). Use the domi
 
 | Class | LOC range | Behaviour |
 |---|---|---|
-| **Tiny** | <500 | Refuse — recommend `/simplify` or direct edit |
+| **Tiny** | <500 | Refuse — recommend focused code edits directly |
 | **Small** | 500–5,000 | Standard audit |
 | **Medium** | 5,000–50,000 | Standard audit, watch token budget |
 | **Large** | 50,000–250,000 | Caution: sample-read strategy is mandatory |

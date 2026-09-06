@@ -1,5 +1,11 @@
 # Requirements to a validated plan
 
+Read [the simplify output guidance](../../simplify/references/output.md) before
+the first user update. Apply it to assistant-written audit, readiness, planning,
+validation, and handoff messages, including blockers and requests for decisions.
+Keep the complete scores and findings in their artifacts; explain the concrete
+gaps and next action to the user. Continue the same guidance during execution.
+
 1. Read the repository instruction file and its Commands contract (`lint`,
    `build`, `test`, `default_branch`, `package_manager`). Missing commands halt
    execution; show the missing fields without inventing commands.

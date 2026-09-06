@@ -15,6 +15,10 @@ disableModelInvocation: false
 
 **Purpose:** Begin implementation work from a requirements artifact with the operator at the keyboard, following a built-in-first flow: readiness check → plan → implement → review. Does NOT produce audit-grade governed artifacts; for an unattended run, use `/skill:execute-prd`.
 
+Before the first user update, read [simplify](../simplify/SKILL.md) and apply its
+output guidance to all assistant-written progress, readiness, task and review
+summaries, blockers, decisions, and final results. Preserve technical evidence.
+
 ## When to Use
 
 - Starting standard feature work from an AERS, PRD, story, or spec

@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 root = Path(__file__).resolve().parents[1]
-bundles = {"workflow-contracts": "validate-plan", "drawio": "drawio"}
+bundles = {"workflow-contracts": "validate-plan", "drawio": "drawio", "simplify": "simplify"}
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--check", action="store_true")
 args = parser.parse_args()
@@ -14,6 +14,11 @@ for bundle, skill in bundles.items():
     source = root / "shared" / bundle
     targets = [root / "codex/plugins/savviety-workflows/skills" / skill,
                root / "copilot/skills" / skill]
+    if bundle in ("workflow-contracts", "simplify"):
+        targets.append(root / "hermes/skills" / skill)
+    if bundle == "simplify":
+        # Claude and the generated Kimi skill use the same presentation contract.
+        targets.append(root / "claude" / skill)
     for src in sorted(source.rglob("*")):
         if not src.is_file() or "__pycache__" in src.parts:
             continue

@@ -27,8 +27,10 @@
     ],
     "starters": [
       { "from": "templates/CLAUDE.starter.md",            "to": "CLAUDE.md" },
-      { "from": "templates/CLAUDE.local.md",              "to": "CLAUDE.local.md" },
-      { "from": "templates/settings.local.starter.json",  "to": ".claude/settings.local.json" }
+      { "from": "templates/CLAUDE.local.md",              "to": "CLAUDE.local.md" }
+    ],
+    "ensure": [
+      { "to": ".claude/settings.local.json", "content": "{}\n" }
     ],
     "gitignore": [
       "CLAUDE.local.md",
@@ -106,6 +108,14 @@
       ".kimi/journal/.lock.*",
       ".kimi/SESSION.md"
     ]
+  },
+
+  "hermes": {
+    "$comment": "Profile-scoped pilot, installed by bin/install-hermes-skills. Target is HERMES_HOME (default ~/.hermes), not a Git project. Hash-tracked updates refuse local edits; no hooks or configuration are copied.",
+    "skills": {
+      "from": "hermes/skills",
+      "to": "skills"
+    }
   },
 
   "user_owned": [

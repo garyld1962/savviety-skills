@@ -1,6 +1,6 @@
 # Task graph plan contract
 
-This contract is shared by the native Codex and Copilot workflows. Its source
+This contract is shared by the native Codex, Copilot and Hermes workflows. Its source
 is `shared/workflow-contracts/`; the installer ships a complete copy with each
 platform. Run `bin/sync-native-contracts` after changing the source.
 

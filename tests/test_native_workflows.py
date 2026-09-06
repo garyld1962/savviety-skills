@@ -208,6 +208,40 @@ class InstallerTests(unittest.TestCase):
     def install(self, platform, action):
         return subprocess.run(["bash", str(ROOT / "cli/skill.sh"), "--" + platform, "--" + action, str(self.target)], env=self.env, capture_output=True, text=True)
 
+    def test_claude_installs_without_hooks_or_template_permissions(self):
+        settings = self.target / ".claude/settings.json"
+        local = self.target / ".claude/settings.local.json"
+        for action in ("init", "update"):
+            with self.subTest(action=action):
+                result = self.install("claude", action)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                installed = json.loads(settings.read_text())
+                self.assertNotIn("permissions", installed)
+                self.assertNotIn("hooks", installed)
+                self.assertEqual(json.loads(local.read_text()), {})
+                local.unlink()  # Update must also recreate a missing file without grants.
+
+    def test_claude_removes_old_hooks_and_preserves_project_permissions(self):
+        settings = self.target / ".claude/settings.json"
+        settings.parent.mkdir()
+        local = self.target / ".claude/settings.local.json"
+        permissions = {"allow": ["Read"], "deny": ["Bash(rm:*)"], "ask": ["Write"]}
+        local_content = '{ "permissions": { "allow": ["Bash(project-task)"] } }\n'
+        local.write_text(local_content)
+        old_hooks = {
+            event: [{"hooks": [{"type": "command", "command": "echo old-hook"}]}]
+            for event in ("SessionStart", "SessionEnd", "PreToolUse", "PostToolUse")
+        }
+        for action in ("init", "update"):
+            with self.subTest(action=action):
+                settings.write_text(json.dumps({"permissions": permissions, "hooks": old_hooks}))
+                result = self.install("claude", action)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                installed = json.loads(settings.read_text())
+                self.assertEqual(installed["permissions"], permissions)
+                self.assertNotIn("hooks", installed)
+                self.assertEqual(local.read_text(), local_content)
+
     def test_copilot_install_update_and_user_settings(self):
         result = self.install("copilot", "init")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

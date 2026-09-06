@@ -2,17 +2,17 @@
 # install-agentic-tools — install the modern CLI set that agentic dev loops
 # rely on (non-interactive, gitignore-aware, structured output).
 #
-# uv is a hard prerequisite. The script verifies uv is installed AND
-# configured (on PATH, tool bin dir on PATH, a Python available) before
-# touching anything else, and prints the exact fix for whatever is wrong.
+# Installs missing uv using Astral's installer, configures its tool bin
+# directory on PATH and installs Python if needed before installing tools.
+# --check only reports missing prerequisites and never installs anything.
 #
 # Usage:
-#   bin/install-agentic-tools           # verify uv, install what's missing
+#   bin/install-agentic-tools           # install uv and missing tools
 #   bin/install-agentic-tools --check   # report only, install nothing
 #
 # Routes, in order: apt (Debian/Ubuntu) → brew (macOS) → uv tool → cargo →
-# print manual steps. Exit 0 when everything is present, 1 when tools are
-# still missing, 2 when uv itself is missing or misconfigured.
+# print manual steps; gh-axi uses npm with Node 20+. Exit 0 when all tools are
+# present, 1 when tools are missing, 2 when uv is missing or misconfigured.
 
 set -euo pipefail
 
@@ -34,14 +34,41 @@ echo "== uv (prerequisite)"
 uv_fail=0
 
 if ! command -v uv >/dev/null 2>&1; then
-  miss "uv is not installed"
-  step 'curl -LsSf https://astral.sh/uv/install.sh | sh'
-  step 'then open a new shell (the installer adds ~/.local/bin to PATH) and re-run this script'
-  if [ -x "$HOME/.local/bin/uv" ]; then
-    step "note: $HOME/.local/bin/uv exists but is not on PATH — add to your shell rc:"
-    step '  export PATH="$HOME/.local/bin:$PATH"'
+  uv_install_dir="${UV_UNMANAGED_INSTALL:-${UV_INSTALL_DIR:-$HOME/.local/bin}}"
+  if [ -n "$CHECK" ]; then
+    miss "uv is not on PATH"
+    step 'run bin/install-agentic-tools to install uv and missing tools'
+    if [ -x "$uv_install_dir/uv" ]; then
+      step "uv already exists at $uv_install_dir/uv — add that directory to PATH"
+    fi
+    exit 2
   fi
-  exit 2
+
+  if [ ! -x "$uv_install_dir/uv" ]; then
+    echo "  installing uv..."
+    uv_installer=$(mktemp) || exit 2
+    trap 'rm -f -- "$uv_installer"' EXIT
+    # Download completely before executing; never run a partial installer.
+    if command -v curl >/dev/null 2>&1; then
+      curl -LsSf https://astral.sh/uv/install.sh -o "$uv_installer" \
+        || { miss "uv installer download failed"; exit 2; }
+    elif command -v wget >/dev/null 2>&1; then
+      wget -q https://astral.sh/uv/install.sh -O "$uv_installer" \
+        || { miss "uv installer download failed"; exit 2; }
+    else
+      miss "curl or wget is required to install uv"
+      exit 2
+    fi
+    UV_INSTALL_DIR="$uv_install_dir" sh "$uv_installer" \
+      || { miss "uv installation failed"; exit 2; }
+    rm -f -- "$uv_installer"
+    trap - EXIT
+  fi
+
+  # Shell profile changes from the installer do not affect this running process.
+  export PATH="$uv_install_dir:$PATH"
+  command -v uv >/dev/null 2>&1 || { miss "uv is still unavailable after installation"; exit 2; }
+  step "using $uv_install_dir for this run; ensure it is on PATH in new shells"
 fi
 ok "uv $(uv --version | awk '{print $2}') at $(command -v uv)"
 
@@ -52,20 +79,36 @@ if [ -z "$uv_bin" ]; then
   uv_fail=1
 elif on_path "$uv_bin"; then
   ok "uv tool bin dir on PATH ($uv_bin)"
-else
+elif [ -n "$CHECK" ]; then
   miss "uv tool bin dir $uv_bin is not on PATH — tools installed via 'uv tool' won't be found"
   step 'uv tool update-shell   # appends the export to your shell rc'
   step "or add manually: export PATH=\"$uv_bin:\$PATH\""
   step 'then open a new shell and re-run'
   uv_fail=1
+else
+  if uv tool update-shell; then
+    export PATH="$uv_bin:$PATH"
+    ok "uv tool bin dir added to PATH ($uv_bin)"
+  else
+    miss "could not configure uv tool bin directory on PATH"
+    uv_fail=1
+  fi
 fi
 
 if py="$(uv python find 2>/dev/null)"; then
   ok "python available to uv ($py)"
-else
+elif [ -n "$CHECK" ]; then
   miss "uv cannot find a Python interpreter"
   step 'uv python install          # installs the latest CPython into uv'"'"'s managed dir'
   uv_fail=1
+else
+  echo "  installing Python for uv..."
+  if uv python install && py="$(uv python find 2>/dev/null)"; then
+    ok "python available to uv ($py)"
+  else
+    miss "could not install a Python interpreter for uv"
+    uv_fail=1
+  fi
 fi
 
 if [ "$uv_fail" -ne 0 ]; then
@@ -94,9 +137,12 @@ TOOLS='
 ripgrep  |rg       |ripgrep  |ripgrep  |-           |ripgrep  |https://github.com/BurntSushi/ripgrep#installation
 fd       |fd       |fd-find  |fd       |-           |fd-find  |https://github.com/sharkdp/fd#installation
 jq       |jq       |jq       |jq       |-           |-        |https://jqlang.github.io/jq/download/
+rsync    |rsync    |rsync    |rsync    |-           |-        |Install rsync with your system package manager
+shellcheck|shellcheck|shellcheck|shellcheck|-         |-        |https://www.shellcheck.net/
 ast-grep |ast-grep |-        |ast-grep |ast-grep-cli|ast-grep |https://ast-grep.github.io/guide/quick-start.html
 sd       |sd       |sd       |sd       |-           |sd       |https://github.com/chmln/sd#installation
 gh       |gh       |gh       |gh       |-           |-        |https://github.com/cli/cli#installation
+gh-axi   |gh-axi   |-        |-        |-           |-        |Install Node.js 20+ and npm, then rerun this script
 just     |just     |just     |just     |-           |just     |https://github.com/casey/just#installation
 hyperfine|hyperfine|hyperfine|hyperfine|-           |hyperfine|https://github.com/sharkdp/hyperfine#installation
 xh       |xh       |-        |xh       |-           |xh       |curl -sSL https://raw.githubusercontent.com/ducaale/xh/master/install.sh | sh
@@ -104,6 +150,19 @@ xh       |xh       |-        |xh       |-           |xh       |curl -sSL https:/
 
 install_one() {
   local name="$1" apt="$2" brew="$3" uvpkg="$4" crate="$5" manual="$6"
+  if [ "$name" = gh-axi ]; then
+    if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1 \
+      || ! node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 20 ? 0 : 1)'; then
+      miss "gh-axi requires Node.js 20+ and npm"
+      step "$manual"
+      return 1
+    fi
+    # Keep the executable in the same user bin directory as skills and uv.
+    # Installing the CLI does not opt in to gh-axi's separate hook setup.
+    npm install --global --prefix "$HOME/.local" gh-axi || return 1
+    on_path "$HOME/.local/bin" || export PATH="$HOME/.local/bin:$PATH"
+    return 0
+  fi
   if [ "$PM" = apt ] && [ "$apt" != - ]; then apt_install "$apt" && return 0; fi
   if [ "$PM" = brew ] && [ "$brew" != - ]; then brew install "$brew" && return 0; fi
   if [ "$uvpkg" != - ]; then uv tool install "$uvpkg" && return 0; fi

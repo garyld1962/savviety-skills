@@ -316,6 +316,15 @@
       "mapping": "direct"
     },
     {
+      "claude": "simplify",
+      "codex": "codex/plugins/savviety-workflows/skills/simplify/SKILL.md",
+      "copilot": [
+        "copilot/skills/simplify/SKILL.md",
+        "copilot/prompts/dev/simplify.prompt.md"
+      ],
+      "mapping": "direct"
+    },
+    {
       "claude": "skill-audit",
       "codex": "codex/plugins/savviety-workflows/skills/skills/SKILL.md",
       "copilot": [
