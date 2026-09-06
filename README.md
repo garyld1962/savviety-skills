@@ -101,9 +101,9 @@ To repair the command, install missing utilities, and refresh a Claude project:
 ```
 
 The target defaults to the current directory and must be a Git repository.
-Existing Claude installs are updated; new ones are initialized. Shared hook
-registrations are removed from `settings.json`, existing permissions are
-preserved, and an existing `settings.local.json` is left untouched.
+Existing Claude installs are updated; new ones are initialized. Existing
+permissions, hooks and other settings are preserved by default, and an
+existing `settings.local.json` is left untouched.
 The script installs `uv`, Python if needed, and these utilities: `ripgrep`,
 `fd`, `jq`, `rsync`, `shellcheck`, `ast-grep`, `sd`, `gh`, `gh-axi`, `just`,
 `hyperfine`, and `xh`. Installing `gh-axi` requires Node.js 20+ and npm; its
@@ -155,6 +155,20 @@ To refresh an existing install, use `--update` with the same platform flag.
 Omit the target path to use the current directory. Run `skills --help` for
 all options, including `--dry-run`.
 
+Claude and Kimi updates automatically ask about skill directories that exist in
+the target but are absent from the source:
+
+```text
+Remove orphaned skill 'old-skill'? [y/N/a/q]
+```
+
+Enter or `n` keeps it, `y` removes it, `a` removes all remaining orphaned skills,
+and `q` stops pruning. Private directories (names starting with `_` or `.`),
+including `_project` and `_local`, are excluded. Noninteractive updates keep
+orphans; use `--prune --yes` only when scripted deletion is intended. A dry run
+lists candidates without prompting or deleting. `update.sh` inherits this
+behavior for Claude updates.
+
 Hermes installs into a profile home and requires Bash and Python 3.9+, without
 a Git repository, jq or rsync requirement for the skill copy itself:
 
@@ -172,10 +186,38 @@ hook utilities, not a skill namespace. `claude/README.md`,
 docs, not files to drop into `.claude/skills/`.
 
 The installer refreshes Claude's shared settings without importing template
-permissions. Existing permissions in `.claude/settings.json` are preserved;
-`.claude/settings.local.json` is created as `{}` only if absent.
-The template registers no hooks. Updating an existing install removes the
-previous template hooks from `.claude/settings.json`.
+permissions or hooks. Existing permissions, hooks and other project settings
+are preserved; `.claude/settings.local.json` is created as `{}` only if absent.
+
+To remove existing permissions and choose which hooks to keep in both
+`.claude/settings.json` and `.claude/settings.local.json`:
+
+```bash
+skills --claude --update /path/to/repo --clean-settings
+# Also refresh the command and install missing utilities:
+./update.sh /path/to/repo --clean-settings
+```
+
+`--clean-settings` removes the complete `permissions` section from both files.
+For each existing hook it shows the file, event, matching conditions and hook
+definition, then asks `Keep this hook? [Y/n/q]`. Enter or `y` keeps it; `n`
+removes it; `q` or exhausted input cancels before either settings file changes.
+All hook decisions are collected first. Kept hooks retain their matching
+conditions and options; unrelated settings remain intact.
+
+Changed files receive exact-byte backups in a private, Git-ignored
+`.claude/.settings-backup-*/` directory. No hooks are executed by cleanup.
+The option is Claude-only and cannot be combined with `--force`.
+Without it, updates do not ask about hooks or remove permissions.
+
+Preview without answering questions or changing files:
+
+```bash
+skills --claude --update /path/to/repo --clean-settings --dry-run
+./update.sh /path/to/repo --clean-settings --dry-run
+```
+
+The wrapper's `--dry-run` also skips command setup and utility installation.
 
 ## Clear progress updates
 

@@ -57,15 +57,22 @@ Mirror Claude Code's own layering. Two separate files with different rules:
 
 | File | Owner | Behavior on `--init` | Behavior on `--update` |
 |---|---|---|---|
-| `.claude/settings.json` | shared settings; project-owned permissions | template settings excluding permissions; preserve existing project permissions | refresh template settings; preserve existing project permissions |
-| `.claude/settings.local.json` | user / personal | created empty `{}` if absent | never touched |
+| `.claude/settings.json` | shared defaults; project-owned settings | merge template defaults excluding permissions/hooks; preserve existing settings | refresh template defaults; preserve existing permissions, hooks and other settings |
+| `.claude/settings.local.json` | user / personal | created empty `{}` if absent | untouched unless `--clean-settings` is selected |
 
-The template owns shared settings and currently registers no hooks. Updating
-an existing install removes its previous shared hook registrations.
+The template provides shared defaults and currently registers no hooks. Normal
+updates preserve existing hook registrations.
 Permission grants belong to
 the consuming project: the installer never imports template permissions into
 either settings file. Manage shared grants directly in the project's
 `.claude/settings.json` and personal grants in `.claude/settings.local.json`.
+
+Explicit `--clean-settings` removes permissions from both files and asks whether
+to retain each individual hook, defaulting to keep. Quit or EOF cancels before
+settings writes. Kept hooks retain group metadata, unrelated settings survive,
+and changed files get private, Git-ignored backups. `--dry-run` only previews.
+This option is also accepted by `update.sh`; it cannot be used with `--force`
+or with other platforms.
 
 For Copilot, no per-user equivalent exists; instructions live in
 `.github/instructions/personal.instructions.md` and follow the same
@@ -94,22 +101,24 @@ already exist**. It never modifies existing files.
 fresh repo without one means every skill operates with no context. Templates
 are minimal — pointers, not policy — so they're safe to drop in unmodified.
 
-### 2.6. `--prune` is interactive
+### 2.6. Updates offer orphan removal interactively
 
-`--update --prune` does **not** silently delete. For each shared skill present
-in the target but absent from source, the script prompts:
+Claude and Kimi `--update` offer removal automatically for skill directories
+present in the target but absent from source. Private `_` and `.` directories
+and declared preserved directories are excluded. The script prompts:
 
 ```
-Skill 'old-thing' exists in target but not in source. Delete? [y/N/a/q]
+Remove orphaned skill 'old-thing'? [y/N/a/q]
   y = delete this one
   N = keep this one (default)
   a = delete this and all remaining (yes-to-all for the rest of the run)
   q = quit pruning, leave remaining as-is
 ```
 
-Without `--prune`, removed-upstream skills are listed in the summary as
-"orphaned" but left in place. A `--yes` flag (only meaningful with `--prune`)
-skips the prompt entirely for non-interactive runs (CI, scripted setup).
+Noninteractive updates keep orphans, including with `--prune` alone. Explicit
+`--prune --yes` permits deletion in scripts. Dry runs only list candidates and
+never prompt or delete. `q` stops further pruning; it does not undo skill updates
+or deletions already selected during this run.
 
 **Why:** silent deletion of work is the kind of "destructive shortcut" your
 global instructions warn against. Asking is cheap; recovering deleted skill
@@ -207,8 +216,10 @@ Actions:
 3. Copy `claude/_internal/` into `<target>/.claude/skills/_internal/`.
 4. Copy `claude/infra/pr-guardrail/`, `claude/infra/journal/`, and
    `claude/install-scan/` into their `.claude/<asset>/` hook locations.
-5. Write `claude/settings.template.json` to `<target>/.claude/settings.json`
-   excluding template permissions and preserving existing project permissions.
+5. Merge `claude/settings.template.json` into `<target>/.claude/settings.json`
+   excluding template permissions/hooks and preserving existing project settings.
+   If `--clean-settings` was requested, collect hook decisions and clean both
+   settings files before installing shared assets.
 6. Create `<target>/.claude/settings.local.json` containing `{}` if absent.
 7. Create `<target>/CLAUDE.md` from `templates/CLAUDE.starter.md` if absent.
 8. Create `<target>/CLAUDE.local.md` from `templates/CLAUDE.local.md` if absent.
@@ -224,12 +235,12 @@ Actions:
    overwriting shared files. **Never** touch `_project/`, `_local/`, or any
    directory matching `_*` inside the target.
 2. Refresh `_internal/`, infra extras, and `settings.json` the same way.
-3. With `--prune`: for each shared skill in target that no longer exists in
-   source, prompt the user (`y/N/a/q` per §2.6). With `--prune --yes`: skip
-   prompts and delete all orphans. Without `--prune`: list orphans in the
-   summary, delete nothing.
-4. **Never** touch `settings.local.json`, `CLAUDE.md`, `CLAUDE.local.md`, or
-   anything under `<target>/.claude/skills/_*/`.
+3. Offer orphan removal on interactive updates (`y/N/a/q` per §2.6), keeping by
+   default. With `--prune --yes`, delete candidates without prompts. With no
+   terminal, retain orphans unless `--prune --yes` was explicitly supplied.
+4. Preserve `settings.local.json` unless explicit `--clean-settings` was selected.
+   Never touch `CLAUDE.md`, `CLAUDE.local.md`, or anything under
+   `<target>/.claude/skills/_*/`.
 5. Print summary: skills updated, skills added, skills pruned (if any), files
    skipped because user-owned.
 

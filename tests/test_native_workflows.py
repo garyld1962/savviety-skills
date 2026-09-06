@@ -221,7 +221,7 @@ class InstallerTests(unittest.TestCase):
                 self.assertEqual(json.loads(local.read_text()), {})
                 local.unlink()  # Update must also recreate a missing file without grants.
 
-    def test_claude_removes_old_hooks_and_preserves_project_permissions(self):
+    def test_claude_preserves_existing_hooks_permissions_and_settings_by_default(self):
         settings = self.target / ".claude/settings.json"
         settings.parent.mkdir()
         local = self.target / ".claude/settings.local.json"
@@ -234,12 +234,13 @@ class InstallerTests(unittest.TestCase):
         }
         for action in ("init", "update"):
             with self.subTest(action=action):
-                settings.write_text(json.dumps({"permissions": permissions, "hooks": old_hooks}))
+                settings.write_text(json.dumps({"permissions": permissions, "hooks": old_hooks, "env": {"CUSTOM": "value"}}))
                 result = self.install("claude", action)
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 installed = json.loads(settings.read_text())
                 self.assertEqual(installed["permissions"], permissions)
-                self.assertNotIn("hooks", installed)
+                self.assertEqual(installed["hooks"], old_hooks)
+                self.assertEqual(installed["env"], {"CUSTOM": "value"})
                 self.assertEqual(local.read_text(), local_content)
 
     def test_copilot_install_update_and_user_settings(self):

@@ -40,6 +40,7 @@ class UpdateTests(unittest.TestCase):
         }))
         (self.source / "bin").mkdir()
         shutil.copy2(ROOT / "bin/install-hermes-skills", self.source / "bin/install-hermes-skills")
+        shutil.copy2(ROOT / "bin/clean-claude-settings", self.source / "bin/clean-claude-settings")
         shutil.copytree(ROOT / "hermes", self.source / "hermes")
         manifest_path = self.source / "manifest.json"
         manifest = json.loads(manifest_path.read_text())
@@ -58,9 +59,9 @@ exit "${TEST_TOOLS_EXIT:-0}"
             self.env.pop(name, None)
         subprocess.run(["git", "init", "-q", str(self.target)], check=True)
 
-    def update(self, *args):
+    def update(self, *args, answers=None):
         return subprocess.run([str(self.source / "update.sh"), *args], cwd=self.target,
-                              env=self.env, capture_output=True, text=True, timeout=20)
+                              env=self.env, input=answers, capture_output=True, text=True, timeout=20)
 
     def test_initializes_then_updates_settings_without_changing_local_configuration(self):
         result = self.update()  # Default target is the caller's current directory.
@@ -75,7 +76,8 @@ exit "${TEST_TOOLS_EXIT:-0}"
                                         "hooks": {"SessionStart": [{"hooks": []}]}}))
         result = self.update(str(self.target))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertEqual(json.loads(settings.read_text()), {"permissions": {"deny": ["Write"]}})
+        self.assertEqual(json.loads(settings.read_text()), {"permissions": {"deny": ["Write"]},
+                                                          "hooks": {"SessionStart": [{"hooks": []}]}})
         self.assertEqual(local.read_text(), local_content)
         self.assertTrue((self.target / ".claude/skills/example/SKILL.md").is_file())
         self.assertEqual(self.log.read_text().splitlines(), ["tools", "tools"])
@@ -112,6 +114,34 @@ exit "${TEST_TOOLS_EXIT:-0}"
         self.assertEqual(self.log.read_text().splitlines(), ["tools", "tools"])
         self.assertFalse((self.target / ".claude").exists())
         self.assertFalse((profile / "config.yaml").exists())
+
+    def test_cleanup_option_reaches_both_settings_files_and_preserves_selected_hook(self):
+        hook = {"type": "command", "command": "echo retained"}
+        for name in ("settings.json", "settings.local.json"):
+            settings = self.target / ".claude" / name
+            settings.parent.mkdir(exist_ok=True)
+            settings.write_text(json.dumps({"permissions": {"allow": ["Read"]},
+                                            "hooks": {"SessionStart": [{"hooks": [hook]}]},
+                                            "env": {"CUSTOM": "value"}}))
+        result = self.update("--clean-settings", str(self.target), answers="y\nn\n")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        shared = json.loads((self.target / ".claude/settings.json").read_text())
+        local = json.loads((self.target / ".claude/settings.local.json").read_text())
+        self.assertNotIn("permissions", shared)
+        self.assertNotIn("permissions", local)
+        self.assertEqual(shared["hooks"]["SessionStart"][0]["hooks"], [hook])
+        self.assertNotIn("hooks", local)
+        self.assertEqual(shared["env"], local["env"])
+        self.assertEqual(self.log.read_text().splitlines(), ["tools"])
+
+    def test_cleanup_dry_run_and_invalid_platform_do_not_install_utilities(self):
+        for args, expected in [(("--clean-settings", "--dry-run"), 0),
+                               (("--hermes", "--clean-settings"), 1)]:
+            result = self.update(*args)
+            self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+            self.assertFalse(self.log.exists())
+            self.assertFalse((self.user_dir / ".local").exists())
+            self.assertFalse((self.target / ".claude").exists())
 
     def test_hermes_collision_stops_before_installing_utilities(self):
         profile = self.base / "Hermes profile"
