@@ -4,6 +4,12 @@ Use a unique run directory under the repo's configured `runs_root`, otherwise
 `docs/runs/<plan-slug>/<UTC-run-id>/`. Respect an explicitly requested location.
 The JSON is canonical; render the Markdown summary from the same data.
 
+For assistant-written console output, apply
+[the simplify output guidance](../../simplify/references/output.md). Lead with
+the actual result, remaining risks or unverified behavior, and next action or
+decision. Link the detailed report after explaining what matters. This wording
+pass does not alter the JSON, audit tables, verdict rules, or required evidence.
+
 Write `execution-report.json`, `execution-report.md`, and `disposition-log.md`.
 JSON schema version 2 is the native contract; it is not wire-compatible with
 the older Claude runtime's version 1. Record:

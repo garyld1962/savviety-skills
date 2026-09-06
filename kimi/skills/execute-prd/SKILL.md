@@ -24,6 +24,11 @@ Converts a requirements source into a plan conforming to
 `/skill:execute-plan`. After the plan is written, the plan governs
 execution; the PRD is used only for traceability.
 
+Before the first user update, read [simplify](../simplify/SKILL.md). Apply its
+output guidance to every assistant-written progress update, readiness or plan
+summary, blocker, decision request, and handoff. Explain the actual gap and next
+action before internal scores or labels. Keep technical artifacts unchanged.
+
 ## Arguments
 
 - `<path>` — path to the requirements source. If not provided and no

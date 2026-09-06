@@ -1,0 +1,191 @@
+#!/usr/bin/env python3
+"""Install the Hermes pilot into a profile, preserving local skills and edits."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import sys
+import tempfile
+
+STATE = ".savviety-skills.json"
+
+
+def snapshot(directory):
+    """Fingerprint complete skill trees; never follow symlinks during updates."""
+    if directory.is_symlink() or not directory.is_dir():
+        raise ValueError(f"Expected a regular skill directory: {directory}")
+    result = {}
+    for path in sorted(directory.rglob("*")):
+        if "__pycache__" in path.relative_to(directory).parts:
+            continue
+        if path.is_symlink():
+            raise ValueError(f"Skill contains a symlink; reconcile it before updating: {path}")
+        name = path.relative_to(directory).as_posix()
+        if path.is_file():
+            result[name] = [hashlib.sha256(path.read_bytes()).hexdigest(),
+                            path.stat().st_mode & 0o777]
+        elif path.is_dir():
+            result[name + "/"] = "directory"
+        else:
+            raise ValueError(f"Unsupported skill file: {path}")
+    return result
+
+
+def read_state(path):
+    if path.is_symlink():
+        raise ValueError(f"Install record must not be a symlink: {path}")
+    if not path.exists():
+        return None
+    value = json.loads(path.read_text())
+    if not isinstance(value, dict) or value.get("version") != 1 or not isinstance(value.get("skills"), dict):
+        raise ValueError(f"Invalid install record: {path}; restore it before updating")
+    for name, files in value["skills"].items():
+        if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name) or not isinstance(files, dict):
+            raise ValueError(f"Invalid skill in install record: {path}")
+    return value
+
+
+def skill_name(path):
+    """Read the standard scalar name without requiring PyYAML to install."""
+    text = path.read_text(encoding="utf-8-sig")
+    if text.startswith("---\n"):
+        frontmatter = text.split("---", 2)[1]
+        match = re.search(r'''^name:\s*["']?([a-z0-9]+(?:-[a-z0-9]+)*)["']?\s*(?:#.*)?$''',
+                          frontmatter, re.M)
+        if match:
+            return match.group(1)
+    return path.parent.name
+
+
+def install(args):
+    root = args.source.resolve()
+    manifest = json.loads((root / "manifest.json").read_text())
+    layout = manifest["hermes"]["skills"]
+    if layout["to"] != "skills":
+        raise ValueError("Hermes destination must be the profile's skills directory")
+    source = (root / layout["from"]).resolve()
+    if not source.is_relative_to(root) or not source.is_dir():
+        raise ValueError(f"Invalid Hermes source: {source}")
+    # Resolve the explicit profile location; reject redirected managed children.
+    profile = args.target.expanduser().resolve()
+    destination = profile / "skills"
+    state_path = profile / STATE
+    if profile.exists() and not profile.is_dir():
+        raise ValueError(f"Profile is not a directory: {profile}")
+    if destination.is_symlink() or (destination.exists() and not destination.is_dir()):
+        raise ValueError(f"Profile skills must be a regular directory: {destination}")
+    if destination.is_relative_to(source) or source.is_relative_to(destination):
+        raise ValueError("Source and installed skills must not overlap")
+    previous = read_state(state_path)
+    if args.action == "init" and previous is not None:
+        raise ValueError("Savviety Hermes skills already installed; use --update")
+    if args.action == "update" and previous is None:
+        raise ValueError("No Savviety Hermes install record; use --init")
+    old = previous["skills"] if previous else {}
+    incoming = {}
+    for entry in sorted(source.iterdir()):
+        if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", entry.name):
+            raise ValueError(f"Invalid Hermes skill directory: {entry}")
+        incoming[entry.name] = snapshot(entry)
+        if "SKILL.md" not in incoming[entry.name]:
+            raise ValueError(f"Missing entrypoint: {entry / 'SKILL.md'}")
+    if not incoming:
+        raise ValueError("Hermes source contains no skills")
+
+    changes, conflicts, observed = [], [], {}
+    # Hermes also discovers categorized skills. Avoid shadowing a same-name
+    # skill elsewhere inside this profile, even though its files would survive.
+    if destination.exists():
+        for entrypoint in destination.rglob("SKILL.md"):
+            name = skill_name(entrypoint)
+            if name in incoming and entrypoint != destination / name / "SKILL.md":
+                conflicts.append(f"{entrypoint}: another profile skill already uses the name {name}")
+    for name, content in incoming.items():
+        target = destination / name
+        exists = target.exists() or target.is_symlink()
+        current = snapshot(target) if exists else None
+        observed[name] = current
+        if name not in old and exists:
+            conflicts.append(f"{target}: existing skill is not managed by this installer")
+        elif name in old and current != old[name] and current != content:
+            conflicts.append(f"{target}: locally edited, added or deleted files")
+        elif current != content:
+            changes.append(name)
+    if conflicts:
+        raise ValueError("No skills changed. Resolve these conflicts before retrying:\n"
+                         + "\n".join(conflicts)
+                         + "\nCompare with the source, preserve your edits elsewhere, then restore "
+                         "the last installed tree or reconcile it to the new source. "
+                         "An unmanaged collision can be moved outside the profile's skills directory.")
+
+    # Keep withdrawn skill records/files. Removing a skill from the catalog is
+    # not authorization to delete the user's installed copy.
+    next_state = {"version": 1, "skills": {**old, **incoming}}
+    print(f"Hermes profile: {profile}")
+    for name in incoming:
+        action = "install" if name not in old else "update" if name in changes else "unchanged"
+        print(f"  {action}: {name}")
+    if args.dry_run:
+        print("Dry run complete; no files written.")
+        return
+    if not changes and previous == next_state:
+        print("Hermes skills are already current.")
+        return
+
+    profile.mkdir(parents=True, exist_ok=True)
+    destination.mkdir(exist_ok=True)
+    # Stage outside skills so backups never become duplicate slash commands.
+    # Restore the previous trees if a normal filesystem operation fails.
+    with tempfile.TemporaryDirectory(prefix=".savviety-stage-", dir=profile) as temporary:
+        stage = Path(temporary)
+        for name in changes:
+            shutil.copytree(source / name, stage / "new" / name,
+                            ignore=shutil.ignore_patterns("__pycache__"))
+            if snapshot(stage / "new" / name) != incoming[name]:
+                raise ValueError(f"Source changed during installation: {source / name}; retry")
+        (stage / "state.json").write_text(json.dumps(next_state, indent=2) + "\n")
+        applied = []
+        try:
+            for name in changes:
+                target = destination / name
+                backup = stage / "old" / name
+                current = snapshot(target) if target.exists() or target.is_symlink() else None
+                if current != observed[name]:
+                    raise ValueError(f"Skill changed during installation: {target}; retry")
+                if target.exists():
+                    backup.parent.mkdir(exist_ok=True)
+                    target.rename(backup)
+                applied.append(name)
+                (stage / "new" / name).rename(target)
+            os.replace(stage / "state.json", state_path)
+        except (OSError, ValueError):
+            for name in reversed(applied):
+                target, backup = destination / name, stage / "old" / name
+                if target.exists():
+                    shutil.rmtree(target)
+                if backup.exists():
+                    backup.rename(target)
+            raise
+    print(f"Installed {len(incoming)} Hermes skills. Start a new Hermes session to load them.")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source", type=Path, required=True)
+    parser.add_argument("--target", type=Path, required=True, help="Hermes profile home")
+    parser.add_argument("--action", choices=("init", "update"), required=True)
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args()
+    try:
+        install(args)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        print(f"Hermes install stopped: {exc}", file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

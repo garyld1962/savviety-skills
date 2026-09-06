@@ -5,6 +5,13 @@
 > Related: `claude/README.md` (source→target mapping), `templates/CLAUDE.local.md`,
 > `claude/settings.template.json`.
 
+Implementation extension: Hermes now has a profile-scoped pilot described in
+[hermes/README.md](../hermes/README.md). Its `--hermes` target defaults to
+`HERMES_HOME` / `~/.hermes`, requires no Git repository, copies no configuration,
+and uses fingerprint-based conflict detection instead of overwriting edited
+skills. The historical project-install design below does not define Hermes
+update semantics; `--force` and `--prune` are unsupported for Hermes.
+
 ## 1. Problem
 
 Today, when starting a new repo and wanting the savviety-skills shared assets,
@@ -14,8 +21,6 @@ the workflow is "manually copy folders from `~/repos/savviety-skills` into
 - forgets files (rubrics, hooks, guardrail scripts)
 - gets the source→target mapping wrong (`claude/<skill>/` is **not** literally
   the deployed layout)
-- leaves `settings.local.json` untouched, so hooks defined in the template
-  don't actually run
 - never creates `CLAUDE.md` or `.github/copilot-instructions.md`, so the
   repo-wide source of truth layer is missing on day one
 - has no safe re-run story when the source repo evolves
@@ -52,15 +57,15 @@ Mirror Claude Code's own layering. Two separate files with different rules:
 
 | File | Owner | Behavior on `--init` | Behavior on `--update` |
 |---|---|---|---|
-| `.claude/settings.json` | shared / refreshable | written from `claude/settings.template.json` | overwritten |
+| `.claude/settings.json` | shared settings; project-owned permissions | template settings excluding permissions; preserve existing project permissions | refresh template settings; preserve existing project permissions |
 | `.claude/settings.local.json` | user / personal | created empty `{}` if absent | never touched |
 
-**Why:** no merge logic. The template owns the hooks and shared permissions;
-the user owns local overrides. Drift is impossible because the two files don't
-overlap responsibilities. Matches Claude Code's documented precedence.
-
-If the user wants to elevate a personal grant to shared, they edit
-`claude/settings.template.json` upstream and re-run `--update`.
+The template owns shared settings and currently registers no hooks. Updating
+an existing install removes its previous shared hook registrations.
+Permission grants belong to
+the consuming project: the installer never imports template permissions into
+either settings file. Manage shared grants directly in the project's
+`.claude/settings.json` and personal grants in `.claude/settings.local.json`.
 
 For Copilot, no per-user equivalent exists; instructions live in
 `.github/instructions/personal.instructions.md` and follow the same
@@ -144,8 +149,8 @@ stays one config language.
 
 All previously-listed open questions resolved into §2.6–§2.9.
 
-Hook scripts referenced by `settings.template.json` are copied via explicit
-manifest extras. Source files live under `claude/infra/`; installed hook paths
+Hook utilities are copied via explicit manifest extras but are not registered
+by `settings.template.json`. Source files live under `claude/infra/`; installed paths
 live directly under `.claude/` (for example `.claude/pr-guardrail/` and
 `.claude/journal/`).
 
@@ -202,7 +207,8 @@ Actions:
 3. Copy `claude/_internal/` into `<target>/.claude/skills/_internal/`.
 4. Copy `claude/infra/pr-guardrail/`, `claude/infra/journal/`, and
    `claude/install-scan/` into their `.claude/<asset>/` hook locations.
-5. Copy `claude/settings.template.json` to `<target>/.claude/settings.json`.
+5. Write `claude/settings.template.json` to `<target>/.claude/settings.json`
+   excluding template permissions and preserving existing project permissions.
 6. Create `<target>/.claude/settings.local.json` containing `{}` if absent.
 7. Create `<target>/CLAUDE.md` from `templates/CLAUDE.starter.md` if absent.
 8. Create `<target>/CLAUDE.local.md` from `templates/CLAUDE.local.md` if absent.
@@ -392,7 +398,7 @@ updating the manifest, not the script.
 The script should pass these by-hand checks:
 
 1. `--claude --init` into a fresh git repo produces a working `.claude/` and
-   a `CLAUDE.md`. Open in Claude Code: skills are discoverable, hooks fire.
+   a `CLAUDE.md`. Skills are discoverable; no hooks are registered in settings.
 2. `--claude --update` against the same repo is a no-op (nothing changes).
 3. Add a file to `<target>/.claude/skills/_project/foo.md`, run `--update`,
    confirm the file survives.

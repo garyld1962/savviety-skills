@@ -17,6 +17,8 @@
 #   skills --codex   --update [<target>] [--dry-run]
 #   skills --kimi    --init   [<target>] [--force] [--dry-run]
 #   skills --kimi    --update [<target>] [--prune [--yes]] [--dry-run]
+#   skills --hermes  --init   [<profile-home>] [--dry-run]
+#   skills --hermes  --update [<profile-home>] [--dry-run]
 #   skills --version | --help
 
 set -euo pipefail
@@ -62,6 +64,8 @@ USAGE
   skills --codex   --update [<target>] [--dry-run]
   skills --kimi    --init   [<target>] [--force] [--dry-run]
   skills --kimi    --update [<target>] [--prune [--yes]] [--dry-run]
+  skills --hermes  --init   [<profile-home>] [--dry-run]
+  skills --hermes  --update [<profile-home>] [--dry-run]
   skills --version | --help
 
 PLATFORM (one required)
@@ -70,6 +74,10 @@ PLATFORM (one required)
   --codex     install Codex assets into <target>/.codex and AGENTS.md
   --kimi      install Kimi Code CLI assets into <target>/.kimi and AGENTS.md
               (run bin/build-kimi-plugin first to regenerate kimi/skills/)
+  --hermes    install skills into <profile-home>/skills (no Git repo required)
+              defaults to HERMES_HOME, otherwise ~/.hermes
+              local edits/collisions stop the whole update before writes;
+              --force and --prune are not supported for Hermes
 
 ACTION (one required)
   --init      first-time install. Refuses if target assets already exist.
@@ -87,6 +95,7 @@ OPTIONS
 ENVIRONMENT
   REPO_SKILLS_HOME  override the source repo (default: the installed checkout)
   REPO_SKILLS_NO_RTK  if set, skip the post-install RTK prompt entirely
+  HERMES_HOME  Hermes profile home when --hermes has no explicit target
 
 RTK INTEGRATION
   After install completes, you'll be prompted to install RTK (Rust Token
@@ -117,6 +126,7 @@ while [[ $# -gt 0 ]]; do
     --copilot)  PLATFORM="copilot" ;;
     --codex)    PLATFORM="codex" ;;
     --kimi)     PLATFORM="kimi" ;;
+    --hermes)   PLATFORM="hermes" ;;
     --init)     ACTION="init" ;;
     --update)   ACTION="update" ;;
     --force)    FORCE=1 ;;
@@ -134,10 +144,21 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-[[ -z "$PLATFORM" ]] && { usage; die "missing platform flag (--claude, --copilot, --codex, or --kimi)" 1; }
+[[ -z "$PLATFORM" ]] && { usage; die "missing platform flag (--claude, --copilot, --codex, --kimi, or --hermes)" 1; }
 [[ -z "$ACTION"   ]] && { usage; die "missing action flag (--init or --update)" 1; }
 [[ "$ACTION" == "init" && "$PRUNE" == 1 ]] && die "--prune is only valid with --update" 1
 [[ "$YES" == 1 && "$PRUNE" == 0 ]] && die "--yes is only valid with --prune" 1
+
+# Hermes installs to a profile, not a Git project. Its updater protects edits
+# made by the user or agent and has no settings, hooks, or RTK side effects.
+if [[ "$PLATFORM" == "hermes" ]]; then
+  (( FORCE == 0 && PRUNE == 0 && YES == 0 )) || die "Hermes does not support --force or --prune; reconcile local edits explicitly." 1
+  command -v python3 >/dev/null || die "python3 is required for Hermes installation" 3
+  hermes_args=(--source "$REPO_SKILLS_HOME" --action "$ACTION"
+    --target "${TARGET:-${HERMES_HOME:-$HOME/.hermes}}")
+  (( DRY_RUN == 0 )) || hermes_args+=(--dry-run)
+  exec python3 "$REPO_SKILLS_HOME/bin/install-hermes-skills" "${hermes_args[@]}"
+fi
 
 TARGET="${TARGET:-.}"
 TARGET="$(cd "$TARGET" 2>/dev/null && pwd)" || die "target does not exist: $TARGET" 1
@@ -306,6 +327,20 @@ apply_ensure() {
 }
 
 # ---- extras (single-source → single-dest pairs) ------------------------------
+copy_claude_settings() {
+  # Refresh shared settings without importing permissions from the template.
+  # Existing project permissions belong to the project and must survive updates.
+  local src="$1" dst="$2" existing=/dev/null content
+  [[ ! -e "$dst" ]] || existing="$dst"
+  content=$(jq --slurpfile existing "$existing" '
+    del(.permissions)
+    | if (($existing[0] // {}) | has("permissions"))
+      then .permissions = $existing[0].permissions
+      else . end
+  ' "$src") || die "cannot read Claude settings: $src or $dst" 1
+  do_write_file "$content"$'\n' "$dst"
+}
+
 apply_extras() {
   local platform="$1"
   local count
@@ -331,7 +366,11 @@ apply_extras() {
       record "extra:synced       $to/"
       done_ "synced extra: $to/"
     elif [[ -f "$abs_from" ]]; then
-      do_copy_file "$abs_from" "$abs_to"
+      if [[ "$platform" == "claude" && "$to" == ".claude/settings.json" ]]; then
+        copy_claude_settings "$abs_from" "$abs_to"
+      else
+        do_copy_file "$abs_from" "$abs_to"
+      fi
       record "extra:copied       $to"
       done_ "copied extra: $to"
     else
@@ -402,7 +441,7 @@ apply_copilot_trees() {
     local -a rsync_args=(--delete)
     while IFS= read -r owned; do
       if [[ "$owned" == "$to/"* ]]; then
-        local rel="${owned#$to/}"
+        local rel="${owned#"$to"/}"
         rsync_args+=(--filter="protect /$rel")
       fi
     done < <(jq -r '.user_owned[]' "$MANIFEST")
@@ -410,7 +449,7 @@ apply_copilot_trees() {
     # If user_owned file exists in source but not in target, treat as starter (copy if absent).
     while IFS= read -r owned; do
       if [[ "$owned" == "$to/"* ]]; then
-        local rel="${owned#$to/}"
+        local rel="${owned#"$to"/}"
         local src_file="$abs_from/$rel"
         local dst_file="$abs_to/$rel"
         if [[ -f "$src_file" && ! -e "$dst_file" ]]; then
@@ -633,7 +672,8 @@ backup_suffix() {
 backup_path_for() {
   # Echo a unique backup destination for $1 (file or dir). Adds .N if needed.
   local p="$1"
-  local base="${p}.$(backup_suffix)"
+  local base
+  base="${p}.$(backup_suffix)"
   local cand="$base" n=1
   while [[ -e "$cand" ]]; do
     cand="${base}.${n}"
@@ -773,7 +813,7 @@ maybe_install_rtk() {
   fi
 
   echo
-  echo "$(c_bld 'RTK (Rust Token Killer)')"
+  printf '%s\n' "$(c_bld 'RTK (Rust Token Killer)')"
   echo "  CLI proxy that cuts LLM token usage 60-90% on common dev commands."
   echo "  Source: https://github.com/rtk-ai/rtk"
   printf "  Install now? [y/N] "
@@ -882,7 +922,7 @@ esac
 
 # ---- summary -----------------------------------------------------------------
 echo
-echo "$(c_bld 'Summary')"
+printf '%s\n' "$(c_bld 'Summary')"
 if (( ${#SUMMARY[@]} == 0 )); then
   echo "  (no actions recorded)"
 else
@@ -893,7 +933,7 @@ fi
 echo
 
 if (( DRY_RUN )); then
-  echo "$(c_yel 'dry-run complete — no files written.')"
+  printf '%s\n' "$(c_yel 'dry-run complete — no files written.')"
 fi
 
 maybe_install_rtk

@@ -23,6 +23,14 @@ review-fix cycles, report assembly — lives in
 owns everything that requires judgment: preflight gates, ambiguity
 handling, disposition decisions, verdict interpretation, postmortem.
 
+Before the first user update, read [simplify](../simplify/SKILL.md). Apply its
+output guidance to every assistant-written progress update, task or milestone
+summary (including legacy waves), blocker, decision request, and final response.
+The technical messages below describe internal conditions: explain what each
+means for the user's goal instead of quoting gate numbers or failure codes as
+the user-facing summary. Preserve exact diagnostics in the report. Explain raw
+Workflow output when relaying it; the skill cannot intercept host-rendered logs.
+
 ## Preflight (all gates must pass before the workflow launches)
 
 1. **Repo-delivery contract.** Read `CLAUDE.md ## Commands` per
@@ -44,15 +52,14 @@ handling, disposition decisions, verdict interpretation, postmortem.
    cannot run until the repo is present, which is why it happens here
    and not inside `/skill:validate-plan`.
 
-   When gate 4 pauses, surface it with this framing so the operator
+   When gate 4 pauses, explain it with this framing so the operator
    does not read it as "the plan is bad":
 
    ```
-   Plan validation: PASS (gate 2).
-   Pre-execution clarification needed:
-     <N> point(s) in the plan map to more than one thing in this codebase.
-     The plan itself is fine — I need you to pick a referent before I
-     start coding, so I don't silently guess wrong.
+   The plan is ready, but <named requirement> could apply to either
+   <concrete option A> or <concrete option B> in this project.
+   <Explain the practical difference and recommendation, if supported.>
+   <Ask for the specific choice needed before starting that work.>
    ```
 
    Never phrase gate 4 output as "the plan tasks are not atomic" or

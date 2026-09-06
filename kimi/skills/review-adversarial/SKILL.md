@@ -243,7 +243,7 @@ This is an **optional step** in the development workflow. The typical flow:
 
 ```
 working  → /skill:domain-review --quick     (periodic mid-development check)
-"done"   → /simplify                (auto-refactor: reuse, quality, efficiency)
+"done"   → focused code cleanup     (reuse, quality, efficiency)
 clean    → /skill:domain-review             (full review — REQUIRED)
 passing  → /skill:review-adversarial      (cross-model review — OPTIONAL)
 reviewed → create PR
