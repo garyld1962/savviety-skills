@@ -158,10 +158,8 @@ stays one config language.
 
 All previously-listed open questions resolved into §2.6–§2.9.
 
-Hook utilities are copied via explicit manifest extras but are not registered
-by `settings.template.json`. Source files live under `claude/infra/`; installed paths
-live directly under `.claude/` (for example `.claude/pr-guardrail/` and
-`.claude/journal/`).
+Lifecycle hook scripts and configuration have been removed from all platform
+packages. Init and update do not install hook utilities or journal ignore entries.
 
 ## 4. Command surface
 
@@ -214,16 +212,14 @@ Actions:
    skipping `claude/README.md`, `claude/SESSION-CONTEXT.md`, and any other
    source-only docs flagged in a manifest (see §6.3).
 3. Copy `claude/_internal/` into `<target>/.claude/skills/_internal/`.
-4. Copy `claude/infra/pr-guardrail/`, `claude/infra/journal/`, and
-   `claude/install-scan/` into their `.claude/<asset>/` hook locations.
-5. Merge `claude/settings.template.json` into `<target>/.claude/settings.json`
+4. Merge `claude/settings.template.json` into `<target>/.claude/settings.json`
    excluding template permissions/hooks and preserving existing project settings.
    If `--clean-settings` was requested, collect hook decisions and clean both
    settings files before installing shared assets.
-6. Create `<target>/.claude/settings.local.json` containing `{}` if absent.
-7. Create `<target>/CLAUDE.md` from `templates/CLAUDE.starter.md` if absent.
-8. Create `<target>/CLAUDE.local.md` from `templates/CLAUDE.local.md` if absent.
-9. Print summary: skills copied, files created, files left alone.
+5. Create `<target>/.claude/settings.local.json` containing `{}` if absent.
+6. Create `<target>/CLAUDE.md` from `templates/CLAUDE.starter.md` if absent.
+7. Create `<target>/CLAUDE.local.md` from `templates/CLAUDE.local.md` if absent.
+8. Print summary: skills copied, files created, files left alone.
 
 ### 5.2. `--claude --update <target>`
 
@@ -342,9 +338,6 @@ Declares what the script should and should not copy. Avoids hardcoding
     "source_dir": "claude",
     "skip": ["README.md", "MODEL-POLICY.md", "SESSION-CONTEXT.md", "settings.template.json", "infra"],
     "extras": [
-      { "from": "claude/infra/pr-guardrail", "to": ".claude/pr-guardrail" },
-      { "from": "claude/infra/journal", "to": ".claude/journal" },
-      { "from": "claude/install-scan", "to": ".claude/install-scan" },
       { "from": "claude/settings.template.json", "to": ".claude/settings.json" }
     ],
     "starters": [

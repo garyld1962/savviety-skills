@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 from urllib.parse import unquote
 import zlib
@@ -219,7 +220,31 @@ class InstallerTests(unittest.TestCase):
                 self.assertNotIn("permissions", installed)
                 self.assertNotIn("hooks", installed)
                 self.assertEqual(json.loads(local.read_text()), {})
+                for name in ("hooks", "pr-guardrail", "journal", "install-scan"):
+                    self.assertFalse((self.target / ".claude" / name).exists(), name)
+                    self.assertFalse((self.target / ".claude/skills" / name).exists(), name)
+                self.assertEqual((self.target / ".gitignore").read_text(), "CLAUDE.local.md\n")
                 local.unlink()  # Update must also recreate a missing file without grants.
+
+    def test_codex_and_kimi_install_and_update_without_lifecycle_hooks(self):
+        for platform in ("codex", "kimi"):
+            for action in ("init", "update"):
+                with self.subTest(platform=platform, action=action):
+                    result = self.install(platform, action)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    root = self.target / ("." + platform)
+                    for name in ("hooks", "hooks.json", "pr-guardrail", "journal", "install-scan"):
+                        self.assertFalse((root / name).exists(), name)
+                    config = tomllib.loads((root / "config.toml").read_text())
+                    self.assertNotIn("hooks", config)
+                    self.assertFalse(config.get("features", {}).get("codex_hooks", False))
+                    self.assertFalse((self.target / ".gitignore").exists())
+                    if platform == "codex":
+                        self.assertFalse((root / "plugins/savviety-workflows/hooks/hooks.json").exists())
+                    else:
+                        plugin = json.loads((root / "kimi.plugin.json").read_text())
+                        self.assertNotIn("hooks", plugin)
+                        self.assertNotIn("sessionStart", plugin)
 
     def test_claude_preserves_existing_hooks_permissions_and_settings_by_default(self):
         settings = self.target / ".claude/settings.json"

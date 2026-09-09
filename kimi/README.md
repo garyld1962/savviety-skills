@@ -9,7 +9,6 @@ kimi/
 ├── kimi.plugin.json      # Native Kimi plugin manifest
 ├── skills/               # Generated from claude/ by bin/build-kimi-plugin
 ├── commands/             # Plugin slash commands (e.g. /savviety-workflows:review)
-├── hooks/                # Kimi-aware hook adapters for install-scan / pr-guardrail / journal
 ├── agents/               # Custom agent YAML files (empty by default)
 └── templates/            # Starter AGENTS.md and config.toml
 ```
@@ -18,7 +17,7 @@ kimi/
 
 ### 1. Plugin install (recommended for individual users)
 
-Installs skills, slash commands, and session-start guidance at user scope:
+Installs skills and slash commands at user scope:
 
 ```
 /plugins install https://github.com/garyld1962/savviety-skills
@@ -33,11 +32,11 @@ After install, run `/reload` or start a new session. Then use:
 - `/skill:gh-readiness` — verify GitHub CLI auth before PR/issue workflows
 - `/skill:<name>` — invoke any full skill body (e.g. `/skill:domain-review`)
 
-Plugin install does **not** include lifecycle hooks, because Kimi plugins run hooks from the per-user plugin root and cannot reliably reference project-level scripts. Use path 2 for hooks.
+Neither install path includes lifecycle hooks or automatic session-start guidance.
 
 ### 2. Project install (recommended for teams)
 
-Seeds a target repo with project-level skills, AGENTS.md, config.toml, and hook wiring:
+Seeds a target repo with project-level skills, AGENTS.md, and config.toml:
 
 First run `./install.sh` from the source repo and open a new terminal; see the
 [installation instructions](../README.md#installation).
@@ -53,10 +52,8 @@ This deploys:
 1. `kimi/skills/` → `<target>/.kimi/skills/` (native frontmatter)
 2. `kimi/commands/` → `<target>/.kimi/commands/`
 3. `kimi/kimi.plugin.json` → `<target>/.kimi/kimi.plugin.json`
-4. `kimi/hooks/` → `<target>/.kimi/hooks/`
-5. `claude/install-scan/` → `<target>/.kimi/install-scan/`
-6. `kimi/templates/AGENTS.starter.md` → `<target>/AGENTS.md`
-7. `kimi/templates/config.toml` → `<target>/.kimi/config.toml`
+4. `kimi/templates/AGENTS.starter.md` → `<target>/AGENTS.md`
+5. `kimi/templates/config.toml` → `<target>/.kimi/config.toml`
 
 Run `bin/build-kimi-plugin` before `--init` or `--update` so `kimi/skills/` is in sync with `claude/`.
 
@@ -67,7 +64,6 @@ Kimi Code CLI v1.39+ auto-discovers `.claude/skills/` when `merge_all_available_
 - `type: flow` skills with Mermaid workflow support
 - `whenToUse` and `arguments` frontmatter for better auto-invocation
 - Plugin slash commands (`/savviety-workflows:<command>`)
-- `sessionStart.skill` loading
 
 Skill prose remains single-sourced in `claude/` and generated into `kimi/skills/` by `bin/build-kimi-plugin`.
 
@@ -87,7 +83,6 @@ bin/build-kimi-plugin --check
 
 - **Skill bodies:** edit in `claude/<skill>/SKILL.md`. Do not hand-edit `kimi/skills/` — it is generated.
 - **Slash commands:** add/edit `.md` files in `kimi/commands/`.
-- **Hook adapters:** edit scripts in `kimi/hooks/`.
 - **Plugin manifest:** edit `kimi/kimi.plugin.json`.
 - **Custom agents:** add `<name>.yaml` + `<name>-system.md` to `kimi/agents/` only when the system prompt is fully specified (no runtime placeholders).
 
@@ -108,15 +103,12 @@ bin/build-kimi-plugin --check
 - **Agent Skills** with `name`, `description`, `type`, `whenToUse`, `arguments`
 - **Flow skills** (`type: flow`) for multi-phase pipelines: `kickoff`, `execute-plan`, `execute-prd`, `triage`, `hotfix`, `test-plan`, `checkpoint`, `pr`, `ship`
 - **Plugin slash commands** for common manual invocations
-- **Inline hooks** (`[[hooks]]` in `config.toml`) wired through Kimi-aware adapters
-- **`sessionStart.skill`** loads `skill-help` at session start
 
 ## GitHub CLI integration
 
 GitHub-dependent skills (`/pr`, `/ship`, `/hotfix`, `/issue-slices`, `/bug-session`, `/changelog`) use the `gh` CLI rather than an MCP server. This keeps the dependency simple and matches the existing Claude workflow.
 
 - Run `/skill:gh-readiness` before a GitHub-dependent workflow to verify `gh` is installed, authenticated, and can reach the API.
-- The shipped `[[hooks]]` include `gh-auth-guard`, which blocks `gh pr create`, `gh issue create`, and `gh release create` when `gh` is missing or not authenticated.
 - Slash commands for `review`, `status`, and `ship` show the preferred `gh --json` + `jq` patterns.
 
 ## Suggested native add-ins

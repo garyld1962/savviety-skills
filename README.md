@@ -24,7 +24,7 @@ as reusable workflow packages, `.codex/agents/*.toml` for custom subagents, and
 `AGENTS.md` as the project instruction layer.
 **Kimi Code CLI** auto-discovers `.claude/skills/` natively (since v1.39, with
 `merge_all_available_skills = true` by default), so the `kimi/` tree only ships
-Kimi-specific YAML agents, hooks, and an `AGENTS.md` starter — skill bodies
+Kimi-specific YAML agents and an `AGENTS.md` starter — skill bodies
 stay single-sourced under `claude/`. Slash invocation differs from Claude:
 `/skill:<name>` and `/flow:<name>` instead of `/<name>`.
 **Hermes Agent** has a four-skill pilot: `/simplify`, `/validate-plan`,
@@ -40,7 +40,6 @@ workflow instructions and validators. It does not yet have the full catalog.
 	│   ├── domain-review/     #   Composite skill with private resources
 	│   ├── configure/         #   Template-filling skill + registry
 	│   ├── _internal/         #   Internal callable contracts and rubrics
-	│   ├── infra/             #   Hook and utility script sources
 	│   └── ...
 ├── copilot/        # Copilot-first workspace
 │   ├── prompts/           #   Thinner prompts that lean on built-ins
@@ -48,14 +47,14 @@ workflow instructions and validators. It does not yet have the full catalog.
 │   ├── skills/            #   Domain knowledge
 │   ├── instructions/      #   Auto-applied rules
 │   └── templates/         #   Blank config templates for user setup
-├── codex/                 # Codex-native plugin, skills, agents, hooks, rules
+├── codex/                 # Codex-native plugin, skills, agents, rules
 │   ├── plugins/           #   Local Codex plugins
 │   ├── agents/            #   Project-scoped custom agent TOML files
-│   ├── templates/         #   AGENTS.md/config/hooks/rules starters
+│   ├── templates/         #   AGENTS.md/config/rules starters
 │   └── prompts/           #   Documented prompt examples
 ├── kimi/                  # Kimi Code CLI overlay (skills auto-sourced from claude/)
 │   ├── agents/            #   Kimi v1 agent YAML + system-prompt files
-│   └── templates/         #   AGENTS.md / config.toml starters (hooks embedded as TOML)
+│   └── templates/         #   AGENTS.md / config.toml starters
 ├── templates/             # Project scaffold templates
 │   ├── CLAUDE.local.md    #   Personal Claude Code overrides
 │   ├── blazorstack/       #   .NET scaffold template
@@ -67,6 +66,9 @@ workflow instructions and validators. It does not yet have the full catalog.
 ```
 
 ## Installation
+
+No platform package ships lifecycle hooks, hook scripts, or hook-generated
+journal ignore entries. Init and update do not install them.
 
 Clone this repository wherever you keep your source code, then run `install.sh`:
 

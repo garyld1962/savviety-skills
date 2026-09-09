@@ -19,8 +19,6 @@ def main() -> int:
     failures.extend(validate_marketplace())
     failures.extend(validate_skills())
     failures.extend(validate_agents())
-    failures.extend(validate_json(CODEX / "templates" / "hooks.json"))
-    failures.extend(validate_json(PLUGIN / "hooks" / "hooks.json", optional=True))
     failures.extend(validate_rules())
 
     if failures:
