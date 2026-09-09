@@ -126,15 +126,8 @@ Several review skills overlap with Claude Code built-ins. Use this matrix to pic
 | feature-sweep | `/feature-sweep` | Audit installed skills against new Claude Code/API releases and propose integrations |
 | vault | `/vault` | Search, create, and manage notes in the Obsidian vault |
 
-### Utilities (not slash commands)
-
-Non-skill assets that ship alongside the skills — typically hooks or shared scripts. These do NOT have `SKILL.md` files and are not invokable via `/name`.
-
-| Asset | Purpose |
-|-------|---------|
-| pr-guardrail | PreToolUse hook that intercepts `gh pr create` and warns about existing open PRs. See `claude/infra/pr-guardrail/INSTALL.md` |
-| journal | Session journal hook scripts. Installed to `.claude/journal/`. |
-| install-scan | Dependency/install scanning hook scripts. Installed to `.claude/install-scan/`. |
+The installer ships skills and starter settings. Hook utilities and automatic
+session journaling have been removed.
 
 ## Artifact layout
 

@@ -710,9 +710,7 @@ check_init_refusal() {
         "$TARGET/.codex/agents"
         "$TARGET/.codex/prompts"
         "$TARGET/.codex/rules"
-        "$TARGET/.codex/hooks"
         "$TARGET/.codex/config.toml"
-        "$TARGET/.codex/hooks.json"
         "$TARGET/.claude-plugin/marketplace.json"
       )
       local -a existing=()

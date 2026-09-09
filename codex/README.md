@@ -6,7 +6,7 @@ Codex-native source assets for Savviety workflows.
 
 - `plugins/savviety-workflows/` is the local Codex plugin.
 - `agents/` contains project-scoped custom agent TOML files.
-- `templates/` contains starter `AGENTS.md`, config, hooks, and rules for downstream repos.
+- `templates/` contains starter `AGENTS.md`, config and rules for downstream repos.
 - `prompts/` contains example prompts. Codex does not currently treat these as a first-class runtime asset.
 - Each skill owns `agents/openai.yaml` for Codex UI metadata and default invocation prompts.
 
@@ -53,6 +53,6 @@ Plans use depends_on, write_scope and milestone_end. Older wave/lane metadata ne
 explicit migration. Shared contracts are packaged inside the plugin; no sibling Claude
 tree or Workflow host is required. The validators need Python 3 and PyYAML. Required
 checks and reviews must prove the final code head, and manual checks remain unproved.
-Existing .codex/config.toml, hooks.json and local marketplace settings are user-owned
+Existing .codex/config.toml and local marketplace settings are user-owned
 on installer updates. Run bin/sync-native-contracts --check, the Codex asset validator,
 bin/validate-native-parity and the behavioral tests before publishing changes.
