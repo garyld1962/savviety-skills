@@ -11,7 +11,7 @@
 #   bin/install-agentic-tools --check   # report only, install nothing
 #
 # Routes, in order: apt (Debian/Ubuntu) → brew (macOS) → uv tool → cargo →
-# print manual steps; gh-axi uses npm with Node 20+. Exit 0 when all tools are
+# print manual steps; gh-axi and defuddle use npm with Node 20+. Exit 0 when all tools are
 # present, 1 when tools are missing, 2 when uv is missing or misconfigured.
 
 set -euo pipefail
@@ -146,20 +146,21 @@ gh-axi   |gh-axi   |-        |-        |-           |-        |Install Node.js 2
 just     |just     |just     |just     |-           |just     |https://github.com/casey/just#installation
 hyperfine|hyperfine|hyperfine|hyperfine|-           |hyperfine|https://github.com/sharkdp/hyperfine#installation
 xh       |xh       |-        |xh       |-           |xh       |curl -sSL https://raw.githubusercontent.com/ducaale/xh/master/install.sh | sh
+defuddle |defuddle |-        |-        |-           |-        |Install Node.js 20+ and npm, then rerun this script
 '
 
 install_one() {
   local name="$1" apt="$2" brew="$3" uvpkg="$4" crate="$5" manual="$6"
-  if [ "$name" = gh-axi ]; then
+  if [ "$name" = gh-axi ] || [ "$name" = defuddle ]; then
     if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1 \
       || ! node -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 20 ? 0 : 1)'; then
-      miss "gh-axi requires Node.js 20+ and npm"
+      miss "$name requires Node.js 20+ and npm"
       step "$manual"
       return 1
     fi
     # Keep the executable in the same user bin directory as skills and uv.
     # Installing the CLI does not opt in to gh-axi's separate hook setup.
-    npm install --global --prefix "$HOME/.local" gh-axi || return 1
+    npm install --global --prefix "$HOME/.local" "$name" || return 1
     on_path "$HOME/.local/bin" || export PATH="$HOME/.local/bin:$PATH"
     return 0
   fi

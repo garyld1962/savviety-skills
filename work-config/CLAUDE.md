@@ -140,6 +140,7 @@ Installed by `~/repos/savviety-skills/bin/install-agentic-tools` (`--check` audi
 | `just` | Repo has a `justfile` | `just --list` first — it is the command contract. Use its recipes rather than reconstructing commands. |
 | `hyperfine` | Any "make it faster" task | Baseline before changing: `hyperfine -w 3 '<cmd>'`; `--export-json` to keep the numbers. No performance claim without before/after output. |
 | `xh` | HTTP smoke tests against a running service | Always `xh -I …` in agent sessions (no TTY → it otherwise reads a body from stdin and errors). `xh -I :8080/health`; `xh -I POST :8080/api k=v` sends a JSON body; `--offline` prints the request without sending. Prefer over `curl` for JSON APIs. |
+| `defuddle` | Reading an article, blog post, or docs page from the web | `defuddle parse <url> --markdown` returns just the main content as markdown, without navigation, sidebars, or scripts. Pipe to `head` or `rg` to sample. Prefer over fetching raw HTML when the goal is to read prose. |
 
 Skip `fzf`, `zoxide`, `bat`, `eza` in agent sessions — interactive or decorative, no information gain.
 
