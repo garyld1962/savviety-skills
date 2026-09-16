@@ -173,6 +173,14 @@
       "mapping": "consolidated"
     },
     {
+      "claude": "humanizer",
+      "codex": "codex/plugins/savviety-workflows/skills/humanizer/SKILL.md",
+      "copilot": [
+        "copilot/skills/humanizer/SKILL.md"
+      ],
+      "mapping": "direct"
+    },
+    {
       "claude": "ideate",
       "codex": "codex/plugins/savviety-workflows/skills/ideate/SKILL.md",
       "copilot": [
