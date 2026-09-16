@@ -72,6 +72,7 @@ project-local `.claude/skills/_project/` content.
 | design-twice | `/design-twice` | Explore multiple radically different designs before committing |
 | refactor-brief | `/refactor-brief` | Plan a refactor through interview and file it as a GitHub issue RFC |
 | drawio | `/drawio` | Generate native .drawio diagrams (flowcharts, ER, sequence, class, architecture) |
+| humanizer | `/humanizer` | Rewrite AI-sounding prose so it reads naturally without changing its meaning |
 
 ### Review & Investigation
 
