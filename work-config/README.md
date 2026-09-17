@@ -52,7 +52,7 @@ if ccx will not be used.
 ## Tools referenced in section 8
 
 `CLAUDE.md` section 8 assumes these are on PATH: `rg`, `fd`, `jq`, `ast-grep`,
-`sd`, `gh`, `uv`, `just`, `hyperfine`, `xh`. Install whichever are missing.
+`sd`, `gh`, `uv`, `just`, `hyperfine`, `xh`, `defuddle`. Install whichever are missing.
 
 ## Provenance
 

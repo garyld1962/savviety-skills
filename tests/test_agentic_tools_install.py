@@ -23,7 +23,7 @@ class AgenticToolsInstallTests(unittest.TestCase):
         # Only expose fixture tools and the small set of shell dependencies.
         for command in ("sh", "awk", "mktemp", "rm", "mkdir", "cp", "chmod"):
             (self.bin / command).symlink_to(shutil.which(command))
-        for command in ("rg", "fd", "jq", "rsync", "shellcheck", "ast-grep", "sd", "gh", "gh-axi", "just", "hyperfine", "xh"):
+        for command in ("rg", "fd", "jq", "rsync", "shellcheck", "ast-grep", "sd", "gh", "gh-axi", "just", "hyperfine", "xh", "defuddle"):
             self.script(self.bin / command, "exit 0\n")
         self.uv = self.base / "uv-fixture"
         self.script(self.uv, '''case "$*" in
@@ -144,6 +144,20 @@ chmod +x "$4/bin/gh-axi"
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(self.log.read_text().splitlines(),
                          ["install", "--global", "--prefix", str(self.user_dir / ".local"), "gh-axi"])
+
+    def test_defuddle_installs_under_user_prefix(self):
+        self.prepare_missing_tool("defuddle")
+        self.script(self.bin / "node", 'exit 0\n')
+        self.script(self.bin / "npm", '''printf '%s\\n' "$@" >> "$TEST_LOG"
+[ "$1" = install ] && [ "$2" = --global ] && [ "$3" = --prefix ] || exit 1
+mkdir -p "$4/bin"
+printf '#!/bin/sh\\nexit 0\\n' > "$4/bin/defuddle"
+chmod +x "$4/bin/defuddle"
+''')
+        result = self.run_installer()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.log.read_text().splitlines(),
+                         ["install", "--global", "--prefix", str(self.user_dir / ".local"), "defuddle"])
 
     def test_gh_axi_reports_missing_or_old_node_without_installing(self):
         self.prepare_missing_tool("gh-axi")

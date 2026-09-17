@@ -108,8 +108,9 @@ permissions, hooks and other settings are preserved by default, and an
 existing `settings.local.json` is left untouched.
 The script installs `uv`, Python if needed, and these utilities: `ripgrep`,
 `fd`, `jq`, `rsync`, `shellcheck`, `ast-grep`, `sd`, `gh`, `gh-axi`, `just`,
-`hyperfine`, and `xh`. Installing `gh-axi` requires Node.js 20+ and npm; its
-executable is installed into `~/.local/bin` without registering session hooks.
+`hyperfine`, `xh`, and `defuddle`. Installing `gh-axi` and `defuddle` requires
+Node.js 20+ and npm; their executables are installed into `~/.local/bin`, and
+`gh-axi` is installed without registering session hooks.
 Debian/Ubuntu package installation may require sudo. Failed installations
 stop the update and report what is still missing.
 
