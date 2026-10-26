@@ -195,6 +195,25 @@ class NativeContractTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 drawio.editor_url(bad)
 
+    def test_universal_platform_rubrics_and_kimi_contracts(self):
+        import yaml
+        for platform in ("claude", "codex", "copilot", "kimi", "hermes"):
+            rubric_file = ROOT / f"shared/platforms/{platform}.rubric.yaml"
+            self.assertTrue(rubric_file.is_file(), platform)
+            data = yaml.safe_load(rubric_file.read_text())
+            self.assertEqual(data["platform"], platform)
+            self.assertIn("instruction_files", data)
+            self.assertIn("runtime", data)
+        registry = yaml.safe_load((ROOT / "shared/platforms/configure-registry.yaml").read_text())
+        self.assertEqual(set(registry["targets"]), {"commands", "env", "ship", "code-investigate", "vault"})
+        # Kimi skills now include _internal rubrics and shared validators without Claude Workflow .mjs scripts
+        self.assertTrue((ROOT / "kimi/skills/_internal/repo-delivery/SKILL.md").is_file())
+        self.assertTrue((ROOT / "kimi/skills/validate-plan/scripts/validate_plan.py").is_file())
+        self.assertTrue((ROOT / "claude/validate-plan/scripts/validate_plan.py").is_file())
+        self.assertTrue((ROOT / "claude/drawio/references/xml.md").is_file())
+        self.assertFalse((ROOT / "kimi/skills/execute-plan/workflows").exists())
+        self.assertFalse((ROOT / "kimi/skills/execute-prd/workflows").exists())
+
 
 @unittest.skipUnless(shutil.which("rsync") and shutil.which("jq"), "installer requires rsync and jq")
 class InstallerTests(unittest.TestCase):

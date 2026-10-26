@@ -1,0 +1,44 @@
+platform: hermes
+display_name: "Hermes Agent"
+source_dir: "hermes"
+install_scope: "profile"
+
+instruction_files:
+  primary: "AGENTS.md"
+  fallbacks:
+    - "CLAUDE.md"
+    - ".github/copilot-instructions.md"
+  personal_override: "$HERMES_HOME/config.yaml"
+  commands_section: "## Commands"
+
+invocation:
+  skill_prefix: "/"
+  internal_dir: "references"
+
+frontmatter:
+  required:
+    - "name"
+    - "description"
+  optional: []
+  model_tiers:
+    deep_reasoning: null
+    fast_routing: null
+    inherit: null
+
+runtime:
+  adapter: "native-task-graph"
+  execution_contract: "../validate-plan/references/execution.md"
+  plan_format_contract: "../validate-plan/references/plan-format.md"
+  reporting_contract: "../validate-plan/references/reporting.md"
+  plan_validator: "../validate-plan/scripts/validate_plan.py"
+  report_validator: "../validate-plan/scripts/validate_report.py"
+  subagent_tool: "hermes_delegation"
+  subagent_persistence: "explicit-opt-in"
+
+configuration:
+  shared_settings: "$HERMES_HOME/.savviety-skills.json"
+  personal_settings: "$HERMES_HOME/config.yaml"
+
+shared_bundles:
+  - "workflow-contracts"
+  - "simplify"

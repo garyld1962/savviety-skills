@@ -41,7 +41,7 @@ Read the repo's `CLAUDE.md` `## Commands` section for the required schema
 If the `## Commands` section is missing, fail fast with:
 
 ```
-Repo missing required CLAUDE.md ## Commands section.
+Repo missing required ## Commands section in AGENTS.md (or CLAUDE.md).
 See _internal/repo-delivery for the schema.
 ```
 

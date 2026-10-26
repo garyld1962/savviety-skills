@@ -13,12 +13,10 @@ drift = []
 for bundle, skill in bundles.items():
     source = root / "shared" / bundle
     targets = [root / "codex/plugins/savviety-workflows/skills" / skill,
-               root / "copilot/skills" / skill]
+               root / "copilot/skills" / skill,
+               root / "claude" / skill]
     if bundle in ("workflow-contracts", "simplify"):
         targets.append(root / "hermes/skills" / skill)
-    if bundle == "simplify":
-        # Claude and the generated Kimi skill use the same presentation contract.
-        targets.append(root / "claude" / skill)
     for src in sorted(source.rglob("*")):
         if not src.is_file() or "__pycache__" in src.parts:
             continue

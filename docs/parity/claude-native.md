@@ -1,8 +1,8 @@
 # Claude → Codex / GitHub Copilot coverage
 
-All 49 public Claude workflows have an explicit native entrypoint or intentional
+All 51 public Claude workflows have an explicit native entrypoint or intentional
 consolidation. This records coverage, not equivalence of runtime internals. Codex
-uses 45 skill entrypoints. Copilot durable skills work across skill-capable hosts;
+uses 47 skill entrypoints. Copilot durable skills work across skill-capable hosts;
 prompt-only mappings require a prompt-capable host. Prompt shortcuts are optional
 for the newly added capabilities and core planning/execution workflows.
 
@@ -31,6 +31,7 @@ task graph and proof contract; it does not run the Claude Workflow scripts.
 | goal | [goal](../../codex/plugins/savviety-workflows/skills/goal/SKILL.md) | [skill](../../copilot/skills/goal/SKILL.md), [prompt](../../copilot/prompts/ba/goal.prompt.md) |
 | grill-me | [grill-me](../../codex/plugins/savviety-workflows/skills/grill-me/SKILL.md) | [prompt](../../copilot/prompts/dev/grill-me.prompt.md) |
 | hotfix | [ship](../../codex/plugins/savviety-workflows/skills/ship/SKILL.md) | [prompt](../../copilot/prompts/dev/hotfix.prompt.md) |
+| humanizer | [humanizer](../../codex/plugins/savviety-workflows/skills/humanizer/SKILL.md) | [skill](../../copilot/skills/humanizer/SKILL.md) |
 | ideate | [ideate](../../codex/plugins/savviety-workflows/skills/ideate/SKILL.md) | [prompt](../../copilot/prompts/ba/ideate.prompt.md) |
 | issue-slices | [issue-slices](../../codex/plugins/savviety-workflows/skills/issue-slices/SKILL.md) | [skill](../../copilot/skills/issue-slices/SKILL.md), [prompt](../../copilot/prompts/ba/issue-slices.prompt.md) |
 | k8s-verify | [k8s-verify](../../codex/plugins/savviety-workflows/skills/k8s-verify/SKILL.md) | [skill](../../copilot/skills/k8s-verify/SKILL.md), [prompt](../../copilot/prompts/dev/k8s-verify.prompt.md) |
@@ -48,6 +49,7 @@ task graph and proof contract; it does not run the Claude Workflow scripts.
 | review-adversarial | [review-adversarial](../../codex/plugins/savviety-workflows/skills/review-adversarial/SKILL.md) | [skill](../../copilot/skills/review-adversarial/SKILL.md), [prompt](../../copilot/prompts/review/review-adversarial.prompt.md) |
 | review-gauntlet | [review-gauntlet](../../codex/plugins/savviety-workflows/skills/review-gauntlet/SKILL.md) | [prompt](../../copilot/prompts/review/review-gauntlet.prompt.md) |
 | ship | [ship](../../codex/plugins/savviety-workflows/skills/ship/SKILL.md) | [prompt](../../copilot/prompts/dev/ship.prompt.md) |
+| simplify | [simplify](../../codex/plugins/savviety-workflows/skills/simplify/SKILL.md) | [skill](../../copilot/skills/simplify/SKILL.md), [prompt](../../copilot/prompts/dev/simplify.prompt.md) |
 | skill-audit | [skills](../../codex/plugins/savviety-workflows/skills/skills/SKILL.md) | [prompt](../../copilot/prompts/dev/skill-audit.prompt.md) |
 | skill-help | [skills](../../codex/plugins/savviety-workflows/skills/skills/SKILL.md) | [prompt](../../copilot/prompts/dev/skill-help.prompt.md) |
 | spec-review-adversarial | [spec-review-adversarial](../../codex/plugins/savviety-workflows/skills/spec-review-adversarial/SKILL.md) | [prompt](../../copilot/prompts/review/spec-review-adversarial.prompt.md) |

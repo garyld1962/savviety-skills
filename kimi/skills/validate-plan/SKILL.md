@@ -25,6 +25,16 @@ to behave unpredictably.
 
 - `<path>` — path to the plan file (optional; if omitted, finds the most recent `.md` in `docs/plans/`).
 
+## Automated Structural Check (`scripts/validate_plan.py`)
+
+When the plan follows the task-graph contract (`_internal/plan-format`, synced at [`references/plan-format.md`](references/plan-format.md)), run the packaged structural validator first:
+
+```bash
+python3 "<this-skill-dir>/scripts/validate_plan.py" "<plan-path>"
+```
+
+This deterministically verifies YAML frontmatter (`slug`, `source_prd`, `intent`, `type`), task IDs, acyclic `depends_on` references, disjoint `write_scope` globs across concurrent tasks, `milestone_end` flags, and non-empty `**Acceptance:**` blocks, and computes the exact `plan_sha` (`--json`). Then apply the semantic/prose checks below.
+
 ## What it checks
 
 Run every check below and collect failures. Do not stop at the first failure —

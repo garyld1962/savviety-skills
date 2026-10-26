@@ -1,0 +1,64 @@
+platform: codex
+display_name: "OpenAI Codex CLI"
+source_dir: "codex"
+install_scope: "project"
+
+instruction_files:
+  primary: "AGENTS.md"
+  fallbacks:
+    - "CLAUDE.md"
+  personal_override: "~/.codex/AGENTS.md"
+  commands_section: "## Commands"
+
+invocation:
+  skill_prefix: "$"
+  plugin_namespace: "savviety-workflows:"
+  internal_dir: "references"
+
+frontmatter:
+  required:
+    - "name"
+    - "description"
+  optional: []
+  ui_metadata_file: "agents/openai.yaml"
+  model_tiers:
+    deep_reasoning: null
+    fast_routing: null
+    inherit: null
+
+runtime:
+  adapter: "native-task-graph"
+  execution_contract: "../validate-plan/references/execution.md"
+  plan_format_contract: "../validate-plan/references/plan-format.md"
+  reporting_contract: "../validate-plan/references/reporting.md"
+  plan_validator: "../validate-plan/scripts/validate_plan.py"
+  report_validator: "../validate-plan/scripts/validate_report.py"
+  subagent_tool: "custom_agents_toml"
+  subagent_dir: ".codex/agents"
+  subagent_persistence: "explicit-opt-in"
+
+configuration:
+  shared_settings: ".codex/config.toml"
+  personal_settings: "~/.codex/config.toml"
+  rules_dir: ".codex/rules"
+  marketplace_manifest: ".claude-plugin/marketplace.json"
+  configure_registry: "codex/plugins/savviety-workflows/skills/configure/references/targets.md"
+
+consolidations:
+  ship:
+    - "ship"
+    - "pr"
+    - "hotfix"
+  execute-prd:
+    - "execute-prd"
+    - "kickoff"
+  skills:
+    - "skill-help"
+    - "skill-audit"
+  code-review:
+    - "domain-review"
+
+shared_bundles:
+  - "workflow-contracts"
+  - "drawio"
+  - "simplify"

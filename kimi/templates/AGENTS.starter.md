@@ -7,6 +7,14 @@
 - Keep project-specific decisions in this file or nearby `AGENTS.md` files close to the code they govern.
 - Put personal preferences in your CLI user configuration (`~/.kimi/AGENTS.md` for Kimi, `~/.codex/AGENTS.md` for Codex), not in shared repository instructions.
 
+## Commands
+
+lint: <cmd>
+build: <cmd>
+test: <cmd>
+default_branch: main
+package_manager: <npm|pnpm|yarn|bun|pip|poetry|cargo|go|dotnet|...>
+
 ## Savviety Workflows
 
 - Use `/skill:repo-status` before delivery or after a long break.

@@ -53,6 +53,17 @@ copilot-env:
   optional_sections:
     - hosts
     - terminal_switching
+
+vault:
+  description: "Obsidian vault path and note structure configuration"
+  template: claude/vault/SKILL.md
+  destination: "{project}/.savviety/vault.json"
+  scope: per-project
+  required_fields:
+    - vault_path
+  optional_fields:
+    - daily_notes_folder
+    - templates_folder
 ```
 
 ## Adding New Targets

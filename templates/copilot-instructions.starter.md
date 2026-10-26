@@ -24,6 +24,14 @@ Personal preferences live in `.github/instructions/personal.instructions.md`
 - Anything a fresh contributor needs to know on day one
 -->
 
+## Commands
+
+lint: <cmd>
+build: <cmd>
+test: <cmd>
+default_branch: main
+package_manager: <npm|pnpm|yarn|bun|pip|poetry|cargo|go|dotnet|...>
+
 ## Stack
 
 <!--

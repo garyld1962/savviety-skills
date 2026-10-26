@@ -30,9 +30,8 @@ live interactive session and is not a CI-runnable command.
 ## Conventions
 
 - Skills live in platform-specific top-level trees: `claude/` (stable,
-  installed via `manifest.json`), `claude/` (staging tree for the
-  execute-prd/execute-plan rebuild — not yet wired into
-  `manifest.json`), `codex/`, `copilot/`, `kimi/`.
+  installed via `manifest.json`), `codex/`, `copilot/`, `kimi/`, and `hermes/`.
+  Shared contracts and platform rubrics live in `shared/`.
 - `claude/_internal`, `claude/execute-plan`, and
   `claude/execute-prd` are also overlaid into this repo's own
   `.claude/skills/` so they can be exercised directly here (self-hosting).
