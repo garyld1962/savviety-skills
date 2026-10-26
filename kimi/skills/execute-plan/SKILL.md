@@ -33,9 +33,9 @@ Workflow output when relaying it; the skill cannot intercept host-rendered logs.
 
 ## Preflight (all gates must pass before the workflow launches)
 
-1. **Repo-delivery contract.** Read `CLAUDE.md ## Commands` per
+1. **Repo-delivery contract.** Read `AGENTS.md` (or `CLAUDE.md`) `## Commands` per
    `_internal/repo-delivery`. Missing → halt with:
-   `Repo missing required CLAUDE.md ## Commands section.`
+   `Repo missing required ## Commands section in AGENTS.md (or CLAUDE.md).`
 2. **Validate plan — refuse contract.** Run `/skill:validate-plan <path>`.
    `FAIL` → refuse to execute; surface findings. Only an explicit
    human `--force` overrides, and its use goes in the final report.
@@ -137,32 +137,7 @@ Workflow output when relaying it; the skill cannot intercept host-rendered logs.
 
 ## Launch the runtime
 
-Invoke the Workflow tool:
-
-    Workflow({
-      scriptPath: "<this-skill-dir>/workflows/run-plan.mjs",
-      args: {
-        planPath, planSha, baseSha, branch,
-        commands: { install, lint, build, test, defaultBranch },  // from ## Commands
-        flags: { maxRetries: 20, maxFixCycles: 3, acceptRisk: [<from --accept-risk>], adversarial: "<auto|always|never>" },
-        timestamp: "<ISO now>"
-      }
-    })
-
-`<this-skill-dir>` is the `Base directory for this skill:` path
-printed when this skill loaded. `run-plan.mjs` is a Workflow-tool
-script, not a Node module: pass its absolute path as `scriptPath` and
-nothing else — do not run it with `node`, `import` it, or paste its
-contents into `script`. This instruction is the operator's opt-in to
-multi-agent orchestration; no further confirmation is needed. If the
-session has no Workflow tool, halt and say so — do not emulate the
-script with the Agent tool.
-
-While it runs, do not implement tasks yourself — the workflow owns
-execution. On a thrown error the run is preserved (worktree branches
-and commits stay); diagnose, then resume with the same scriptPath and
-`resumeFromRunId` from the failed run — completed agent calls replay
-from cache.
+Execute the validated plan using Kimi's native tools and the shared [native execution contract](../validate-plan/references/execution.md), [plan format](../validate-plan/references/plan-format.md), and [reporting contract](../validate-plan/references/reporting.md). Validate the plan with `../validate-plan/scripts/validate_plan.py` and validate `execution-report.json` with `../validate-plan/scripts/validate_report.py`.
 
 ## Interpreting the result
 

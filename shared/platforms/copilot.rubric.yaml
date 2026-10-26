@@ -1,0 +1,54 @@
+platform: copilot
+display_name: "GitHub Copilot (CLI & VS Code)"
+source_dir: "copilot"
+install_scope: "project"
+
+instruction_files:
+  primary: ".github/copilot-instructions.md"
+  fallbacks:
+    - "AGENTS.md"
+    - "CLAUDE.md"
+  personal_override: ".github/instructions/personal.instructions.md"
+  commands_section: "## Commands"
+
+invocation:
+  skill_prefix: "/"
+  prompt_dir: ".github/prompts"
+  skills_dir: ".github/skills"
+  agents_dir: ".github/agents"
+  internal_dir: "references"
+
+frontmatter:
+  required:
+    - "name"
+    - "description"
+  optional:
+    - "tools"
+    - "agent"
+  model_tiers:
+    deep_reasoning: null
+    fast_routing: null
+    inherit: null
+
+runtime:
+  adapter: "native-task-graph"
+  execution_contract: "../validate-plan/references/execution.md"
+  plan_format_contract: "../validate-plan/references/plan-format.md"
+  reporting_contract: "../validate-plan/references/reporting.md"
+  plan_validator: "../validate-plan/scripts/validate_plan.py"
+  report_validator: "../validate-plan/scripts/validate_report.py"
+  subagent_tool: "copilot_agents"
+  subagent_dir: ".github/agents"
+  subagent_persistence: "stateless-per-dispatch"
+
+configuration:
+  shared_settings: ".github/copilot-instructions.md"
+  personal_settings: ".github/instructions/personal.instructions.md"
+  project_extensions_dir: ".github/prompts/project"
+  local_extensions_dir: ".github/prompts/local"
+  configure_registry: "copilot/skills/configure/SKILL.md"
+
+shared_bundles:
+  - "workflow-contracts"
+  - "drawio"
+  - "simplify"

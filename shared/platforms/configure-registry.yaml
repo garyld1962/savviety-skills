@@ -1,0 +1,87 @@
+# Canonical cross-platform configuration target registry for /configure
+version: 1
+targets:
+  commands:
+    description: "Repository build, lint, test, default_branch, and package_manager contract (## Commands)"
+    scope: "per-project"
+    required_fields:
+      - "lint"
+      - "build"
+      - "test"
+      - "default_branch"
+      - "package_manager"
+    optional_fields:
+      - "adversarial_triggers"
+      - "retry_budget"
+      - "auto_accept_deviations"
+      - "auto_generated_paths"
+      - "runtime_probes"
+    destinations:
+      claude: "{project}/CLAUDE.md"
+      codex: "{project}/AGENTS.md"
+      copilot: "{project}/.github/copilot-instructions.md"
+      kimi: "{project}/AGENTS.md"
+      hermes: "{project}/AGENTS.md"
+
+  env:
+    description: "Shell and host routing for cross-platform workflows"
+    scope: "per-user-global"
+    template: "claude/env-check/env.config.template.md"
+    required_sections:
+      - "shells"
+      - "routing_rules"
+    optional_sections:
+      - "hosts"
+      - "terminal_switching"
+    destinations:
+      claude: "~/.claude/env.config.md"
+      codex: "~/.codex/env.config.md"
+      copilot: "~/.copilot/env.config.md"
+      kimi: "~/.kimi/env.config.md"
+
+  ship:
+    description: "Project delivery commands (build, test, tag, release, deploy)"
+    scope: "per-project"
+    template: "claude/ship/config.template.md"
+    required_fields:
+      - "build_command"
+      - "test_command"
+      - "ship_command"
+    optional_fields:
+      - "tag_command"
+      - "release_command"
+      - "deploy_command"
+    destinations:
+      claude: "{project}/.claude/ship.config.md"
+      codex: "{project}/AGENTS.md"
+      copilot: "{project}/.github/copilot-instructions.md"
+      kimi: "{project}/.kimi/ship.config.md"
+
+  code-investigate:
+    description: "Default report output root and repo search paths"
+    scope: "per-user-global"
+    template: "claude/code-investigate/config.template.md"
+    required_fields:
+      - "report_root"
+    optional_fields:
+      - "default_repo_roots"
+      - "default_confidence_threshold"
+    destinations:
+      claude: "~/.claude/code-investigate.config.md"
+      codex: "~/.codex/code-investigate.config.md"
+      copilot: "~/.copilot/code-investigate.config.md"
+      kimi: "~/.kimi/code-investigate.config.md"
+
+  vault:
+    description: "Obsidian vault path and note structure configuration"
+    scope: "per-project-or-user"
+    required_fields:
+      - "vault_path"
+    optional_fields:
+      - "daily_notes_folder"
+      - "templates_folder"
+    destinations:
+      claude: "{project}/.savviety/vault.json"
+      codex: "{project}/.savviety/vault.json"
+      copilot: "{project}/.savviety/vault.json"
+      kimi: "{project}/.savviety/vault.json"

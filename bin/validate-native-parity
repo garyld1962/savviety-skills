@@ -63,12 +63,41 @@ for path in (root / "copilot").rglob("*.md"):
         if target not in user_paths and not (root / "copilot" / target.removeprefix(".github/")).is_file():
             errors.append(f"{path.relative_to(root)} references missing asset {target}")
 
+# Validate universal platform rubrics and configure registry under shared/platforms/.
+expected_platforms = {"claude", "codex", "copilot", "kimi", "hermes"}
+rubrics_dir = root / "shared/platforms"
+for platform in sorted(expected_platforms):
+    rubric_path = rubrics_dir / f"{platform}.rubric.yaml"
+    if not rubric_path.is_file():
+        errors.append(f"missing platform rubric: {rubric_path.relative_to(root)}")
+        continue
+    try:
+        rubric = yaml.safe_load(rubric_path.read_text())
+        if not isinstance(rubric, dict) or rubric.get("platform") != platform:
+            errors.append(f"invalid platform rubric header: {rubric_path.relative_to(root)}")
+        for required_key in ("display_name", "source_dir", "install_scope", "instruction_files", "invocation", "frontmatter", "runtime", "configuration"):
+            if required_key not in rubric:
+                errors.append(f"{rubric_path.relative_to(root)} missing key: {required_key}")
+    except yaml.YAMLError as exc:
+        errors.append(f"invalid YAML in {rubric_path.relative_to(root)}: {exc}")
+
+registry_path = rubrics_dir / "configure-registry.yaml"
+if not registry_path.is_file():
+    errors.append("missing shared/platforms/configure-registry.yaml")
+else:
+    try:
+        reg = yaml.safe_load(registry_path.read_text())
+        if not isinstance(reg, dict) or not isinstance(reg.get("targets"), dict):
+            errors.append("invalid shared/platforms/configure-registry.yaml structure")
+    except yaml.YAMLError as exc:
+        errors.append(f"invalid YAML in {registry_path.relative_to(root)}: {exc}")
+
 # Linked resources in the new/updated native entrypoints and packaged contracts
 # must resolve without a sibling platform source tree.
 paths = {root / row["codex"] for row in rows}
 paths.update(root / p for row in rows for p in row["copilot"])
 paths.update(hermes_source.rglob("*.md"))
-for platform in ("codex/plugins/savviety-workflows/skills", "copilot/skills"):
+for platform in ("codex/plugins/savviety-workflows/skills", "copilot/skills", "claude", "kimi/skills"):
     for skill in ("validate-plan", "drawio", "simplify"):
         paths.update((root / platform / skill).rglob("*.md"))
 for path in paths:

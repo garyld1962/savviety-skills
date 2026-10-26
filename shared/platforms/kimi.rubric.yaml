@@ -1,0 +1,70 @@
+platform: kimi
+display_name: "Kimi Code CLI"
+source_dir: "kimi"
+install_scope: "project"
+
+instruction_files:
+  primary: "AGENTS.md"
+  fallbacks:
+    - "CLAUDE.md"
+  personal_override: "~/.kimi/AGENTS.md"
+  commands_section: "## Commands"
+
+invocation:
+  skill_prefix: "/skill:"
+  flow_prefix: "/flow:"
+  plugin_namespace: "/savviety-workflows:"
+  internal_dir: "_internal"
+
+frontmatter:
+  required:
+    - "name"
+    - "description"
+  optional:
+    - "whenToUse"
+    - "type"
+    - "disableModelInvocation"
+    - "arguments"
+    - "user-invocable"
+    - "internal"
+    - "kind"
+  flow_skills:
+    - "kickoff"
+    - "execute-plan"
+    - "execute-prd"
+    - "triage"
+    - "hotfix"
+    - "test-plan"
+    - "checkpoint"
+    - "pr"
+    - "ship"
+  model_tiers:
+    deep_reasoning: null
+    fast_routing: null
+    inherit: null
+
+runtime:
+  adapter: "native-task-graph"
+  execution_contract: "../validate-plan/references/execution.md"
+  plan_format_contract: "../validate-plan/references/plan-format.md"
+  reporting_contract: "../validate-plan/references/reporting.md"
+  plan_validator: "../validate-plan/scripts/validate_plan.py"
+  report_validator: "../validate-plan/scripts/validate_report.py"
+  subagent_tool: "Agent"
+  subagent_types:
+    - "coder"
+    - "explore"
+    - "plan"
+  subagent_persistence: "stateless-per-dispatch"
+
+configuration:
+  shared_settings: ".kimi/config.toml"
+  personal_settings: "~/.kimi/config.toml"
+  project_extensions_dir: ".kimi/skills/_project"
+  local_extensions_dir: ".kimi/skills/_local"
+  configure_registry: "kimi/skills/configure/registry.md"
+
+shared_bundles:
+  - "workflow-contracts"
+  - "drawio"
+  - "simplify"

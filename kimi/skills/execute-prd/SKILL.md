@@ -190,20 +190,7 @@ At most one of `<path>` / `--ado` / `--linear` may be set.
    feature/refactor AND the audit reveals a significant new
    architectural decision (service boundary, data model, public API,
    module interface) AND no closed decision resolves it. When it
-   fires, invoke the Workflow tool with
-   `scriptPath: <this-skill-dir>/workflows/design-it-twice.mjs`,
-   `args: { decision, contextSummary, repoAuditPath }`. Record the
-   returned recommendation as a Closed Decision in the plan,
-   citing the rejected options.
-
-   `<this-skill-dir>` is the `Base directory for this skill:` path
-   printed when this skill loaded. The `.mjs` file is a Workflow-tool
-   script, not a Node module: pass its absolute path as `scriptPath`
-   and nothing else — do not run it with `node`, `import` it, or paste
-   its contents into `script`. This step is the operator's opt-in to
-   multi-agent orchestration; no further confirmation is needed. If
-   the session has no Workflow tool, halt and say so — do not emulate
-   the script with the Agent tool.
+   fires, compare at least two radically different designs (minimal surface, flexibility, and common-case ergonomics) using `/skill:design-twice` or parallel Kimi `Agent` exploration, and record the chosen design and rejected options as a Closed Decision in the plan.
 
 7. **Draft the plan** in the `_internal/plan-format` contract:
    frontmatter (slug/source_prd/intent/type), Closed Decisions,

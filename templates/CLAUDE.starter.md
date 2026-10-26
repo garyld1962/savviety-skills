@@ -11,6 +11,14 @@ Per-skill project config lives under `.claude/skills/_project/`.
 
 <!-- Replace the comments below with real content. Delete sections that don't apply. -->
 
+## Commands
+
+lint: <cmd>
+build: <cmd>
+test: <cmd>
+default_branch: main
+package_manager: <npm|pnpm|yarn|bun|pip|poetry|cargo|go|dotnet|...>
+
 ## Stack
 
 <!--

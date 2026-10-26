@@ -1,0 +1,53 @@
+platform: claude
+display_name: "Claude Code"
+source_dir: "claude"
+install_scope: "project"
+
+instruction_files:
+  primary: "CLAUDE.md"
+  fallbacks:
+    - "AGENTS.md"
+  personal_override: "CLAUDE.local.md"
+  commands_section: "## Commands"
+
+invocation:
+  skill_prefix: "/"
+  plugin_namespace: "savviety-workflows:"
+  internal_dir: "_internal"
+
+frontmatter:
+  required:
+    - "name"
+    - "description"
+  optional:
+    - "model"
+    - "user-invocable"
+    - "internal"
+    - "kind"
+    - "private-resource"
+  model_tiers:
+    deep_reasoning: "opus"
+    fast_routing: "haiku"
+    inherit: null
+
+runtime:
+  adapter: "claude-workflow"
+  plan_executor: "workflows/run-plan.mjs"
+  design_twice_runner: "workflows/design-it-twice.mjs"
+  subagent_tool: "Agent"
+  subagent_types:
+    - "general-purpose"
+    - "Explore"
+    - "Plan"
+  subagent_persistence: "stateless-per-dispatch"
+
+configuration:
+  shared_settings: ".claude/settings.json"
+  personal_settings: ".claude/settings.local.json"
+  project_extensions_dir: ".claude/skills/_project"
+  local_extensions_dir: ".claude/skills/_local"
+  configure_registry: "claude/configure/registry.md"
+
+shared_bundles:
+  - "simplify"
+  - "workflow-contracts"

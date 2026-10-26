@@ -112,7 +112,7 @@ read the `## Commands` section for:
 If the `## Commands` section is absent, fail fast with:
 
 ```
-Repo missing required CLAUDE.md ## Commands section.
+Repo missing required ## Commands section in AGENTS.md (or CLAUDE.md).
 See _internal/repo-delivery for the schema.
 ```
 

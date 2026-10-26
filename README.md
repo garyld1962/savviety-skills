@@ -60,6 +60,11 @@ workflow instructions and validators. It does not yet have the full catalog.
 │   ├── blazorstack/       #   .NET scaffold template
 │   └── ts-monorepo/       #   TypeScript scaffold template
 ├── docs/                  # Design and planning docs
+├── shared/                # Universal contracts, validators, and per-CLI config rubrics
+│   ├── platforms/         #   Per-CLI config & capability rubrics (*.rubric.yaml)
+│   ├── workflow-contracts/#   Shared task-graph plan & execution contracts + scripts
+│   ├── drawio/            #   Shared draw.io XML reference & URL helper
+│   └── simplify/          #   Shared plain-language update contract
 ├── hermes/                # Hermes entrypoints and packaged shared contracts
 ├── install.sh             # Installs the skills command in ~/.local/bin
 └── cli/                   # Implementation of skills, driven by manifest.json

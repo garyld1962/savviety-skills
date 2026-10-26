@@ -91,14 +91,11 @@ More examples:
 
 The `.drawio.*` double extension signals that the file contains embedded diagram XML. Open any of these in draw.io to recover and edit the full diagram. The intermediate `.drawio` source file is deleted after image export since the exported file contains the complete diagram. In `url` mode, the `.drawio` file is kept so you have a persistent local copy to re-edit or share.
 
-`url` mode uses only Node.js's built-in `zlib` (deflate-raw compression) and `child_process` (browser open) — no external dependencies. The resulting `https://app.diagrams.net/#create=...` URL is the same format used by the [MCP Tool Server](../mcp-tool-server/README.md), so behavior is identical.
+`url` mode uses [`scripts/drawio_url.py`](scripts/drawio_url.py) or Node.js's built-in `zlib` (deflate-raw compression) and `child_process` (browser open) — no external dependencies.
 
 ## XML Reference
 
-The skill references the shared XML generation guide (edge routing, containers, layers, tags, metadata, dark mode, etc.) from GitHub at runtime:
-[`shared/xml-reference.md`](../shared/xml-reference.md)
-
-This is the single source of truth for all draw.io MCP prompts across the repository. No extra files need to be copied during installation.
+Read the packaged XML generation guide (edge routing, containers, layers, tags, metadata, dark mode, etc.) at [`references/xml.md`](references/xml.md). For `url` mode, you can also use [`scripts/drawio_url.py`](scripts/drawio_url.py) to validate the XML and build the `#R` diagrams.net fragment locally.
 
 ## Why XML Only?
 
@@ -107,11 +104,3 @@ A `.drawio` file is just mxGraphModel XML. Mermaid and CSV formats require draw.
 - No server dependency
 - No conversion step
 - Files are immediately editable in draw.io
-
-## Other Variants
-
-This repository offers multiple ways to integrate draw.io with AI assistants:
-
-- **[MCP App Server](../mcp-app-server/README.md)** — Inline diagrams in chat (Claude.ai, VS Code)
-- **[MCP Tool Server](../mcp-tool-server/README.md)** — Opens diagrams in browser via MCP (Claude Desktop)
-- **[Project Instructions](../project-instructions/README.md)** — Claude.ai Projects, no install needed
