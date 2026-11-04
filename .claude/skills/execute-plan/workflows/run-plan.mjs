@@ -138,9 +138,16 @@ function implPrompt(task, attempt, priorFailure) {
       : '',
     `Task spec:\n${task.body}`,
     `Write scope (only these globs): ${task.writeScope.join(', ')}. ${CO_TENANCY}`,
+    `Jev-gate pre-triage (when jev-gate MCP is available): call triage_coding_task ` +
+    `with this task spec and candidate files matching the write scope. If ` +
+    `insufficient_context scores highest, stop and set clarificationNeeded. Read ` +
+    `keep_full files completely, extract signatures only for keep_signatures_only, ` +
+    `and skip drop files.`,
     `TDD: if an acceptance bullet names a test that doesn't exist, write it ` +
     `first and see it fail before implementing.`,
     `Acceptance (ALL must pass):\n- ${task.acceptance.join('\n- ')}`,
+    `Before running slow builds/tests, if jev-gate MCP is available, pass git diff ` +
+    `to verify_code_invariants(git_diff) and fix any violated project invariant from .jev-gate.toml.`,
     `Then run build ("${cfg.commands.build}") and tests ("${cfg.commands.test}").`,
     `Commit with subject "<type>(<scope>): <desc>" and trailer lines:\n` +
     `Task ${task.id} from ${cfg.planPath}\nPlan-SHA: ${cfg.planSha}\nBase-SHA: ${cfg.baseSha}`,
@@ -261,12 +268,15 @@ async function reviewGate(profile, where) {
 // ---------- Phase: Review Gates (PR boundary) ----------
 phase('Review Gates')
 const checkpoint = await agent(
-  `Final quality gate on branch ${cfg.branch}: run lint ("${cfg.commands.lint}"), ` +
+  `Final quality gate on branch ${cfg.branch}: first, if the jev-gate MCP server ` +
+  `is available, run verify_code_invariants(git_diff) on ${cfg.baseSha}..HEAD (report ` +
+  `any violated invariant as severity 'major', or log skipped if jev-gate is unreachable). ` +
+  `Then run lint ("${cfg.commands.lint}"), ` +
   `build ("${cfg.commands.build}"), tests ("${cfg.commands.test}"). If the diff ` +
   `${cfg.baseSha}..HEAD touches product source (not just tests/docs/config), also ` +
   `invoke the built-in /verify skill to exercise the changed flow end-to-end. ` +
-  `Report any lint, build, test, or /verify failures as findings: severity 'critical' ` +
-  `for a broken build or failing tests, severity 'major' for a lint or /verify failure. ` +
+  `Report any invariant, lint, build, test, or /verify failures as findings: severity 'critical' ` +
+  `for a broken build or failing tests, severity 'major' for an invariant, lint, or /verify failure. ` +
   `Return an empty findings array if everything passed.`,
   { schema: FINDINGS_SCHEMA, label: 'checkpoint' })
 if (!checkpoint) throw new Error('Checkpoint agent failed to return a result')
