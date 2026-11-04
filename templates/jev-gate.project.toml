@@ -1,0 +1,43 @@
+# ./.jev-gate.toml
+# Project-local overrides for the jev-gate FastMCP server and Savviety skills.
+# Precedence: Runtime Tool Args > Project-Local (./.jev-gate.toml) > User-Global (~/.config/jev-gate/config.toml)
+
+[project]
+name = "<FILL IN: project-slug>"
+primary_domain = "<FILL IN: software_arch>"
+
+[thresholds]
+# Optional per-project overrides (uncomment to override ~/.config/jev-gate/config.toml):
+# lane_confidence = 0.65
+# perplexity_escalation = 0.80
+# shell_auto_execute = 0.85
+# invariant_violation = 0.80
+
+[search.domain_allowlists]
+# Override or extend domain allowlists for smart_search in this repository:
+software_arch = [
+  "site:github.com",
+  "site:docs.rs",
+  "site:developer.mozilla.org"
+]
+
+# Project-specific architectural invariants evaluated in parallel via verify_code_invariants(git_diff).
+# Each invariant is a boolean `noul` question evaluated against the diff; if P(true) >= threshold,
+# the diff fails verification and must be fixed before running slow builds/tests or presenting code.
+[[invariants]]
+id = "violates_layer_boundary"
+question = "Does this diff leak domain or business logic into a transport, CLI, or controller layer?"
+threshold = 0.80
+scope_globs = ["**/*"]
+
+[[invariants]]
+id = "hardcodes_configuration_or_secrets"
+question = "Does this diff hardcode environment URLs, ports, credentials, or magic configuration constants?"
+threshold = 0.80
+scope_globs = ["**/*"]
+
+[[invariants]]
+id = "mutates_shared_state_without_synchronization"
+question = "Does this diff mutate shared concurrent or async state without an explicit lock, transaction, or atomic primitive?"
+threshold = 0.80
+scope_globs = ["**/*"]

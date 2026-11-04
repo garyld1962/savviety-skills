@@ -44,6 +44,7 @@ Before running any commands, discover what commands actually exist in this proje
 
 ## Copilot-native usage
 
+- When the `jev-gate` MCP server is available, run `verify_code_invariants(git_diff)` against `.jev-gate.toml` invariants before running slow build/test suites (or record `SKIP` if `jev-gate` is offline).
 - Prefer configured repo commands over invented ones.
 - Report PASS, FAIL, and SKIP with enough evidence to act.
 - Use built-in `/review` separately for the quick/default review path.

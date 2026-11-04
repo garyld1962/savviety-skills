@@ -20,6 +20,7 @@ package_manager: <npm|pnpm|yarn|bun|pip|poetry|cargo|go|dotnet|...>
 - Use `/skill:repo-status` before delivery or after a long break.
 - Use `/skill:validate-plan` before executing implementation plans.
 - Use `/skill:checkpoint` before push, PR creation, or release.
+- When the `jev-gate` FastMCP server is connected (`Runtime Tool Args > ./.jev-gate.toml > ~/.config/jev-gate/config.toml`), route technical/SDK/hardware searches through `smart_search`, pre-triage multi-file tasks with `triage_coding_task`, audit diffs with `verify_code_invariants`, and gate non-trivial shell commands via `gate_shell_command`.
 - Use project-scoped custom agents only when the task explicitly calls for subagent delegation.
 
 ## Cross-CLI Notes

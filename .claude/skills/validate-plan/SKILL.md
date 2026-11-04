@@ -19,6 +19,16 @@ to behave unpredictably.
 
 - `<path>` — path to the plan file (optional; if omitted, finds the most recent `.md` in `docs/plans/`).
 
+## Automated Structural Check (`scripts/validate_plan.py`)
+
+When the plan follows the task-graph contract (`_internal/plan-format`, synced at [`references/plan-format.md`](references/plan-format.md)), run the packaged structural validator first:
+
+```bash
+python3 "<this-skill-dir>/scripts/validate_plan.py" "<plan-path>"
+```
+
+This deterministically verifies YAML frontmatter (`slug`, `source_prd`, `intent`, `type`), task IDs, acyclic `depends_on` references, disjoint `write_scope` globs across concurrent tasks, `milestone_end` flags, and non-empty `**Acceptance:**` blocks, and computes the exact `plan_sha` (`--json`). Then apply the semantic/prose checks below.
+
 ## What it checks
 
 Run every check below and collect failures. Do not stop at the first failure —
@@ -63,16 +73,15 @@ check #4 when it is expressible as one of:
 - **a schema or type check**
   (e.g., `jq -e '.field' config.json`, `tsc --noEmit passes`)
 
-Task-level frontmatter may declare `verify:` directly (preferred; used
-by the sibling `/plan` skill). Absent frontmatter, the task's
-`**Acceptance:**` section is parsed.
+Task-level frontmatter may declare `verify:` directly (preferred).
+Absent frontmatter, the task's `**Acceptance:**` section is parsed.
 
 **Passing example** ✓
 
 ```markdown
 **Acceptance:** all of the following shell checks exit 0.
-- grep -q 'adversarial_triggers' claude-working/execute-plan/SKILL.md
-- test -f claude-working/closed-decisions/stacks/nextjs-app-router.md
+- grep -q 'adversarial_triggers' claude/execute-plan/SKILL.md
+- test -f claude/_internal/closed-decisions/stacks/nextjs-app-router.md
 ```
 
 **Failing example** ✗
@@ -94,7 +103,8 @@ satisfied. Rewrite each as a concrete test/command/observable.
   (One failure per offending task, up to 5 listed.)
 
 See `plan-execute-boundary.md` §3 for the pre-ship smoke test that
-verifies `/plan`-authored plans pass this check without modification.
+verifies plans authored by `/execute-prd` pass this check without
+modification.
 
 ### 5. Milestones are marked (or plan is flat)
 
@@ -148,7 +158,7 @@ ordinary outcome-shaped titles.
 
 Check #8 previously verified that file references in the plan resolved
 to existing parent directories. Removed per Task 17 of
-`claude-working-hardening.md`: too many false positives on greenfield
+`claude-hardening.md`: too many false positives on greenfield
 plans and template-copy tasks where the referenced directory is
 intentionally created during execution. The numbering is preserved
 (check #9 stays #9) so cross-references in existing plans and tests
@@ -165,11 +175,10 @@ of the three permitted forms:
   closed decisions that don't belong in the shared library.
 - **Library reference:** `@closed-decisions/<category>/<slug>`
   Resolves to a fragment file in the skill's own library at
-  `<claude-working-root>/closed-decisions/<category>/<slug>.md`,
-  where `<claude-working-root>` is the directory containing this
-  `validate-plan/` skill — **not** a path in the consumer repo.
-  The library is part of the skill package; consumer repos do not
-  ship their own `closed-decisions/` trees.
+  `_internal/closed-decisions/<category>/<slug>.md`,
+  sibling to this `validate-plan/` skill — **not** a path in the
+  consumer repo. The library is part of the skill package; consumer
+  repos do not ship their own `closed-decisions/` trees.
 - **Plain bullet (new `_internal/plan-format` contract):**
   `<Label>: <one-line value>.` A single-sentence bullet, optionally
   prefixed with a short label ending in `:` (e.g. `Chunking: 500-token /
@@ -200,13 +209,13 @@ plan, "Key: value.").`
 
 **Fail (reference):** `Closed Decision references
 @closed-decisions/<path> but fragment file does not exist at
-claude-working/closed-decisions/<path>.md.`
+_internal/closed-decisions/<path>.md.`
 
 **Fail (contradiction):** `[plan-ambiguity] Closed Decision
 "<key>" contradicts Task N acceptance on line M. Reconcile before
 re-running.`
 
-See `claude-working/closed-decisions/` for the seed library.
+See `_internal/closed-decisions/` for the seed library.
 
 ### 10. Parallel Execution section is well-formed (if present)
 
@@ -294,12 +303,12 @@ VERDICT: FAIL
 
 ## Refuse contract
 
-A `VERDICT: FAIL` from this skill causes `/execute-plan` Phase 0b to
-**refuse to execute**. This refusal is non-negotiable except via the
-explicit human-only `--force` override (see
-`execute-plan/SKILL.md` Phase 0b). The contract is the teeth behind
-the guiding principle that bad plans are refused up front, not guessed
-through at execution time.
+A `VERDICT: FAIL` from this skill causes `/execute-plan` preflight
+gate 2 to **refuse to execute**. This refusal is non-negotiable except
+via the explicit human-only `--force` override (see
+`execute-plan/SKILL.md`, preflight gate 2). The contract is the teeth
+behind the guiding principle that bad plans are refused up front, not
+guessed through at execution time.
 
 ## Emitting `plan-ambiguity` findings
 
@@ -321,8 +330,8 @@ from structural issues:
   "Testing" names Vitest only. Reconcile before re-running.
 ```
 
-See the ambiguity taxonomy in `execute-plan/SKILL.md` Phase 1.5 for the
-three ambiguity categories.
+See the ambiguity taxonomy in `execute-plan/SKILL.md`, preflight gate 4
+(pre-execution clarification), for the three ambiguity categories.
 
 ## What this skill does NOT do
 
@@ -339,5 +348,5 @@ structurally ready for `execute-plan` to consume?*
 - **Inputs:** path to a plan file (markdown with YAML frontmatter).
 - **Preconditions:** plan file exists and is readable.
 - **Outputs:** `VERDICT: PASS | WARN | FAIL` with a check-by-check breakdown (frontmatter shape, task discreteness, acceptance criteria, milestones, forbidden placeholders, parallel-execution shape if present, etc.); structured findings caller can act on.
-- **Postconditions:** caller (`/execute-plan` Phase 0b, `/execute-prd` step 7) decides whether to proceed (`PASS`), warn (`WARN`), or fix (`FAIL`).
+- **Postconditions:** caller (`/execute-plan` preflight gate 2, `/execute-prd` step 7) decides whether to proceed (`PASS`), warn (`WARN`), or fix (`FAIL`).
 - **Failure modes:** plan file unreadable → `FAIL` with a file-access finding; plan present but parses inconsistently → `FAIL` with a `plan-ambiguity` finding; this skill never edits the plan — it only reports.

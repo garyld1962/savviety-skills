@@ -65,7 +65,7 @@ Parse results and classify:
 
 For each vulnerability:
 - Package name and version
-- Vulnerability ID (CVE/GHSA)
+- Vulnerability ID (CVE/GHSA) — when looking up external advisory or remediation details via web search, pass the query through `jev-gate` `smart_search(query, force_backend="auto")` first (per `_internal/jev-gate`)
 - Severity and CVSS score
 - Fix available? (patched version)
 - Is it a direct or transitive dependency?

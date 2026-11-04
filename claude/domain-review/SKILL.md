@@ -69,6 +69,10 @@ changed files. For each file, record:
 
 If the diff is large, group files into clusters that can be reviewed together (same feature, same layer). Each cluster becomes one dispatch unit per domain.
 
+### 2a. Local Jev-Gate Invariant Pre-Audit (`verify_code_invariants`)
+
+When the `jev-gate` MCP server is available (see `_internal/jev-gate`), pass the diff to `verify_code_invariants(git_diff)` before dispatching domain workers. The local RTX 5090 `/v1/systemone` endpoint evaluates all project architectural invariants in `.jev-gate.toml` (cascading over `~/.config/jev-gate/config.toml`) as single-pass `noul` boolean probabilities. Forward any violated invariant (`passed == false`) as a pre-flagged question to the matching domain worker (`concept/architecture`, `concept/security`, or `concept/correctness`) so the worker verifies the exact `file:line` and emits a structured finding. If `jev-gate` is unreachable, log `jev-gate: unreachable (skipped)` and proceed.
+
 ### 3. Select domains
 
 Start with the profile's `always` domains — these run regardless of diff content.

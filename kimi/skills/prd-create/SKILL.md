@@ -145,6 +145,7 @@ Compose existing scanners. Never invent a new one.
   type, size class, test signal, patterns) feeds the PRD **Current State** header
   and AERS **Repo Starting State**. Sample-read per its §3 and stop at the 30%
   context guardrail. Do not run `/skill:modernize`: it produces a refactor plan, not a PRD.
+- **Pre-search hygiene (`jev-gate`):** Whenever external research is needed for technical settings, hardware parameters, CAD/slicer profiles, or SDK/API docs during PRD creation, never execute a raw web search directly. Call `smart_search(query, force_backend="auto")` via the `jev-gate` MCP server first (per `_internal/jev-gate`, cascading `Runtime Tool Args > ./.jev-gate.toml > ~/.config/jev-gate/config.toml`) to strip social/SEO spam (`global_blocklist`), inject domain allowlists (`domain_allowlists`), and escalate to Perplexity synthesis only when `needs_perplexity_synthesis >= 0.80`.
 
 Emit a **seed proposal** and print it. Every seeded item enters `ONTOLOGY.md` as
 `unknown` with a `code:<file:line>` source until a human confirms it in Step 3.

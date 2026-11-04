@@ -7,7 +7,7 @@ intent: >
   task. validate-plan must PASS; execute-plan must run Task 1 as a
   template-copy fast path without codebase exploration.
 verify: |
-  claude-working/validate-plan against this file returns VERDICT: PASS
+  claude/validate-plan against this file returns VERDICT: PASS
   with no plan-ambiguity findings. The execute-plan template-copy fast
   path triggers on Task 1.
 ---
@@ -16,7 +16,7 @@ verify: |
 
 Tiny plan used to exercise Task 9's Closed Decisions primitive and the
 template-copy fast path. Not a real deliverable; it exists so the Task 9
-acceptance checks in `claude-working-hardening.md` can verify end-to-end
+acceptance checks in `claude-hardening.md` can verify end-to-end
 that the primitive works.
 
 ## Closed Decisions

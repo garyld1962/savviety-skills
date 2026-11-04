@@ -1,0 +1,17 @@
+{
+  "$comment": "Optional PreToolUse shell-gating hook for Contract 4 (gate_shell_command). Merge into .claude/settings.local.json (Claude Code) or .agents/hooks.json (Antigravity).",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bin/jev-shell-hook",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

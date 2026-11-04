@@ -44,17 +44,19 @@ plan hash, objective, scope, read-only context, dependencies, acceptance,
 governing decisions and a warning to preserve other work in each worker brief.
 
 For each task:
-1. Inspect current code and the requirement before editing.
-2. Implement the scoped behavior. Add a failing regression/characterization test
+1. When the `jev-gate` MCP server is available, call `triage_coding_task(task_prompt, candidate_files)` before loading large repo files (respecting `Runtime Tool Args > ./.jev-gate.toml > ~/.config/jev-gate/config.toml`). Halt immediately on `insufficient_context`; route single-file/mechanical edits to `fast_lane` and multi-file/architectural work or confidence `< 0.65` (or offline fallback) to `deep_lane`; load `keep_full` files completely, inspect only exported signatures (`ast-grep`) for `keep_signatures_only`, and skip `drop` files.
+2. Inspect current code and the requirement before editing.
+3. Implement the scoped behavior. Add a failing regression/characterization test
    when behavior demands it; do not write tests that only restate prose edits.
-3. Run each acceptance check and applicable declared build/test checks. Record
+4. When `jev-gate` is available and `.jev-gate.toml` defines `[[invariants]]`, run `verify_code_invariants(git_diff)` before slow builds/tests and fix any violated invariant (`passed == false`) before proceeding. Before non-trivial shell commands, gate via `gate_shell_command(command, working_dir)` (or `bin/jev-shell-hook`): auto-run only when `safe_auto_execute >= 0.85`, ask on `requires_user_confirmation`, and abort on `blocked_destructive`.
+5. Run each acceptance check and applicable declared build/test checks. Record
    command, exit code or observation, evidence location and verified commit.
-4. Inspect actual changed paths, including new/untracked files, against ownership.
+6. Inspect actual changed paths, including new/untracked files, against ownership.
    Re-plan and revalidate before writing outside scope.
-5. Commit a verified task when repository policy requires commits. Include
+7. Commit a verified task when repository policy requires commits. Include
    `Task N from <plan>`, `Plan-SHA: <sha256>` and `Base-SHA: <commit>` trailers.
    Review-fix commits name the finding and never impersonate task completion.
-6. Record completion only with proof; a worker saying `done` is not proof.
+8. Record completion only with proof; a worker saying `done` is not proof.
 
 If isolated branches/worktrees are used, integrate in dependency order and
 reverify affected acceptance after integration. Never resolve a conflict by

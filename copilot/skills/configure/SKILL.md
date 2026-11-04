@@ -11,6 +11,8 @@ Read the repository's registry if present. Otherwise use these supplied targets:
 |---|---|---|
 | env, copilot-env | [environment template](../../templates/env.config.template.md) | user .copilot/env.config.md or project .github/instructions/env.config.md |
 | vault | [vault contract](../vault/SKILL.md) | project .savviety/vault.json, or explicit user-selected path |
+| jev-gate-global | `templates/jev-gate.global.toml` | user `~/.config/jev-gate/config.toml` |
+| jev-gate | `templates/jev-gate.project.toml` | project `.jev-gate.toml` |
 
 With no target, report configured/missing status without dumping sensitive values.
 With a target, inspect existing configuration, safely discover routine defaults, and

@@ -27,7 +27,7 @@ The two values describe how callers consume the skill:
 - **`embedded`** — a reusable procedure with explicit Inputs /
   Outputs / Failure modes. Callers *invoke* it (run the rubric over a
   diff, classify a dependency) and act on the structured result.
-  Examples: `security-quick-check`.
+  Examples: `jev-gate`, `security-quick-check`.
 
 When in doubt: if you'd describe what it produces in terms of "PASS
 / FAIL plus findings", it's `embedded`. If you'd describe it in terms

@@ -153,8 +153,10 @@ When the ask is a routine, low-risk, convention-bound edit (single-file change, 
 3. **Plan.** Once the artifact is ready enough to build, use `superpowers:writing-plans` for implementation planning. Skip for the small change fast path unless the user asks for a plan or the work expands.
 
 4. **Implement.** After planning:
+   - **Pre-coding triage & context pruning (`jev-gate`):** Before starting a multi-file task or loading large repo files into the cloud context window, call `triage_coding_task(task_prompt, candidate_files)` via the `jev-gate` MCP server (per `_internal/jev-gate`, cascading `Runtime Tool Args > ./.jev-gate.toml > ~/.config/jev-gate/config.toml`). If `insufficient_context` scores highest, halt immediately and ask the user for clarification. Follow the returned `lane` (`fast_lane` vs. `deep_lane`; `< 0.65` confidence or offline defaults to `deep_lane`), read `keep_full` files completely, inspect only exported signatures (`ast-grep`) for `keep_signatures_only`, and skip `drop` files.
    - Inspect the repo structure and relevant files
    - Make precise changes
+   - **Post-generation invariant & shell gating (`jev-gate`):** Before running non-trivial shell commands, gate via `gate_shell_command(command, working_dir)` (or `bin/jev-shell-hook`). After generating a code patch and before slow builds/tests, pass `git diff` to `verify_code_invariants(git_diff)` and fix any failed `.jev-gate.toml` invariant before proceeding.
    - Run the repo's existing build, test, lint, or validation commands
    - Use background tasks or parallel agents when helpful
    - Continue until the change is verified or a real blocker is reached
@@ -186,6 +188,7 @@ Keep updates concise:
 ## Rubrics
 
 This skill references:
+- `_internal/jev-gate` — for local System-1 pre-coding triage (`triage_coding_task`), search hygiene (`smart_search`), diff invariant auditing (`verify_code_invariants`), and shell gating (`gate_shell_command`)
 - `_internal/disposition` — for governance principles (elevation pass, evidence standard) when applicable
 - `_internal/repo-delivery` — for delivery contracts
 

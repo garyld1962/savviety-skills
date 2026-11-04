@@ -108,6 +108,7 @@
     "AGENTS.md",
     ".kimi/config.toml",
     ".codex/config.toml",
-    ".claude-plugin/marketplace.json"
+    ".claude-plugin/marketplace.json",
+    ".jev-gate.toml"
   ]
 }
