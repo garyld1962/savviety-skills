@@ -69,6 +69,8 @@ If `--ado <item-id>` or `--linear <issue-id>` was provided, use /skill:work-item
 
 Attempt to reproduce or confirm the bug through code analysis:
 
+0. **Pre-triage & context pruning (`jev-gate`):** When the `jev-gate` MCP server is available (see `_internal/jev-gate`), pass the symptom description and initial candidate file paths (from Grep/Glob) to `triage_coding_task(task_prompt, candidate_files)` before reading large files into the cloud context window. Halt and ask for clarification if `insufficient_context` scores highest; read `keep_full` files completely, extract exported signatures (`ast-grep`) for `keep_signatures_only` files, and skip `drop` files. If looking up external SDK/hardware/framework error behavior, call `smart_search(query, force_backend="auto")` before running any raw web search.
+
 1. **Search for the symptom.** Find the code path that produces the reported behavior:
    - Error messages: search for the exact error text in the codebase
    - HTTP status codes: trace the endpoint handler

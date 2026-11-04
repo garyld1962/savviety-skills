@@ -48,7 +48,7 @@ model: opus
 Search for the official migration guide or changelog:
 
 1. Check the package's repository for `CHANGELOG.md`, `MIGRATION.md`, or `UPGRADING.md`
-2. Search for "migrating from <from> to <to>" in official docs
+2. Search for "migrating from <from> to <to>" in official docs — when the `jev-gate` MCP server is available (see `_internal/jev-gate`), pass the raw query to `smart_search(query, force_backend="auto")` first rather than executing an unfiltered web search
 3. Check GitHub releases between the two versions
 4. Use context7 to fetch up-to-date documentation if available
 

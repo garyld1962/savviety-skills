@@ -60,10 +60,12 @@ When the user provides one artifact (BRD, PRD, story, notes, proposal, architect
 ### Folder of documents
 
 When the user provides a folder:
+- When the `jev-gate` MCP server is available (see `_internal/jev-gate`), call `triage_coding_task(task_prompt, candidate_files)` to score and prune candidate files (`keep_full`, `keep_signatures_only`, `drop`) before loading documents into context
 - Identify the most relevant files (don't read everything)
 - Synthesize repeated themes
 - Surface contradictions and missing decisions
 - Name which files drove the conclusions
+- When external technical, hardware, CAD/slicer, or SDK lookups are needed during `tech` or `idea` shaping, call `smart_search(query, force_backend="auto")` via `jev-gate` before executing any web search (escalating to Perplexity only when `needs_perplexity_synthesis >= 0.80`)
 
 ### Blank start
 

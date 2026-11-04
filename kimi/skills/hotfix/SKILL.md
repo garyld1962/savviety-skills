@@ -68,7 +68,7 @@ If `--from <tag|sha>` is provided, branch from that ref instead of the main bran
 
 ## Step 3: Confirm Scope
 
-Before writing any code, state:
+Before writing any code, when the `jev-gate` MCP server is available (see `_internal/jev-gate`), call `triage_coding_task(task_prompt, candidate_files)` to prune candidate files (`keep_full`, `keep_signatures_only`, `drop`) and verify the issue has sufficient context (halt if `insufficient_context` scores highest). Then state:
 
 - **What is broken:** one sentence
 - **Root cause:** one sentence
@@ -84,6 +84,7 @@ Rules:
 - Write a regression test for the specific bug. This is the one thing you do not skip.
 - No new features. No "while I'm here" improvements.
 - Follow the project's error handling and logging conventions from `CLAUDE.md`.
+- **Invariants & shell gating (`jev-gate`):** Before running non-trivial shell commands, gate via `gate_shell_command(command, working_dir)` (or `bin/jev-shell-hook`). After applying the patch and before running slow tests, pass `git diff` to `verify_code_invariants(git_diff)` and fix any violated invariant from `.jev-gate.toml`.
 
 ## Step 5: Run Targeted Tests
 
