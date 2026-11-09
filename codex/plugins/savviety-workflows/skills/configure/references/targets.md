@@ -23,3 +23,9 @@ Use this for Codex-side setup.
 For the vault target, resolve an explicit path or OBSIDIAN_VAULT first. Otherwise
 write user-owned .savviety/vault.json using the sibling vault skill contract.
 Ask once for an unknown location, preserve existing fields, and verify directory access.
+
+## jev-gate (System-1 Decision Control Plane)
+
+- `jev-gate-global`: User-global config at `~/.config/jev-gate/config.toml` (RTX 5090 `/v1/systemone` endpoint, default `fast_lane`/`deep_lane` mappings, `global_blocklist`, and baseline thresholds).
+- `jev-gate`: Project-local override at `{project}/.jev-gate.toml` (`primary_domain`, `search.domain_allowlists`, and `[[invariants]]` evaluated against `git diff`).
+- Precedence is always `Runtime Tool Args > ./.jev-gate.toml > ~/.config/jev-gate/config.toml`.

@@ -1,0 +1,269 @@
+#!/usr/bin/env python3
+"""PreToolUse shell-gating hook backed by the local RTX 5090 /v1/systemone Jev endpoint.
+
+Enforces Contract 4 (`gate_shell_command`) with the 3-tier cascading configuration:
+  Runtime Tool Args / Env > Project-Local (./.jev-gate.toml) > User-Global (~/.config/jev-gate/config.toml)
+
+Decision classes:
+  - safe_auto_execute (>= threshold, default 0.85) -> allow
+  - requires_user_confirmation                     -> ask
+  - blocked_destructive                            -> deny
+
+Graceful fallback when the local /v1/systemone endpoint is unreachable:
+  - Catastrophic destructive patterns are hard-denied (`deny`).
+  - All other commands fall back to `ask` (`requires_user_confirmation`).
+"""
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+import re
+import sys
+import tomllib
+import urllib.error
+import urllib.request
+
+DEFAULT_CONFIG = {
+    "endpoint": {
+        "url": "http://sherlock:8000/v1/systemone",
+        "model": "vllm-sr/Decision-1.0-Nox-4B",
+        "timeout_ms": 250,
+        "fallback_mode": "graceful",
+    },
+    "thresholds": {
+        "shell_auto_execute": 0.85,
+    },
+}
+
+DESTRUCTIVE_PATTERNS = [
+    re.compile(r"\b(?:rtk\s+)?git\s+reset\s+--hard\b"),
+    re.compile(r"\b(?:rtk\s+)?git\s+push\s+(?:--force|-f)\b"),
+    re.compile(r"\b(?:rtk\s+)?git\s+clean\s+-[a-zA-Z]*f"),
+    re.compile(r"\b(?:rtk\s+)?git\s+branch\s+-D\b"),
+    re.compile(r"\b(?:rtk\s+)?git\s+checkout\s+--\s+\.(?:\s|$)"),
+    re.compile(r"\brm\s+-[a-zA-Z]*r[a-zA-Z]*f[a-zA-Z]*\s+(?:/|~|\$HOME|\.\.?)(?:\s|$)"),
+    re.compile(r"\b(?:mkfs|dd\s+if=)\b"),
+]
+
+
+def deep_merge(base: dict, override: dict) -> dict:
+    result = dict(base)
+    for k, v in override.items():
+        if isinstance(v, dict) and isinstance(result.get(k), dict):
+            result[k] = deep_merge(result[k], v)
+        else:
+            result[k] = v
+    return result
+
+
+def load_toml_if_valid(path: Path) -> dict:
+    if not path.is_file():
+        return {}
+    try:
+        raw = path.read_text(encoding="utf-8")
+        data = tomllib.loads(raw)
+        # Ignore unfilled <FILL IN...> placeholder strings
+        cleaned = {}
+        for k, v in data.items():
+            if isinstance(v, dict):
+                sub = {
+                    sk: sv
+                    for sk, sv in v.items()
+                    if not (isinstance(sv, str) and "<FILL IN" in sv)
+                }
+                if sub:
+                    cleaned[k] = sub
+            elif not (isinstance(v, str) and "<FILL IN" in v):
+                cleaned[k] = v
+        return cleaned
+    except (OSError, tomllib.TOMLDecodeError):
+        return {}
+
+
+def load_cascading_config(working_dir: Path, runtime_overrides: dict | None = None) -> dict:
+    cfg = dict(DEFAULT_CONFIG)
+    global_path = Path(
+        os.environ.get("JEV_GATE_GLOBAL_CONFIG", Path.home() / ".config/jev-gate/config.toml")
+    )
+    cfg = deep_merge(cfg, load_toml_if_valid(global_path))
+
+    # Walk from working_dir up to git root for .jev-gate.toml
+    project_path = working_dir / ".jev-gate.toml"
+    if not project_path.is_file():
+        for parent in working_dir.parents:
+            candidate = parent / ".jev-gate.toml"
+            if candidate.is_file():
+                project_path = candidate
+                break
+            if (parent / ".git").exists():
+                break
+    cfg = deep_merge(cfg, load_toml_if_valid(project_path))
+
+    # Environment variable / runtime overrides
+    env_overrides: dict = {"endpoint": {}, "thresholds": {}}
+    if os.environ.get("JEV_GATE_URL"):
+        env_overrides["endpoint"]["url"] = os.environ["JEV_GATE_URL"]
+    if os.environ.get("JEV_GATE_MODEL"):
+        env_overrides["endpoint"]["model"] = os.environ["JEV_GATE_MODEL"]
+    if os.environ.get("JEV_GATE_FALLBACK_MODE"):
+        env_overrides["endpoint"]["fallback_mode"] = os.environ["JEV_GATE_FALLBACK_MODE"]
+    if os.environ.get("JEV_GATE_SHELL_THRESHOLD"):
+        try:
+            env_overrides["thresholds"]["shell_auto_execute"] = float(
+                os.environ["JEV_GATE_SHELL_THRESHOLD"]
+            )
+        except ValueError:
+            pass
+    if env_overrides["endpoint"]:
+        cfg = deep_merge(cfg, {"endpoint": env_overrides["endpoint"]})
+    if env_overrides["thresholds"]:
+        cfg = deep_merge(cfg, {"thresholds": env_overrides["thresholds"]})
+    if runtime_overrides:
+        cfg = deep_merge(cfg, runtime_overrides)
+    return cfg
+
+
+def extract_command_and_cwd(payload: dict) -> tuple[str | None, Path, bool]:
+    """Return (command, working_dir, is_claude_code_format)."""
+    # Antigravity / Codex hook format
+    if "toolCall" in payload:
+        tool_call = payload.get("toolCall") or {}
+        name = (tool_call.get("name") or "").lower()
+        args = tool_call.get("args") or tool_call.get("parameters") or {}
+        cmd = args.get("CommandLine") or args.get("command")
+        workspaces = payload.get("workspacePaths") or []
+        cwd_str = (workspaces[0] if workspaces else None) or payload.get("cwd")
+        cwd = Path(cwd_str) if cwd_str else Path.cwd()
+        if name not in ("run_command", "bash", "execute"):
+            return None, cwd, False
+        return cmd, cwd, False
+
+    # Claude Code PreToolUse hook format
+    tool_name = (payload.get("tool_name") or "").lower()
+    tool_input = payload.get("tool_input") or {}
+    cmd = tool_input.get("command") or tool_input.get("CommandLine")
+    cwd = Path(payload.get("cwd") or os.getcwd())
+    if tool_name and tool_name not in ("bash", "run_command", "execute"):
+        return None, cwd, True
+    return cmd, cwd, True
+
+
+def is_static_destructive(command: str) -> str | None:
+    for pattern in DESTRUCTIVE_PATTERNS:
+        if pattern.search(command):
+            return f"Blocked destructive shell pattern ({pattern.pattern})"
+    return None
+
+
+def evaluate_via_systemone(command: str, working_dir: Path, cfg: dict) -> tuple[str, str]:
+    """Return (decision: allow|ask|deny, reason)."""
+    static_block = is_static_destructive(command)
+    if static_block:
+        return "deny", f"blocked_destructive: {static_block}"
+
+    endpoint = cfg["endpoint"]["url"]
+    model = cfg["endpoint"]["model"]
+    timeout_s = max(0.05, float(cfg["endpoint"].get("timeout_ms", 250)) / 1000.0)
+    threshold = float(cfg["thresholds"].get("shell_auto_execute", 0.85))
+    fallback_mode = cfg["endpoint"].get("fallback_mode", "graceful")
+
+    request_body = {
+        "state": f"Working Directory: {working_dir}\nCommand: {command}",
+        "model": model,
+        "questions": {
+            "gate_shell_command": {
+                "type": "choice",
+                "instructions": "Classify the execution safety of this shell command in the working directory.",
+                "criteria": {
+                    "safe_auto_execute": (
+                        "Read-only inspection, standard project lint/build/test, "
+                        "or bounded workspace command safe for autonomous execution."
+                    ),
+                    "requires_user_confirmation": (
+                        "Mutates git history/branches, installs packages, modifies files outside "
+                        "normal scope, or has side effects requiring operator confirmation."
+                    ),
+                    "blocked_destructive": (
+                        "Destructive command that deletes uncommitted work, force-pushes, "
+                        "wipes directories, or exfiltrates secrets."
+                    ),
+                },
+            }
+        },
+    }
+
+    req = urllib.request.Request(
+        endpoint,
+        data=json.dumps(request_body).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout_s) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
+        if fallback_mode == "fail_closed":
+            return "deny", f"jev-gate unreachable ({exc}) and fallback_mode=fail_closed"
+        return (
+            "ask",
+            f"requires_user_confirmation (jev-gate offline fallback: {exc})",
+        )
+
+    q_res = (
+        (data.get("questions") or {}).get("gate_shell_command")
+        or (data.get("results") or {}).get("gate_shell_command")
+        or data.get("gate_shell_command")
+        or {}
+    )
+    probs = q_res.get("probabilities") or {}
+    choice = q_res.get("choice") or q_res.get("selected") or ""
+    p_safe = float(probs.get("safe_auto_execute", 0.0))
+    p_confirm = float(probs.get("requires_user_confirmation", 0.0))
+    p_block = float(probs.get("blocked_destructive", 0.0))
+
+    if choice == "blocked_destructive" or (p_block >= p_safe and p_block >= p_confirm and p_block > 0.0):
+        return "deny", f"blocked_destructive (p={p_block:.2f})"
+    if p_safe >= threshold:
+        return "allow", f"safe_auto_execute (p={p_safe:.2f} >= {threshold:.2f})"
+    return (
+        "ask",
+        f"requires_user_confirmation (p_safe={p_safe:.2f} < {threshold:.2f}, p_confirm={p_confirm:.2f})",
+    )
+
+
+def format_output(decision: str, reason: str, is_claude: bool) -> dict:
+    out: dict = {"decision": decision, "reason": reason}
+    if is_claude:
+        out["hookSpecificOutput"] = {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": decision,
+            "permissionDecisionReason": reason,
+        }
+    return out
+
+
+def main() -> int:
+    raw = sys.stdin.read().strip()
+    if not raw:
+        print(json.dumps({"decision": "allow"}))
+        return 0
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        print(json.dumps({"decision": "ask", "reason": "Invalid hook stdin JSON"}))
+        return 0
+
+    cmd, cwd, is_claude = extract_command_and_cwd(payload)
+    if not cmd:
+        print(json.dumps(format_output("allow", "Non-shell tool call", is_claude)))
+        return 0
+
+    cfg = load_cascading_config(cwd, payload.get("jevGateConfig"))
+    decision, reason = evaluate_via_systemone(cmd, cwd, cfg)
+    print(json.dumps(format_output(decision, reason, is_claude)))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

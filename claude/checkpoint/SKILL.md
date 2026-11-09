@@ -73,6 +73,14 @@ git diff --cached --name-only
 
 Report: "N files changed across M packages: [list]"
 
+### Step 2a: Run Local Jev-Gate Invariants (if available)
+
+When the `jev-gate` FastMCP server is available (see `_internal/jev-gate`), pass the diff (`git diff <base>..HEAD` or uncommitted working-tree diff) to `verify_code_invariants(git_diff)` **before** running slow lint, build, or test commands.
+
+- The local RTX 5090 `/v1/systemone` endpoint evaluates all project architectural invariants defined in `.jev-gate.toml` (cascading over `~/.config/jev-gate/config.toml`) in a single ~15ms forward pass (`noul` boolean probabilities).
+- If any invariant returns `passed == false`, record the violation (`id`, `rule`, `p_yes`), fix the violation before proceeding, and re-run `verify_code_invariants(git_diff)`.
+- If `jev-gate` is unreachable or `.jev-gate.toml` has no `[[invariants]]`, record `SKIP (jev-gate unreachable or no invariants)` and continue to Step 3.
+
 ### Step 3: Run Linter (if configured)
 
 ```bash
@@ -136,6 +144,7 @@ Output a summary:
 
 | Check      | Result | Details          |
 |------------|--------|------------------|
+| Invariants | PASS/FAIL/SKIP | [jev-gate verify_code_invariants summary] |
 | Lint       | PASS/FAIL/SKIP | [summary]  |
 | Build      | PASS/FAIL | [summary]       |
 | Probes     | PASS/FAIL/SKIP | [summary]  |

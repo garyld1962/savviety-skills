@@ -391,7 +391,12 @@ the same recommendation appears across multiple runs.
 
 Destructive git commands are denied by `settings.template.json`
 permissions (`git reset --hard`, `git push --force*`, `git clean -f`,
-`git branch -D`). This skill assumes those rules are installed; it
+`git branch -D`). When `bin/jev-shell-hook` (from `templates/jev-gate.hooks.json`)
+or the `jev-gate` FastMCP server is active, shell commands are additionally
+gated by Contract 4 (`gate_shell_command`), task context/lanes are triaged by
+Contract 3 (`triage_coding_task`), and `git diff`s are checked against
+`.jev-gate.toml` architectural invariants via `verify_code_invariants` per
+`_internal/jev-gate`. This skill assumes those rules are installed; it
 does not restate them as instructions.
 
 ## Contract
@@ -402,7 +407,7 @@ does not restate them as instructions.
   `resumeFromRunId` when resuming a failed run. Calls `/validate-plan`
   (preflight gate 2) and the `workflows/run-plan.mjs` Workflow script,
   which owns the task loop. Consults `_internal/repo-delivery`,
-  `_internal/disposition`, `_internal/decision-record`, and
+  `_internal/jev-gate`, `_internal/disposition`, `_internal/decision-record`, and
   `_internal/ontology-readiness` (preflight gate 5).
 - **Preconditions:** the session has the Workflow tool; repo has a
   `CLAUDE.md ## Commands` section; the plan validates (or a human

@@ -79,6 +79,7 @@ For multi-repo scope, dispatch parallel searches using the Agent tool with one a
 - **Small repos (<200 files):** read all source files directly before grepping — comprehensive reads surface semantic matches that keyword search misses.
 - **Medium repos (200–2000 files):** full read of entry points, public surfaces, and files matching structure cues; grep for anchors elsewhere.
 - **Large repos (2000+ files):** layered approach below; sample by signal category rather than exhaustive read.
+- **Pre-retrieval pruning (`jev-gate`):** When the `jev-gate` MCP server is available (see `_internal/jev-gate`), pass the investigation prompt and candidate file list from Grep/Glob to `triage_coding_task(task_prompt, candidate_files)` before reading large file sets into the cloud context window. Read `keep_full` files completely, extract exported signatures (`ast-grep`) for `keep_signatures_only` files, and skip `drop` files.
 
 For each repo in scope, search using a layered approach:
 1. Grep/Glob for exact anchors

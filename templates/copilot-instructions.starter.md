@@ -67,4 +67,5 @@ package_manager: <npm|pnpm|yarn|bun|pip|poetry|cargo|go|dotnet|...>
 ## Pointers
 
 - Personal overrides: `.github/instructions/personal.instructions.md`
+- Local Jev-Gate control plane config: `.jev-gate.toml` (cascades over `~/.config/jev-gate/config.toml` for `smart_search`, `triage_coding_task`, `verify_code_invariants`, and `gate_shell_command`)
 - Shared assets installed via [savviety-skills](https://github.com/garyld1962/savviety-skills) — refresh with `cli/skill.sh --copilot --update`.

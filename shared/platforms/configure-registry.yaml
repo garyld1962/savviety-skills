@@ -85,3 +85,38 @@ targets:
       codex: "{project}/.savviety/vault.json"
       copilot: "{project}/.savviety/vault.json"
       kimi: "{project}/.savviety/vault.json"
+
+  jev-gate-global:
+    description: "User-global RTX 5090 /v1/systemone endpoint, model lanes, thresholds, and search blocklists"
+    scope: "per-user-global"
+    template: "templates/jev-gate.global.toml"
+    required_fields:
+      - "url"
+      - "model"
+    optional_fields:
+      - "timeout_ms"
+      - "fallback_mode"
+      - "global_blocklist"
+    destinations:
+      claude: "~/.config/jev-gate/config.toml"
+      codex: "~/.config/jev-gate/config.toml"
+      copilot: "~/.config/jev-gate/config.toml"
+      kimi: "~/.config/jev-gate/config.toml"
+      hermes: "~/.config/jev-gate/config.toml"
+
+  jev-gate:
+    description: "Project-local jev-gate overrides: domain search allowlists, thresholds, and diff invariants"
+    scope: "per-project"
+    template: "templates/jev-gate.project.toml"
+    required_fields:
+      - "name"
+      - "primary_domain"
+    optional_fields:
+      - "domain_allowlists"
+      - "invariants"
+    destinations:
+      claude: "{project}/.jev-gate.toml"
+      codex: "{project}/.jev-gate.toml"
+      copilot: "{project}/.jev-gate.toml"
+      kimi: "{project}/.jev-gate.toml"
+      hermes: "{project}/.jev-gate.toml"

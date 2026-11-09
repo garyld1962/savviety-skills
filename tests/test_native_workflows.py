@@ -205,14 +205,60 @@ class NativeContractTests(unittest.TestCase):
             self.assertIn("instruction_files", data)
             self.assertIn("runtime", data)
         registry = yaml.safe_load((ROOT / "shared/platforms/configure-registry.yaml").read_text())
-        self.assertEqual(set(registry["targets"]), {"commands", "env", "ship", "code-investigate", "vault"})
+        self.assertEqual(set(registry["targets"]), {"commands", "env", "ship", "code-investigate", "vault", "jev-gate", "jev-gate-global"})
         # Kimi skills now include _internal rubrics and shared validators without Claude Workflow .mjs scripts
         self.assertTrue((ROOT / "kimi/skills/_internal/repo-delivery/SKILL.md").is_file())
+        self.assertTrue((ROOT / "kimi/skills/_internal/jev-gate/SKILL.md").is_file())
+        self.assertTrue((ROOT / "claude/_internal/jev-gate/SKILL.md").is_file())
         self.assertTrue((ROOT / "kimi/skills/validate-plan/scripts/validate_plan.py").is_file())
         self.assertTrue((ROOT / "claude/validate-plan/scripts/validate_plan.py").is_file())
         self.assertTrue((ROOT / "claude/drawio/references/xml.md").is_file())
         self.assertFalse((ROOT / "kimi/skills/execute-plan/workflows").exists())
         self.assertFalse((ROOT / "kimi/skills/execute-prd/workflows").exists())
+
+    def test_jev_gate_templates_and_shell_hook(self):
+        global_cfg = tomllib.loads((ROOT / "templates/jev-gate.global.toml").read_text())
+        project_cfg = tomllib.loads((ROOT / "templates/jev-gate.project.toml").read_text())
+        self.assertIn("/v1/systemone", global_cfg["endpoint"]["url"])
+        self.assertEqual(global_cfg["thresholds"]["shell_auto_execute"], 0.85)
+        self.assertEqual(global_cfg["thresholds"]["perplexity_escalation"], 0.80)
+        self.assertEqual(global_cfg["thresholds"]["lane_confidence"], 0.65)
+        self.assertIn("domain_allowlists", project_cfg["search"])
+        self.assertTrue(len(project_cfg["invariants"]) >= 1)
+
+        hook = ROOT / "bin/jev-shell-hook"
+        # Destructive command in Claude Code format -> deny
+        res_claude = subprocess.run(
+            [sys.executable, str(hook)],
+            input=json.dumps({"tool_name": "Bash", "tool_input": {"command": "git reset --hard HEAD~1"}, "cwd": self.tmp.name}),
+            capture_output=True, text=True, check=True,
+        )
+        out_claude = json.loads(res_claude.stdout)
+        self.assertEqual(out_claude["decision"], "deny")
+        self.assertEqual(out_claude["hookSpecificOutput"]["permissionDecision"], "deny")
+
+        # Offline graceful fallback in Antigravity format -> ask
+        res_agy = subprocess.run(
+            [sys.executable, str(hook)],
+            input=json.dumps({
+                "toolCall": {"name": "run_command", "parameters": {"CommandLine": "pytest -q"}},
+                "cwd": self.tmp.name,
+                "jevGateConfig": {"endpoint": {"url": "http://127.0.0.1:9/v1/systemone", "timeout_ms": 50}},
+            }),
+            capture_output=True, text=True, check=True,
+        )
+        out_agy = json.loads(res_agy.stdout)
+        self.assertEqual(out_agy["decision"], "ask")
+        self.assertNotIn("hookSpecificOutput", out_agy)
+
+        # Cascading override to fail_closed via project .jev-gate.toml -> deny when offline
+        (Path(self.tmp.name) / ".jev-gate.toml").write_text('[endpoint]\nurl = "http://127.0.0.1:9/v1/systemone"\ntimeout_ms = 50\nfallback_mode = "fail_closed"\n')
+        res_closed = subprocess.run(
+            [sys.executable, str(hook)],
+            input=json.dumps({"toolCall": {"name": "run_command", "parameters": {"CommandLine": "pytest -q"}}, "cwd": self.tmp.name}),
+            capture_output=True, text=True, check=True,
+        )
+        self.assertEqual(json.loads(res_closed.stdout)["decision"], "deny")
 
 
 @unittest.skipUnless(shutil.which("rsync") and shutil.which("jq"), "installer requires rsync and jq")

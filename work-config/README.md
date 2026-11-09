@@ -51,8 +51,9 @@ if ccx will not be used.
 
 ## Tools referenced in section 8
 
-`CLAUDE.md` section 8 assumes these are on PATH: `rg`, `fd`, `jq`, `ast-grep`,
-`sd`, `gh`, `uv`, `just`, `hyperfine`, `xh`, `defuddle`. Install whichever are missing.
+`CLAUDE.md` section 8 assumes these are on PATH: `rg`, `fd`, `jq`, `rsync`,
+`shellcheck`, `ast-grep`, `sd`, `gh`, `gh-axi`, `uv`, `just`, `hyperfine`, `xh`,
+`defuddle`. Install whichever are missing.
 
 ## Provenance
 

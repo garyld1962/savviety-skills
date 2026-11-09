@@ -64,6 +64,31 @@ vault:
   optional_fields:
     - daily_notes_folder
     - templates_folder
+
+jev-gate-global:
+  description: "User-global RTX 5090 /v1/systemone endpoint, model lanes, and search blocklists"
+  template: templates/jev-gate.global.toml
+  destination: ~/.config/jev-gate/config.toml
+  scope: per-user-global
+  required_fields:
+    - url
+    - model
+  optional_fields:
+    - timeout_ms
+    - fallback_mode
+    - global_blocklist
+
+jev-gate:
+  description: "Project-local jev-gate overrides: domain search allowlists and diff invariants"
+  template: templates/jev-gate.project.toml
+  destination: "{project}/.jev-gate.toml"
+  scope: per-project
+  required_fields:
+    - name
+    - primary_domain
+  optional_fields:
+    - domain_allowlists
+    - invariants
 ```
 
 ## Adding New Targets

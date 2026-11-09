@@ -130,17 +130,20 @@ Installed by `~/repos/savviety-skills/bin/install-agentic-tools` (`--check` audi
 
 | Tool | When | How |
 |---|---|---|
-| `rg` | Any content search | `rg -l` / `-c` to scope before reading; `-n -A3 -B3` for context; `--json` when a script consumes the result. Not `grep -r`. |
-| `fd` | Any file lookup | `fd -e ts <pattern>`; `fd … -x <cmd> {}` or `-0 \| xargs -0` for batches. Not `find`. |
+| `rg` | Any content search | `rg -l <pattern>` / `-c` to scope before reading; `-n -A3 -B3` for context; `--json` when a script consumes the result. Not `grep -r`. |
+| `fd` | Any file lookup | `fd -e ts <pattern>` to find; `fd <pattern> -x <cmd> {}` or `-0 \| xargs -0` for batches. Not `find`. |
 | `jq` | Any JSON in or out | `jq -r '.x[]'` to extract; `jq empty` to validate; pairs with `--json` on `gh`/`rg`. |
-| `ast-grep` | Search or rewrite by syntax node (calls, imports, signatures) | `ast-grep -p 'foo($A)' -l ts` to find; add `-r 'bar($A)'` to preview a rewrite, `-U` to apply. Prefer over regex whenever the target is code structure, not text. |
-| `sd` | One-off string replace from the shell | `sd -F 'old' 'new' <file>` (`-F` = literal, no regex escaping). Use the Edit tool instead when the file is already in context. |
-| `gh` | Any GitHub action | `gh pr list --json number,title --jq '…'`; `gh pr create` / `merge`; `gh run view`. Never scrape github.com. |
-| `uv` | Any Python | `uv run script.py`; `uvx <tool>` for one-shot tools (`uvx --from shellcheck-py shellcheck`); `uv tool install` for persistent ones. Never bare `pip` or `python -m venv`. |
-| `just` | Repo has a `justfile` | `just --list` first — it is the command contract. Use its recipes rather than reconstructing commands. |
-| `hyperfine` | Any "make it faster" task | Baseline before changing: `hyperfine -w 3 '<cmd>'`; `--export-json` to keep the numbers. No performance claim without before/after output. |
-| `xh` | HTTP smoke tests against a running service | Always `xh -I …` in agent sessions (no TTY → it otherwise reads a body from stdin and errors). `xh -I :8080/health`; `xh -I POST :8080/api k=v` sends a JSON body; `--offline` prints the request without sending. Prefer over `curl` for JSON APIs. |
-| `defuddle` | Reading an article, blog post, or docs page from the web | `defuddle parse <url> --markdown` returns just the main content as markdown, without navigation, sidebars, or scripts. Pipe to `head` or `rg` to sample. Prefer over fetching raw HTML when the goal is to read prose. |
+| `rsync` | Copying or mirroring a directory tree | `rsync -a <src>/ <dest>/` to copy (trailing slash on the source = its contents, not the directory itself); `-n` to dry-run first; `--delete` only after the dry-run shows what it removes. Not `cp -r`. |
+| `shellcheck` | Any shell script written or edited | `shellcheck <script>` before calling it done; `-f gcc` for one line per finding; `-x` to follow sourced files. |
+| `ast-grep` | Search or rewrite by syntax node (calls, imports, signatures) | `ast-grep -p 'foo($A)' -l ts` to find; `-r 'bar($A)'` to preview a rewrite; `-U` to apply. Prefer over regex whenever the target is code structure, not text. |
+| `sd` | One-off string replace from the shell | `sd -F '<old>' '<new>' <file>` to replace (`-F` = literal, no regex escaping). Use the Edit tool instead when the file is already in context. |
+| `gh` | Any GitHub action | `gh pr list --json number,title --jq '<filter>'` to query; `gh pr create` / `gh pr merge` to act; `gh run view <run-id>` for CI results. Never scrape github.com. |
+| `gh-axi` | Reading GitHub state in an agent session (PRs, issues, runs) | `gh-axi pr list` / `gh-axi issue list --state open` to scan (compact output with next-step hints); `gh-axi pr view <number> --comments` for detail; `--fields <a,b>` to narrow. Use `gh` when a script needs `--json`/`--jq` or for anything it lacks. `gh-axi setup hooks` is opt-in — do not run it unprompted. |
+| `uv` | Any Python | `uv run <script>` to execute; `uvx <tool>` for one-shot tools (`uvx ruff check .`; `uvx --from <package> <cmd>` when the names differ); `uv tool install <tool>` for persistent ones. Never bare `pip` or `python -m venv`. |
+| `just` | Repo has a `justfile` | `just --list` first (it is the command contract); `just <recipe>` to run. Use its recipes rather than reconstructing commands. |
+| `hyperfine` | Any "make it faster" task | `hyperfine -w 3 '<cmd>'` to baseline before changing; `--export-json <file>` to keep the numbers. No performance claim without before/after output. |
+| `xh` | HTTP smoke tests against a running service | `xh -I :8080/health` to check; `xh -I POST :8080/api k=v` to send a JSON body; `--offline` to print the request without sending. Always pass `-I` in agent sessions (no TTY → it otherwise reads a body from stdin and errors). Prefer over `curl` for JSON APIs. |
+| `defuddle` | Reading an article, blog post, or docs page from the web | `defuddle parse <url> --markdown` to get just the main content as markdown, without navigation, sidebars, or scripts; pipe to `head` or `rg` to sample. Prefer over fetching raw HTML when the goal is to read prose. |
 
 Skip `fzf`, `zoxide`, `bat`, `eza` in agent sessions — interactive or decorative, no information gain.
 

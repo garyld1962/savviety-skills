@@ -13,7 +13,7 @@ a schema check. See examples in validate-plan/SKILL.md §4.
 ```
 
 This fixture is referenced by the Task 7 acceptance block of
-`docs/plans/claude-working-hardening.md`.
+`docs/plans/claude-hardening.md`.
 
 ## Task 1: Make the widget handle errors
 
