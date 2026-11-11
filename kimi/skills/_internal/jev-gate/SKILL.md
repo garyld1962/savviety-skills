@@ -25,7 +25,7 @@ Runtime Tool Args > Project-Local (./.jev-gate.toml) > User-Global (~/.config/je
    - Holds the RTX 5090 `/v1/systemone` endpoint URL, active decision model ID, default cloud model lane mappings (`fast_lane` vs. `deep_lane`), global search blocklists (`-site:linkedin.com`, `-site:pinterest.com`, `-site:quora.com`, `-site:medium.com`), and baseline confidence thresholds.
 2. **Project-Local Config (`./.jev-gate.toml`):**
    - Template: `templates/jev-gate.project.toml` (configure via `/configure jev-gate`).
-   - Overrides domain-specific search allowlists (e.g., `3d_printing`, `rust_cad`, `software_arch`), project-specific architectural invariants (`[[invariants]]` evaluated as `noul` booleans against `git diff`s), and per-project lane routing thresholds.
+   - Overrides domain-specific search allowlists (e.g., `3d_printing`, `rust_cad`, `software_arch`), project-specific architectural invariants (`invariants` evaluated as `noul` booleans against `git diff`s), and per-project lane routing thresholds.
 3. **Runtime Tool Args:**
    - Explicit arguments passed to `smart_search`, `triage_coding_task`, `verify_code_invariants`, or `gate_shell_command` override both files for that call.
 
@@ -73,7 +73,7 @@ Runtime Tool Args > Project-Local (./.jev-gate.toml) > User-Global (~/.config/je
 ### 4A. Diff Auditing (`verify_code_invariants`)
 
 - **Rule:** After generating a code patch (and before running slow builds/tests or committing), pass the `git diff` to `verify_code_invariants(git_diff)`.
-- **What it does:** Evaluates all project architectural invariants defined under `[[invariants]]` in `.jev-gate.toml` in a single parallel forward pass (`noul` boolean probabilities).
+- **What it does:** Evaluates all project architectural invariants defined under `invariants` in `.jev-gate.toml` in a single parallel forward pass (`noul` boolean probabilities).
 - **Required Action:**
   - If any invariant exceeds its failure threshold (default `>= 0.80`), fix the architectural violation immediately before running build/test or presenting the code.
   - Record invariant check status in checkpoint and execution reports.

@@ -1,57 +1,78 @@
 # ~/.config/jev-gate/config.toml
-# User-global configuration for the local RTX 5090 System-1 Jev decision gate.
-# Precedence: Runtime Tool Args > Project-Local (./.jev-gate.toml) > User-Global (~/.config/jev-gate/config.toml)
+# User-global configuration for the jev-gate FastMCP server (~/repos/jev-gate) and
+# bin/jev-shell-hook. Schema mirrors jev-gate's config.example.toml; the server rejects
+# unknown keys, so do not add tables or keys that are not listed here.
+# Precedence: Runtime Tool Args > Project-Local (./.jev-gate.toml) > User-Global (this file) > Defaults
+# Lists replace; tables merge recursively. Keep the root-level array above the table headings.
 
-[endpoint]
-url = "<FILL IN: http://sherlock:8000/v1/systemone>"
-model = "<FILL IN: vllm-sr/Decision-1.0-Nox-4B>"
-timeout_ms = 250
-fallback_mode = "graceful" # "graceful" (deep_lane + static blocklist + logged skip) or "fail_closed"
+invariants = [
+  "Do not hardcode credentials or API keys.",
+  "Validate external input before using it.",
+  "Keep database access out of UI components.",
+]
 
-[lanes.claude]
-fast_lane = "sonnet"
-deep_lane = "opus"
+[decision]
+base_url = "<FILL IN: http://localhost:8000/v1/systemone>"
+model = "<FILL IN: vllm-sr/Decision-1.0-Nox-4B>"   # exact alias from the endpoint's /v1/models
+timeout_ms = 2000
+mode = "live"            # "live" or "mock" (mock returns explicit unknowns; no GPU needed)
+max_state_chars = 48000
+max_questions = 100
+# api_key_env = "JEV_DECISION_API_KEY"
 
-[lanes.gemini]
-fast_lane = "gemini-2.5-flash"
-deep_lane = "gemini-2.5-pro"
+[fast_lane]
+provider = "anthropic"
+base_url = "https://api.anthropic.com/v1"
+model = "claude-sonnet-5-5"
+api_key_env = "ANTHROPIC_API_KEY"
+enabled = true
 
-[lanes.openai]
-fast_lane = "gpt-4.1-mini"
-deep_lane = "o3"
+[deep_lane]
+provider = "anthropic"
+base_url = "https://api.anthropic.com/v1"
+model = "claude-opus-5-5"
+api_key_env = "ANTHROPIC_API_KEY"
+enabled = true
+
+[local_fallback_lane]
+provider = "openai_compatible"
+base_url = "http://localhost:8001/v1"
+model = "local-coder"
+enabled = false
+
+[routing]
+# Both this flag and local_fallback_lane.enabled must be true for local routing.
+cloud_quota_exhausted = false
 
 [thresholds]
-lane_confidence = 0.65          # Below 0.65 -> automatically fall back to deep_lane
-perplexity_escalation = 0.80    # needs_perplexity_synthesis >= 0.80 -> escalate to Perplexity MCP
-shell_auto_execute = 0.85       # safe_auto_execute >= 0.85 -> auto-execute without confirmation
-invariant_violation = 0.80      # noul >= 0.80 on an invariant failure condition -> block and fix
-file_keep_full = 0.70           # score >= 0.70 -> keep_full
-file_keep_signatures = 0.35     # 0.35 <= score < 0.70 -> keep_signatures_only; < 0.35 -> drop
+deep_lane_confidence_min = 0.65   # lane confidence below this -> deep_lane
+auto_execute_tool_min = 0.85      # safe_auto_execute >= this -> run shell command without asking
+abstention_label = "insufficient_context"
+perplexity_synthesis_min = 0.80   # needs_perplexity_synthesis >= this -> Perplexity synthesis
+prune_confidence_min = 0.65
+invariant_violation_min = 0.80
+invariant_pass_min = 0.80
+blocked_destructive_min = 0.50
 
 [search]
+base_url = "https://api.perplexity.ai/v1/agent"
+api_key_env = "PERPLEXITY_API_KEY"
+effort = "fast"
+timeout_ms = 30000
 global_blocklist = [
   "-site:linkedin.com",
   "-site:pinterest.com",
   "-site:quora.com",
-  "-site:medium.com"
+  "-site:medium.com",
 ]
 
 [search.domain_allowlists]
-software_arch = [
-  "site:github.com",
-  "site:docs.rs",
-  "site:developer.mozilla.org",
-  "site:learn.microsoft.com",
-  "site:arxiv.org"
-]
-rust_cad = [
-  "site:docs.rs",
-  "site:crates.io",
-  "site:github.com"
-]
-3d_printing = [
-  "site:printables.com",
-  "site:vorondesign.com",
-  "site:klipper3d.org",
-  "site:github.com"
-]
+# Plain domain names only (no "site:" prefix); at most 20 per domain.
+software_arch = ["github.com", "docs.rs", "developer.mozilla.org", "learn.microsoft.com", "arxiv.org"]
+rust_cad = ["docs.rs", "crates.io", "doc.rust-lang.org", "opencascade.org", "github.com"]
+3d_printing = ["help.prusa3d.com", "wiki.bambulab.com", "orcaslicer.com", "printables.com", "klipper3d.org"]
+electronics = ["ti.com", "analog.com", "microchip.com"]
+
+[context]
+max_candidate_files = 64
+summary_chars = 600
