@@ -380,11 +380,20 @@ Destructive git commands are denied by `settings.template.json`
 permissions (`git reset --hard`, `git push --force*`, `git clean -f`,
 `git branch -D`). When `bin/jev-shell-hook` (from `templates/jev-gate.hooks.json`)
 or the `jev-gate` FastMCP server is active, shell commands are additionally
-gated by Contract 4 (`gate_shell_command`), task context/lanes are triaged by
-Contract 3 (`triage_coding_task`), and `git diff`s are checked against
+gated by Contract 4 (`gate_shell_command`), and `git diff`s are checked against
 `.jev-gate.toml` architectural invariants via `verify_code_invariants` per
 `_internal/jev-gate`. This skill assumes those rules are installed; it
 does not restate them as instructions.
+
+Model routing is done by the runtime, not by the coding agent: before
+spawning each task's implementer, `run-plan.mjs` has a Haiku router call
+Contract 3 (`triage_coding_task`) and starts the implementer on the
+returned lane's model (`fast_lane` → e.g. Sonnet, `deep_lane` → Opus).
+Confidence below 0.65, a non-live decision, or an unreachable jev-gate
+falls back to Opus; a confident `insufficient_context` blocks the task as
+`AMBIGUITY`; retries re-route with `retry_count` and never downgrade.
+`flags.modelRouting: "off"` skips routing and inherits the session model.
+The report's `routing` array records each task attempt's model and reason.
 
 ## Contract
 

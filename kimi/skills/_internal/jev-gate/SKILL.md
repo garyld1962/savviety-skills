@@ -51,6 +51,7 @@ Runtime Tool Args > Project-Local (./.jev-gate.toml) > User-Global (~/.config/je
 ## Contract 3: Pre-Coding Triage & Context Pruning (`triage_coding_task`)
 
 - **Rule:** Before starting a multi-file task or loading large repository contexts into the cloud LLM, call `triage_coding_task(task_prompt, candidate_files)`.
+- **Who calls it:** the lane choice only takes effect if it is made *before* the coding agent is spawned, because an agent's model is fixed at spawn time. Orchestrators (e.g. `execute-plan`'s `run-plan.mjs`) call it per task and pass the lane's model to the agent they spawn. An agent that calls it for itself can only use the abstention and context-pruning outputs.
 - **Outputs & Required Agent Actions:**
   1. **Model Lane Selection (`fast_lane` vs. `deep_lane`):**
      - `fast_lane` (e.g., Claude Sonnet/Haiku, Gemini Flash) for single-file edits, boilerplate, unit tests, and syntax fixes.
