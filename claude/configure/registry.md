@@ -71,24 +71,25 @@ jev-gate-global:
   destination: ~/.config/jev-gate/config.toml
   scope: per-user-global
   required_fields:
-    - url
+    - base_url
     - model
   optional_fields:
     - timeout_ms
-    - fallback_mode
+    - fast_lane
+    - deep_lane
+    - thresholds
     - global_blocklist
 
 jev-gate:
-  description: "Project-local jev-gate overrides: domain search allowlists and diff invariants"
+  description: "Project-local jev-gate overrides: diff invariants, domain search allowlists, and thresholds"
   template: templates/jev-gate.project.toml
   destination: "{project}/.jev-gate.toml"
   scope: per-project
   required_fields:
-    - name
-    - primary_domain
+    - invariants
   optional_fields:
     - domain_allowlists
-    - invariants
+    - thresholds
 ```
 
 ## Adding New Targets

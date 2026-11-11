@@ -219,12 +219,21 @@ class NativeContractTests(unittest.TestCase):
     def test_jev_gate_templates_and_shell_hook(self):
         global_cfg = tomllib.loads((ROOT / "templates/jev-gate.global.toml").read_text())
         project_cfg = tomllib.loads((ROOT / "templates/jev-gate.project.toml").read_text())
-        self.assertIn("/v1/systemone", global_cfg["endpoint"]["url"])
-        self.assertEqual(global_cfg["thresholds"]["shell_auto_execute"], 0.85)
-        self.assertEqual(global_cfg["thresholds"]["perplexity_escalation"], 0.80)
-        self.assertEqual(global_cfg["thresholds"]["lane_confidence"], 0.65)
+        # Templates must match the jev-gate server schema (extra="forbid").
+        self.assertIn("/v1/systemone", global_cfg["decision"]["base_url"])
+        self.assertEqual(global_cfg["thresholds"]["auto_execute_tool_min"], 0.85)
+        self.assertEqual(global_cfg["thresholds"]["perplexity_synthesis_min"], 0.80)
+        self.assertEqual(global_cfg["thresholds"]["deep_lane_confidence_min"], 0.65)
+        self.assertEqual(set(global_cfg) - {"invariants"}, {
+            "decision", "fast_lane", "deep_lane", "local_fallback_lane",
+            "routing", "thresholds", "search", "context",
+        })
+        self.assertEqual(set(project_cfg), {"invariants", "search"})
         self.assertIn("domain_allowlists", project_cfg["search"])
-        self.assertTrue(len(project_cfg["invariants"]) >= 1)
+        self.assertTrue(all(isinstance(i, str) for i in project_cfg["invariants"]))
+        for cfg in (global_cfg, project_cfg):
+            for domains in cfg["search"]["domain_allowlists"].values():
+                self.assertFalse(any(d.startswith("site:") for d in domains))
 
         hook = ROOT / "bin/jev-shell-hook"
         # Destructive command in Claude Code format -> deny
@@ -243,7 +252,7 @@ class NativeContractTests(unittest.TestCase):
             input=json.dumps({
                 "toolCall": {"name": "run_command", "parameters": {"CommandLine": "pytest -q"}},
                 "cwd": self.tmp.name,
-                "jevGateConfig": {"endpoint": {"url": "http://127.0.0.1:9/v1/systemone", "timeout_ms": 50}},
+                "jevGateConfig": {"decision": {"base_url": "http://127.0.0.1:9/v1/systemone", "timeout_ms": 50}},
             }),
             capture_output=True, text=True, check=True,
         )
@@ -251,12 +260,13 @@ class NativeContractTests(unittest.TestCase):
         self.assertEqual(out_agy["decision"], "ask")
         self.assertNotIn("hookSpecificOutput", out_agy)
 
-        # Cascading override to fail_closed via project .jev-gate.toml -> deny when offline
-        (Path(self.tmp.name) / ".jev-gate.toml").write_text('[endpoint]\nurl = "http://127.0.0.1:9/v1/systemone"\ntimeout_ms = 50\nfallback_mode = "fail_closed"\n')
+        # Endpoint from project .jev-gate.toml (server schema) + fail_closed via env -> deny when offline
+        (Path(self.tmp.name) / ".jev-gate.toml").write_text('[decision]\nbase_url = "http://127.0.0.1:9/v1/systemone"\ntimeout_ms = 50\n')
         res_closed = subprocess.run(
             [sys.executable, str(hook)],
             input=json.dumps({"toolCall": {"name": "run_command", "parameters": {"CommandLine": "pytest -q"}}, "cwd": self.tmp.name}),
             capture_output=True, text=True, check=True,
+            env={**os.environ, "JEV_GATE_FALLBACK_MODE": "fail_closed", "JEV_GATE_GLOBAL_CONFIG": "/nonexistent"},
         )
         self.assertEqual(json.loads(res_closed.stdout)["decision"], "deny")
 

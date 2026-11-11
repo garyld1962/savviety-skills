@@ -4,6 +4,11 @@
 Enforces Contract 4 (`gate_shell_command`) with the 3-tier cascading configuration:
   Runtime Tool Args / Env > Project-Local (./.jev-gate.toml) > User-Global (~/.config/jev-gate/config.toml)
 
+Reads the same TOML schema as the jev-gate FastMCP server: `[decision]` (base_url, model,
+timeout_ms) and `[thresholds]` (auto_execute_tool_min, blocked_destructive_min). The server
+rejects unknown keys, so the hook-only `fallback_mode` is set via the JEV_GATE_FALLBACK_MODE
+environment variable or the runtime `jevGateConfig.hook.fallback_mode` override, never in TOML.
+
 Decision classes:
   - safe_auto_execute (>= threshold, default 0.85) -> allow
   - requires_user_confirmation                     -> ask
@@ -25,14 +30,17 @@ import urllib.error
 import urllib.request
 
 DEFAULT_CONFIG = {
-    "endpoint": {
-        "url": "http://sherlock:8000/v1/systemone",
+    "decision": {
+        "base_url": "http://localhost:8000/v1/systemone",
         "model": "vllm-sr/Decision-1.0-Nox-4B",
-        "timeout_ms": 250,
-        "fallback_mode": "graceful",
+        "timeout_ms": 500,
     },
     "thresholds": {
-        "shell_auto_execute": 0.85,
+        "auto_execute_tool_min": 0.85,
+        "blocked_destructive_min": 0.50,
+    },
+    "hook": {
+        "fallback_mode": "graceful",
     },
 }
 
@@ -101,24 +109,23 @@ def load_cascading_config(working_dir: Path, runtime_overrides: dict | None = No
     cfg = deep_merge(cfg, load_toml_if_valid(project_path))
 
     # Environment variable / runtime overrides
-    env_overrides: dict = {"endpoint": {}, "thresholds": {}}
+    env_overrides: dict = {"decision": {}, "thresholds": {}, "hook": {}}
     if os.environ.get("JEV_GATE_URL"):
-        env_overrides["endpoint"]["url"] = os.environ["JEV_GATE_URL"]
+        env_overrides["decision"]["base_url"] = os.environ["JEV_GATE_URL"]
     if os.environ.get("JEV_GATE_MODEL"):
-        env_overrides["endpoint"]["model"] = os.environ["JEV_GATE_MODEL"]
+        env_overrides["decision"]["model"] = os.environ["JEV_GATE_MODEL"]
     if os.environ.get("JEV_GATE_FALLBACK_MODE"):
-        env_overrides["endpoint"]["fallback_mode"] = os.environ["JEV_GATE_FALLBACK_MODE"]
+        env_overrides["hook"]["fallback_mode"] = os.environ["JEV_GATE_FALLBACK_MODE"]
     if os.environ.get("JEV_GATE_SHELL_THRESHOLD"):
         try:
-            env_overrides["thresholds"]["shell_auto_execute"] = float(
+            env_overrides["thresholds"]["auto_execute_tool_min"] = float(
                 os.environ["JEV_GATE_SHELL_THRESHOLD"]
             )
         except ValueError:
             pass
-    if env_overrides["endpoint"]:
-        cfg = deep_merge(cfg, {"endpoint": env_overrides["endpoint"]})
-    if env_overrides["thresholds"]:
-        cfg = deep_merge(cfg, {"thresholds": env_overrides["thresholds"]})
+    for section, values in env_overrides.items():
+        if values:
+            cfg = deep_merge(cfg, {section: values})
     if runtime_overrides:
         cfg = deep_merge(cfg, runtime_overrides)
     return cfg
@@ -162,11 +169,12 @@ def evaluate_via_systemone(command: str, working_dir: Path, cfg: dict) -> tuple[
     if static_block:
         return "deny", f"blocked_destructive: {static_block}"
 
-    endpoint = cfg["endpoint"]["url"]
-    model = cfg["endpoint"]["model"]
-    timeout_s = max(0.05, float(cfg["endpoint"].get("timeout_ms", 250)) / 1000.0)
-    threshold = float(cfg["thresholds"].get("shell_auto_execute", 0.85))
-    fallback_mode = cfg["endpoint"].get("fallback_mode", "graceful")
+    endpoint = cfg["decision"]["base_url"]
+    model = cfg["decision"]["model"]
+    timeout_s = max(0.05, float(cfg["decision"].get("timeout_ms", 500)) / 1000.0)
+    threshold = float(cfg["thresholds"].get("auto_execute_tool_min", 0.85))
+    block_min = float(cfg["thresholds"].get("blocked_destructive_min", 0.50))
+    fallback_mode = cfg.get("hook", {}).get("fallback_mode", "graceful")
 
     request_body = {
         "state": f"Working Directory: {working_dir}\nCommand: {command}",
@@ -210,8 +218,10 @@ def evaluate_via_systemone(command: str, working_dir: Path, cfg: dict) -> tuple[
             f"requires_user_confirmation (jev-gate offline fallback: {exc})",
         )
 
+    # /v1/systemone returns {"answers": {<question_id>: {...}}}; older shapes kept as fallbacks.
     q_res = (
-        (data.get("questions") or {}).get("gate_shell_command")
+        (data.get("answers") or {}).get("gate_shell_command")
+        or (data.get("questions") or {}).get("gate_shell_command")
         or (data.get("results") or {}).get("gate_shell_command")
         or data.get("gate_shell_command")
         or {}
@@ -222,9 +232,9 @@ def evaluate_via_systemone(command: str, working_dir: Path, cfg: dict) -> tuple[
     p_confirm = float(probs.get("requires_user_confirmation", 0.0))
     p_block = float(probs.get("blocked_destructive", 0.0))
 
-    if choice == "blocked_destructive" or (p_block >= p_safe and p_block >= p_confirm and p_block > 0.0):
-        return "deny", f"blocked_destructive (p={p_block:.2f})"
-    if p_safe >= threshold:
+    if p_block >= block_min:
+        return "deny", f"blocked_destructive (p={p_block:.2f} >= {block_min:.2f})"
+    if p_safe >= threshold and choice in ("", "safe_auto_execute"):
         return "allow", f"safe_auto_execute (p={p_safe:.2f} >= {threshold:.2f})"
     return (
         "ask",
