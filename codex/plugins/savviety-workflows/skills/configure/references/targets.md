@@ -27,5 +27,5 @@ Ask once for an unknown location, preserve existing fields, and verify directory
 ## jev-gate (System-1 Decision Control Plane)
 
 - `jev-gate-global`: User-global config at `~/.config/jev-gate/config.toml` (RTX 5090 `/v1/systemone` endpoint, default `fast_lane`/`deep_lane` mappings, `global_blocklist`, and baseline thresholds).
-- `jev-gate`: Project-local override at `{project}/.jev-gate.toml` (`primary_domain`, `search.domain_allowlists`, and `[[invariants]]` evaluated against `git diff`).
+- `jev-gate`: Project-local override at `{project}/.jev-gate.toml` (`invariants` list of plain-sentence rules evaluated against `git diff`, `search.domain_allowlists`, and optional `[thresholds]`; the server rejects unknown keys).
 - Precedence is always `Runtime Tool Args > ./.jev-gate.toml > ~/.config/jev-gate/config.toml`.

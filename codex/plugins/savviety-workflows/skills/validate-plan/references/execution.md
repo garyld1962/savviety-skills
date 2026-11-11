@@ -48,7 +48,7 @@ For each task:
 2. Inspect current code and the requirement before editing.
 3. Implement the scoped behavior. Add a failing regression/characterization test
    when behavior demands it; do not write tests that only restate prose edits.
-4. When `jev-gate` is available and `.jev-gate.toml` defines `[[invariants]]`, run `verify_code_invariants(git_diff)` before slow builds/tests and fix any violated invariant (`passed == false`) before proceeding. Before non-trivial shell commands, gate via `gate_shell_command(command, working_dir)` (or `bin/jev-shell-hook`): auto-run only when `safe_auto_execute >= 0.85`, ask on `requires_user_confirmation`, and abort on `blocked_destructive`.
+4. When `jev-gate` is available and `.jev-gate.toml` defines `invariants`, run `verify_code_invariants(git_diff)` before slow builds/tests and fix any violated invariant (`passed == false`) before proceeding. Before non-trivial shell commands, gate via `gate_shell_command(command, working_dir)` (or `bin/jev-shell-hook`): auto-run only when `safe_auto_execute >= 0.85`, ask on `requires_user_confirmation`, and abort on `blocked_destructive`.
 5. Run each acceptance check and applicable declared build/test checks. Record
    command, exit code or observation, evidence location and verified commit.
 6. Inspect actual changed paths, including new/untracked files, against ownership.
