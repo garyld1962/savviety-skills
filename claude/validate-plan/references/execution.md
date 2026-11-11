@@ -44,7 +44,23 @@ plan hash, objective, scope, read-only context, dependencies, acceptance,
 governing decisions and a warning to preserve other work in each worker brief.
 
 For each task:
-1. When the `jev-gate` MCP server is available, call `triage_coding_task(task_prompt, candidate_files)` before loading large repo files (respecting `Runtime Tool Args > ./.jev-gate.toml > ~/.config/jev-gate/config.toml`). Halt immediately on `insufficient_context`; route single-file/mechanical edits to `fast_lane` and multi-file/architectural work or confidence `< 0.65` (or offline fallback) to `deep_lane`; load `keep_full` files completely, inspect only exported signatures (`ast-grep`) for `keep_signatures_only`, and skip `drop` files.
+1. Model lane and context (controller, before dispatch). When the `jev-gate` MCP
+   server is available, the controller calls `triage_coding_task(task_prompt,
+   candidate_files, retry_count)` with the task spec and the existing files in its
+   write scope, before dispatching the task or loading large repo files (respecting
+   `Runtime Tool Args > ./.jev-gate.toml > ~/.config/jev-gate/config.toml`). A
+   worker's model is fixed when it starts, so the lane only takes effect when the
+   controller uses it to choose the worker profile: `fast_lane` → the platform's
+   fast implementer, `deep_lane` → its deep implementer. Use the returned lane only
+   when the decision status is `live` and the coding-lane confidence is `>= 0.65`;
+   otherwise, or when jev-gate is unreachable, use the deep implementer. Stop the
+   task as `plan-ambiguity` only when the raw choice is `insufficient_context` with
+   confidence `>= 0.65`. On a retry, re-triage with `retry_count` and never move to
+   a weaker profile. Record the profile and reason with the task evidence. Running
+   sequentially (no delegation), the model cannot change: apply only the abstention
+   and file actions. Pass the file actions into the worker brief: read `keep_full`
+   files completely, inspect only exported signatures (`ast-grep`) for
+   `keep_signatures_only`, and skip `drop` files.
 2. Inspect current code and the requirement before editing.
 3. Implement the scoped behavior. Add a failing regression/characterization test
    when behavior demands it; do not write tests that only restate prose edits.

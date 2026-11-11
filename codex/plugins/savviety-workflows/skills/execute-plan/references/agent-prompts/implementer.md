@@ -2,7 +2,8 @@
 
 Provide: plan path/hash; task IDs; base/head commits; working directory and branch;
 owned write scope; read-only context; dependencies; acceptance; repository commands;
-governing decisions; remaining retry budget; and the relevant findings for this pass.
+governing decisions; remaining retry budget; the relevant findings for this pass; and,
+when jev-gate triaged the task, its file actions (read fully / signatures only / skip).
 
 Implement assigned tasks only. Prove every acceptance criterion and list actual changed
 paths (including new files), verification results and commits. Stop on out-of-scope needs.

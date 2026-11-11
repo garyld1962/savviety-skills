@@ -47,5 +47,13 @@ permission to delegate. Do not bypass a required gate to achieve a successful ve
 
 ## Codex integration
 Use $execute-plan and native Codex tools. Read AGENTS.md; preserve current host permissions.
+
+Model routing: when delegating a task, triage it first (execution contract, task step 1)
+and pick the implementer role from the lane: `fast_lane` → `plan_implementer_fast`,
+`deep_lane`, low confidence or jev-gate unreachable → `plan_implementer`. A retry never
+moves from `plan_implementer` back to `plan_implementer_fast`; if a fast worker reports
+the task needs deeper work, re-dispatch it to `plan_implementer`. The jev-gate config's
+lane model names are for Claude; on Codex only the lane name matters, and each role's
+`model` in `codex/agents/*.toml` decides the model.
 Private agent briefs live under execute-plan/references/agent-prompts. Legacy references
 are archival and are not part of the active contract.
